@@ -54,6 +54,12 @@ If tasked with updating the `npx nextviz` logic:
 1. **Templates**: Ensure the `templates/` folder matches the current working `app/nextviz` structure.
 2. **Injections**: The CLI must automatically add `.env.nextviz` to the user's `.gitignore`.
 
+## 🧠 The Headless Engine (Phase 3 Rules)
+
+1. **The Orchestrator, Not the Brain**: NextViz is an orchestrator. Core business logic (e.g., Supabase queries) MUST be written in pure TypeScript in standard directories (e.g., `lib/db/`). NextViz action nodes simply import and wrap these functions.
+2. **Direct Invocation**: Flows are executed in code via `executeFlow("flow-name", payload)`. This allows Next.js API Routes and Server Actions to seamlessly trigger visual workflows.
+3. **Execution Caching**: To prevent runtime overhead, the Engine (`engine.ts`) MUST cache the topological sort (the parsed execution plan) in memory so that high-frequency loops are not bottlenecked by JSON parsing and edge resolution.
+
 ---
 
 ## Code Architecture Summary

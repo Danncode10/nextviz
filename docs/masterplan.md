@@ -22,8 +22,9 @@ This document outlines the strategic phases and architecture for **NextViz**, a 
 
 ## ⚙️ Phase 3: Core Nodes & Execution Engine
 - [ ] Define the strict TypeScript interfaces (`NextVizNode`, `WorkflowJSON`) in `lib/nextviz/types.ts`.
-- [ ] Implement the primary Execution Engine (`lib/nextviz/engine.ts`) capable of traversing the graph and resolving inputs/outputs.
-- [ ] Ensure a **"Headless" Engine** design: `engine.ts` must be completely decoupled from the UI, allowing Vercel to run automations via Webhooks without ever loading the `/nextviz` page.
+- [ ] Implement the primary Execution Engine (`lib/nextviz/engine.ts`) using the `executeFlow("name", payload)` direct invocation pattern.
+- [ ] **Performance:** Build a topological sort mechanism that parses the graph and caches the "Execution Plan" in memory to eliminate JSON parsing overhead on subsequent runs.
+- [ ] Ensure a **"Headless" Engine** design: `engine.ts` must be completely decoupled from the UI, allowing Vercel to run automations via Webhooks or pure Server Actions.
 - [ ] Develop the fundamental **Trigger** node: `onHTTP` (Webhook receiver).
 - [ ] Develop the fundamental **Action** node: `logData` (Console/File logger).
 

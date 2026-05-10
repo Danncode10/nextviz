@@ -4,13 +4,13 @@
       "id": "1",
       "type": "manualTrigger",
       "position": {
-        "x": -660.9506588855211,
-        "y": -492.1456392323764
+        "x": -652.6860923078917,
+        "y": -484.79935783003924
       },
       "data": {
         "label": "Trigger this workflow"
       },
-      "selected": false,
+      "selected": true,
       "width": 256,
       "height": 88
     },
@@ -24,7 +24,7 @@
       "data": {
         "label": "Fetch data from API"
       },
-      "selected": true,
+      "selected": false,
       "width": 256,
       "height": 88
     }
