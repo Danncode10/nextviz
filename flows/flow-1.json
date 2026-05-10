@@ -1,0 +1,43 @@
+{
+  "id": "flow-1",
+  "name": "nextviz example",
+  "description": "Default example workflow",
+  "nodes": [
+    {
+      "id": "1",
+      "type": "manualTrigger",
+      "position": {
+        "x": -994.6745249426345,
+        "y": -760.9182222294404
+      },
+      "data": {
+        "label": "Trigger this workflow"
+      },
+      "selected": false,
+      "width": 256,
+      "height": 88
+    },
+    {
+      "id": "2",
+      "type": "httpAction",
+      "position": {
+        "x": -627.8481113899577,
+        "y": -758.8201433248613
+      },
+      "data": {
+        "label": "Fetch data from API"
+      },
+      "selected": true,
+      "width": 256,
+      "height": 88
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1-2",
+      "source": "1",
+      "target": "2",
+      "animated": true
+    }
+  ]
+}

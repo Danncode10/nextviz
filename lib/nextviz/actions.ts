@@ -1,53 +1,60 @@
 "use server";
 
-import fs from "fs/promises";
-import path from "path";
-import { NextVizProject, NextVizProjectSchema } from "./types";
+import * as registry from "./registry";
+import { WorkflowJSON } from "./types";
 
-const FLOW_FILE_PATH = path.join(process.cwd(), "nextviz-flow.json");
-
-/**
- * Reads the workflow from the local file system.
- * This is the source of truth for NextViz.
- */
-export async function getWorkflow(): Promise<NextVizProject | null> {
-  try {
-    const data = await fs.readFile(FLOW_FILE_PATH, "utf-8");
-    const parsed = JSON.parse(data);
-    // Validate with Zod
-    return NextVizProjectSchema.parse(parsed);
-  } catch (error: any) {
-    // If the file doesn't exist, return null
-    if (error.code === "ENOENT") {
-      return null;
-    }
-    console.error("Failed to read workflow:", error);
-    return null;
+function guardDev() {
+  if (process.env.NODE_ENV !== "development") {
+    throw new Error(
+      "NextViz Local Bridge: File system writes are forbidden outside development."
+    );
   }
 }
 
-/**
- * Saves the workflow to the local file system.
- * Includes the Production Guard to prevent file system modifications in production.
- */
-export async function saveWorkflow(project: NextVizProject): Promise<{ success: boolean; error?: string }> {
-  // CRITICAL: Production Guard
-  if (process.env.NODE_ENV !== "development") {
-    throw new Error("NextViz Local Bridge Error: File system writes are strictly forbidden outside of development mode.");
-  }
-
+export async function listFlows(): Promise<WorkflowJSON[]> {
   try {
-    // Ensure strict validation before writing to disk
-    const validWorkflow = NextVizProjectSchema.parse(project);
-    
-    await fs.writeFile(
-      FLOW_FILE_PATH,
-      JSON.stringify(validWorkflow, null, 2),
-      "utf-8"
-    );
+    return await registry.listFlows();
+  } catch (e) {
+    console.error("Failed to list flows:", e);
+    return [];
+  }
+}
+
+export async function loadFlow(flowId: string): Promise<WorkflowJSON | null> {
+  return registry.loadFlow(flowId);
+}
+
+export async function saveFlow(
+  flow: WorkflowJSON
+): Promise<{ success: boolean; error?: string }> {
+  guardDev();
+  try {
+    await registry.saveFlow(flow);
     return { success: true };
-  } catch (error: any) {
-    console.error("Failed to save workflow:", error);
-    return { success: false, error: error.message };
+  } catch (e: any) {
+    return { success: false, error: e.message };
+  }
+}
+
+export async function createFlow(
+  name: string,
+  description?: string
+): Promise<WorkflowJSON> {
+  guardDev();
+  const id = `flow-${Date.now()}`;
+  const flow: WorkflowJSON = { id, name, description, nodes: [], edges: [] };
+  await registry.saveFlow(flow);
+  return flow;
+}
+
+export async function deleteFlow(
+  flowId: string
+): Promise<{ success: boolean; error?: string }> {
+  guardDev();
+  try {
+    await registry.deleteFlow(flowId);
+    return { success: true };
+  } catch (e: any) {
+    return { success: false, error: e.message };
   }
 }

@@ -22,15 +22,18 @@ This document outlines the strategic phases and architecture for **NextViz**, a 
 
 ## 🗂️ Phase 3.5: Flow Restructuring & Flow Registry (ARCHITECTURAL UPGRADE)
 
-### What's Changing
+### ✅ COMPLETE
 
-Migrating from monolithic `nextviz-flow.json` to individual flow files in `flows/` directory:
+Migrated from monolithic `nextviz-flow.json` to individual flow files in `flows/` directory:
 
-- [ ] Move each flow to `flows/{flow-id}.json` to eliminate git merge conflicts.
-- [ ] Build a `FlowRegistry` utility in `lib/nextviz/registry.ts` that auto-discovers flows in the `flows/` folder at runtime.
-- [ ] Update Server Actions (`lib/nextviz/actions.ts`) to save/load flows individually instead of the entire monolith.
-- [ ] Update the Canvas Editor to use `FlowRegistry.loadFlow(activeFlowId)` instead of reading from a static JSON file.
-- [ ] Maintain backward compatibility for in-memory active flow state (UI still tracks `activeFlowId`).
+- [x] Move each flow to `flows/{flow-id}.json` to eliminate git merge conflicts.
+- [x] Build a `FlowRegistry` utility in `lib/nextviz/registry.ts` that auto-discovers flows in the `flows/` folder at runtime.
+- [x] Update Server Actions (`lib/nextviz/actions.ts`) to save/load flows individually instead of the entire monolith.
+- [x] Update the Canvas Editor to use `FlowRegistry.loadFlow(activeFlowId)` instead of reading from a static JSON file.
+- [x] Maintain backward compatibility for in-memory active flow state (UI still tracks `activeFlowId`).
+- [x] Convert `page.tsx` to server component for clean URL-based flow switching with `key={flowId}` remounting.
+- [x] Add `FlowsContext` for shared flows list across components.
+- [x] Update sidebar to dynamically list flows and highlight the active one.
 
 ### Design Decisions
 
@@ -54,7 +57,7 @@ Migrating from monolithic `nextviz-flow.json` to individual flow files in `flows
 
 ## ⚙️ Phase 3: Core Nodes & Execution Engine
 - [x] Support multi-flow management and custom Add Flow modals with name/description in JSON schema.
-- [ ] Define the strict TypeScript interfaces (`NextVizNode`, `WorkflowJSON`) in `lib/nextviz/types.ts`.
+- [x] Define the strict TypeScript interfaces (`NextVizNode`, `WorkflowJSON`) in `lib/nextviz/types.ts`.
 - [ ] Implement the primary Execution Engine (`lib/nextviz/engine.ts`) using the `executeFlow("name", payload)` direct invocation pattern.
 - [ ] **Performance:** Build a topological sort mechanism that parses the graph and caches the "Execution Plan" in memory to eliminate JSON parsing overhead on subsequent runs.
 - [ ] Ensure a **"Headless" Engine** design: `engine.ts` must be completely decoupled from the UI, allowing Vercel to run automations via Webhooks or pure Server Actions.
