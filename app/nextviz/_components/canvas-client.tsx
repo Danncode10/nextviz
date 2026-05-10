@@ -307,7 +307,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
             nodesDraggable={isDevelopment}
             nodesConnectable={isDevelopment}
             elementsSelectable={isDevelopment}
-            deleteKeyCode="Delete"
+            deleteKeyCode={["Delete", "Backspace"]}
             fitView
             className="bg-zinc-950"
           >

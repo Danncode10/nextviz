@@ -1,33 +1,32 @@
 {
-  "id": "flow-1778397010396",
-  "name": "chatbot",
-  "description": "sample chatbot",
+  "id": "flow-1778408428085",
+  "name": "example",
+  "description": "Default example for NextViz",
   "nodes": [
     {
-      "id": "node-1778397766275",
+      "id": "node-1778408433031",
       "type": "manualTrigger",
       "position": {
-        "x": 165.346610441706,
-        "y": 56.53218774328346
+        "x": 232.39088615467233,
+        "y": 139
       },
       "data": {
         "label": "Manual Trigger"
       },
-      "selected": false,
+      "selected": true,
       "width": 108,
       "height": 108
     },
     {
-      "id": "node-1778397770242",
+      "id": "node-1778408465986",
       "type": "onHTTP",
       "position": {
-        "x": 361.1481865691551,
-        "y": 52.0902050966404
+        "x": 477.5481121415289,
+        "y": 175.56699072623962
       },
       "data": {
         "label": "HTTP Trigger"
       },
-      "selected": false,
       "width": 256,
       "height": 111
     }
