@@ -10,8 +10,8 @@ This document outlines the strategic phases and architecture for **NextViz**, a 
 - [x] Ensure `.gitignore` ignores `.env.nextviz` and local agent logs.
 
 ## 🌉 Phase 2: The Local Bridge & Visual Canvas
-- [ ] Setup core UI foundation: shadcn/ui components, NextViz dark theme aesthetic (`bg-zinc-950`), and sidebar layout.
-- [ ] Define precise Workflow Schema (nodes and edges) using Zod for type-safe validation.
+- [x] Setup core UI foundation: shadcn/ui components, NextViz dark theme aesthetic (`bg-zinc-950`), and sidebar layout.
+- [x] Define precise Workflow Schema (nodes and edges) using Zod for type-safe validation.
 - [ ] Implement the React Flow Canvas in `/app/nextviz/page.tsx` with `variant="dots"` background and custom semantic tokens.
 - [ ] Setup initial UI for basic nodes (e.g., Manual Trigger, HTTP Action) for the visual canvas.
 - [ ] Build the "Local Bridge" Server Actions (`lib/nextviz/actions.ts`) to read/write from `nextviz-flow.json`. 
