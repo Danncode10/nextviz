@@ -2,6 +2,35 @@
   "id": "flow-1778397010396",
   "name": "chatbot",
   "description": "sample chatbot",
-  "nodes": [],
+  "nodes": [
+    {
+      "id": "node-1778397766275",
+      "type": "manualTrigger",
+      "position": {
+        "x": 304.70163320672407,
+        "y": 167.58072150915723
+      },
+      "data": {
+        "label": "Manual Trigger"
+      },
+      "selected": false,
+      "width": 256,
+      "height": 88
+    },
+    {
+      "id": "node-1778397770242",
+      "type": "onHTTP",
+      "position": {
+        "x": 313.9707049039147,
+        "y": -0.893735850475835
+      },
+      "data": {
+        "label": "HTTP Trigger"
+      },
+      "selected": true,
+      "width": 256,
+      "height": 120
+    }
+  ],
   "edges": []
 }

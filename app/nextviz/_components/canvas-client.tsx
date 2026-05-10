@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ReactFlow, {
   addEdge,
   applyEdgeChanges,
@@ -14,6 +14,7 @@ import ReactFlow, {
   MiniMap,
   Node,
   NodeChange,
+  ReactFlowInstance,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { useRouter } from "next/navigation";
@@ -55,6 +56,9 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newFlowName, setNewFlowName] = useState("");
   const [newFlowDesc, setNewFlowDesc] = useState("");
+
+  const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
 
   // Load flow on mount — key prop in page.tsx forces remount on flow change
   useEffect(() => {
@@ -110,6 +114,38 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
     []
+  );
+
+  const onDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+      if (!rfInstance || !reactFlowWrapper.current) return;
+
+      const nodeType = event.dataTransfer.getData("application/reactflow");
+      const label = event.dataTransfer.getData("application/reactflow-label");
+      if (!nodeType) return;
+
+      const bounds = reactFlowWrapper.current.getBoundingClientRect();
+      const position = rfInstance.project({
+        x: event.clientX - bounds.left,
+        y: event.clientY - bounds.top,
+      });
+
+      const newNode: Node = {
+        id: `node-${Date.now()}`,
+        type: nodeType,
+        position,
+        data: { label },
+      };
+
+      setNodes((nds) => [...nds, newNode]);
+    },
+    [rfInstance]
   );
 
   const handleCreateFlow = async () => {
@@ -190,14 +226,17 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
         )}
       </div>
 
-      <div className="flex-1 w-full relative">
+      <div ref={reactFlowWrapper} className="flex-1 w-full relative">
         <ReactFlow
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          onInit={setRfInstance}
           onNodesChange={isDevelopment ? onNodesChange : undefined}
           onEdgesChange={isDevelopment ? onEdgesChange : undefined}
           onConnect={isDevelopment ? onConnect : undefined}
+          onDragOver={isDevelopment ? onDragOver : undefined}
+          onDrop={isDevelopment ? onDrop : undefined}
           nodesDraggable={isDevelopment}
           nodesConnectable={isDevelopment}
           elementsSelectable={isDevelopment}
