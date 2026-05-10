@@ -69,19 +69,18 @@ export function NodePropertiesPanel({ node, onClose, onExecuteStep, onNodeChange
   const modal = (
     /* Backdrop */
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center"
-      style={{ backgroundColor: "rgba(0,0,0,0.65)" }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-[2px]"
       onClick={onClose}
     >
       {/* Modal */}
       <div
-        className="relative w-[90vw] max-w-[1100px] h-[88vh] bg-zinc-950 rounded-2xl border border-zinc-800/60 shadow-2xl flex flex-col overflow-hidden"
+        className="relative w-[90vw] max-w-[1100px] h-[88vh] bg-[#09090b] rounded-2xl border border-zinc-800 shadow-[0_0_50px_-12px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Header ─────────────────────────────────────── */}
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-zinc-800 shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
-            <MousePointer2 className="w-4 h-4 text-zinc-300" strokeWidth={1.5} />
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-zinc-800 shrink-0 bg-[#09090b]">
+          <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0">
+            <MousePointer2 className="w-4 h-4 text-zinc-400" strokeWidth={2} />
           </div>
           <span className="text-base font-semibold text-zinc-100 flex-1 truncate">{nodeTitle}</span>
           <button className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
@@ -98,7 +97,7 @@ export function NodePropertiesPanel({ node, onClose, onExecuteStep, onNodeChange
           {/* Left — Parameters / Settings */}
           <div className="flex flex-col flex-1 border-r border-zinc-800 min-w-0">
             {/* Tabs + Execute */}
-            <div className="flex items-center gap-1 px-6 border-b border-zinc-800 shrink-0">
+            <div className="flex items-center gap-1 px-6 border-b border-zinc-800 shrink-0 bg-[#09090b]">
               {(["parameters", "settings"] as Tab[]).map((tab) => (
                 <button
                   key={tab}
@@ -119,7 +118,7 @@ export function NodePropertiesPanel({ node, onClose, onExecuteStep, onNodeChange
                 disabled={isRunning}
                 className={cn(
                   "flex items-center gap-2 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors",
-                  isRunning ? "bg-orange-700 opacity-70 cursor-wait" : "bg-orange-600 hover:bg-orange-500"
+                  isRunning ? "bg-orange-700 opacity-70 cursor-wait" : "bg-orange-600 hover:bg-orange-500 shadow-lg shadow-orange-900/20"
                 )}
               >
                 <Zap className={cn("w-3.5 h-3.5", isRunning && "animate-pulse")} />
@@ -130,15 +129,25 @@ export function NodePropertiesPanel({ node, onClose, onExecuteStep, onNodeChange
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {activeTab === "parameters" && (
-                <>
-                  <div className="bg-zinc-800/50 border border-zinc-700/40 rounded-xl p-4 text-sm text-zinc-400 leading-relaxed">
-                    This node is where the workflow execution starts (when you click the{" "}
-                    <span className="text-orange-400 font-medium">&apos;Execute step&apos;</span> button above).
-                    You can also trigger this flow via{" "}
-                    <span className="text-orange-400 font-medium">a schedule, or a webhook</span>.
+                <div className="flex flex-col items-center justify-center h-full max-w-md mx-auto text-center space-y-4 pt-8">
+                  <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-2">
+                    <MousePointer2 className="w-6 h-6 text-zinc-500" />
                   </div>
-                  <p className="text-sm text-zinc-600 italic">This node does not have any parameters.</p>
-                </>
+                  <div className="space-y-2">
+                    <h3 className="text-zinc-200 font-medium">Manual Trigger</h3>
+                    <p className="text-sm text-zinc-500 leading-relaxed">
+                      This node starts your workflow manually when you click the 
+                      <span className="text-orange-400 font-semibold mx-1">Execute step</span> 
+                      button or trigger it via API.
+                    </p>
+                  </div>
+                  <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-4 w-full">
+                    <p className="text-xs text-orange-500/70">
+                      Pro Tip: You can pass mock data using the "Test this trigger" section on the right.
+                    </p>
+                  </div>
+                  <p className="text-xs text-zinc-700 italic pt-4">No configurable parameters for this node type.</p>
+                </div>
               )}
 
               {activeTab === "settings" && (
@@ -240,18 +249,23 @@ export function NodePropertiesPanel({ node, onClose, onExecuteStep, onNodeChange
                   </button>
                 </div>
               ) : (
-                <>
-                  <Zap className="w-8 h-8 text-zinc-700" />
-                  <p className="text-sm text-zinc-500 text-center font-medium">No trigger output</p>
+                <div className="flex flex-col items-center justify-center gap-4 w-full">
+                  <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center animate-pulse shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                    <Zap className="w-8 h-8 text-zinc-700" />
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-sm text-zinc-300 font-medium">No execution data</p>
+                    <p className="text-xs text-zinc-500">Run a test to see output</p>
+                  </div>
                   <button
                     onClick={handleExecuteStep}
                     disabled={isRunning}
-                    className="bg-orange-600 hover:bg-orange-500 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-xl transition-colors w-full"
+                    className="bg-orange-600 hover:bg-orange-500 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-xl transition-all w-full shadow-lg shadow-orange-900/20 active:scale-[0.98]"
                   >
                     {isRunning ? "Running…" : "Test this trigger"}
                   </button>
-                  <button className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">or set mock data</button>
-                </>
+                  <button className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">or set mock data</button>
+                </div>
               )}
             </div>
           </div>

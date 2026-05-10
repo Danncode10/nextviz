@@ -7,11 +7,15 @@
       "id": "node-1778408433031",
       "type": "manualTrigger",
       "position": {
-        "x": 232.39088615467233,
+        "x": 203.20214497891942,
         "y": 139
       },
       "data": {
-        "label": "Manual Trigger"
+        "label": "Manual Trigger",
+        "alwaysOutputData": false,
+        "executeOnce": false,
+        "retryOnFail": false,
+        "displayNote": false
       },
       "selected": true,
       "width": 108,
@@ -21,14 +25,29 @@
       "id": "node-1778408465986",
       "type": "onHTTP",
       "position": {
-        "x": 477.5481121415289,
-        "y": 175.56699072623962
+        "x": 451.42299820411165,
+        "y": 310.8640072800178
       },
       "data": {
         "label": "HTTP Trigger"
       },
+      "selected": false,
       "width": 256,
       "height": 111
+    },
+    {
+      "id": "node-1778408664351",
+      "type": "httpAction",
+      "position": {
+        "x": 451.8065272764396,
+        "y": 142.08863864824679
+      },
+      "data": {
+        "label": "HTTP Action"
+      },
+      "selected": false,
+      "width": 256,
+      "height": 88
     }
   ],
   "edges": []
