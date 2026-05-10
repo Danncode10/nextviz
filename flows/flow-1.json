@@ -7,8 +7,8 @@
       "id": "1",
       "type": "manualTrigger",
       "position": {
-        "x": -994.6745249426345,
-        "y": -760.9182222294404
+        "x": -997.6873485382199,
+        "y": -758.507963352972
       },
       "data": {
         "label": "Trigger this workflow"
@@ -21,13 +21,13 @@
       "id": "2",
       "type": "httpAction",
       "position": {
-        "x": -627.8481113899577,
-        "y": -758.8201433248613
+        "x": -610.8603504619334,
+        "y": -744.514660438104
       },
       "data": {
         "label": "Fetch data from API"
       },
-      "selected": true,
+      "selected": false,
       "width": 256,
       "height": 88
     }

@@ -149,43 +149,43 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
               Add Flow
             </Button>
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Create New Flow</DialogTitle>
-                <DialogDescription>
-                  Define a new automation workflow.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={newFlowName}
-                    onChange={(e) => setNewFlowName(e.target.value)}
-                    placeholder="e.g. Slack Onboarding"
-                  />
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Create New Flow</DialogTitle>
+                  <DialogDescription>
+                    Define a new automation workflow.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      value={newFlowName}
+                      onChange={(e) => setNewFlowName(e.target.value)}
+                      placeholder="e.g. Slack Onboarding"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Input
+                      id="description"
+                      value={newFlowDesc}
+                      onChange={(e) => setNewFlowDesc(e.target.value)}
+                      placeholder="Briefly describe what this flow does..."
+                    />
+                  </div>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    value={newFlowDesc}
-                    onChange={(e) => setNewFlowDesc(e.target.value)}
-                    placeholder="Briefly describe what this flow does..."
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  onClick={handleCreateFlow}
-                  disabled={!newFlowName.trim()}
-                >
-                  Create Flow
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                <DialogFooter>
+                  <Button
+                    onClick={handleCreateFlow}
+                    disabled={!newFlowName.trim()}
+                  >
+                    Create Flow
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </>
         )}
       </div>
