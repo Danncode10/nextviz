@@ -27,12 +27,10 @@ export function ModeToggle() {
                     <SidebarMenu>
                         <SidebarMenuItem>
                             <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <SidebarMenuButton>
-                                        <Sun className="h-4 w-4" />
-                                        <span>Theme</span>
-                                    </SidebarMenuButton>
-                                </DropdownMenuTrigger>
+                                <SidebarMenuButton render={<DropdownMenuTrigger />}>
+                                    <Sun className="h-4 w-4" />
+                                    <span>Theme</span>
+                                </SidebarMenuButton>
                                 <DropdownMenuContent side="right" align="start">
                                     <DropdownMenuItem onClick={() => setTheme("light")}>
                                         Light
