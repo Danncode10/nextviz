@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NextViz
 
-## Getting Started
+**NextViz** is a local-first, node-based automation and UI orchestration engine designed specifically for the Next.js ecosystem. It allows developers to build complex logic, chatbots, and data pipelines visually within their own codebase—eliminating the need for external VPS hosting like n8n.
 
-First, run the development server:
+## 1. The Core Philosophy
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+* **Code-Owned:** The workflows are stored as JSON files (`nextviz-flow.json`) in the user's repository. If it’s in Git, it’s in NextViz.
+* **Environment-Aware:** Full editing power in `localhost`; **Read-Only** safety in production (Vercel).
+* **Zero-Latency:** Workflows run as native Next.js Server Actions or API Routes.
+* **Vibe-First:** Designed for "Vibe Coders" who want to drag, drop, and prompt their way to a functional backend.
+
+---
+
+## 2. Technical Stack & Constraints
+
+* **Framework:** Next.js 14+ (App Router).
+* **Visual Engine:** `reactflow` (Handles the canvas, edge logic, and node dragging).
+* **Styling:** Tailwind CSS + `lucide-react` icons + `shadcn/ui`.
+* **Storage:**
+* **Logic:** Local `.json` files.
+* **Secrets:** A dedicated `.env.nextviz` (auto-added to `.gitignore`).
+* **Database:** Supabase (for persistent user data/logs).
+
+
+* **Security:** Node.js `fs` module is strictly limited to `process.env.NODE_ENV === 'development'`.
+
+---
+
+## 3. The Architecture (The "Triad")
+
+### A. The Editor (`/app/nextviz/page.tsx`)
+
+The visual workspace. It interprets the JSON schema and renders it as a React Flow graph.
+
+* **Interaction:** Dragging a node updates the local JSON via a Server Action.
+* **Marketplace:** A sidebar of "Grayed-out" nodes that can be injected via CLI.
+
+### B. The Engine (`/lib/nextviz/engine.ts`)
+
+The "brain" that executes the workflow.
+
+* It traverses the JSON graph.
+* It identifies the **Trigger** (e.g., an incoming Webhook or a Button Click).
+* It executes **Action Nodes** sequentially or in parallel based on the **Logic Nodes** (If/Else).
+
+### C. The CLI (`npx nextviz`)
+
+The "Delivery System."
+
+* `init`: Scaffolds the folders and installs dependencies.
+* `add <node>`: Fetches specific component code into the user's local directory.
+
+---
+
+## 4. Key Implementation Rules (For the AI Agent)
+
+> [!IMPORTANT]
+> **Rule 1: The Local Bridge.** All "Save" functionality must use Next.js Server Actions that interact with the local file system using `fs/promises`.
+> **Rule 2: Type Strictness.** Every node must have a TypeScript interface defining its `Inputs` and `Outputs`.
+> **Rule 3: Secret Isolation.** Never write secrets to the `workflow.json`. Always reference keys that exist in `.env.nextviz`.
+> **Rule 4: Component Autonomy.** Nodes are just React components. A user should be able to create a new node by simply dropping a `.tsx` file into `app/nextviz/nodes/`.
+
+---
+
+## 5. High-Level Project Directory
+
+Your blank Next.js project will eventually be structured as follows:
+
+```text
+/
+├── app/
+│   ├── nextviz/            <-- The Editor Route
+│   │   ├── page.tsx        <-- Main Canvas
+│   │   ├── nodes/          <-- Folder for custom Node components
+│   │   └── layout.tsx
+│   └── api/nextviz/        <-- Runtime endpoints (Triggers)
+├── lib/
+│   └── nextviz/
+│       ├── engine.ts       <-- The Execution Logic
+│       ├── actions.ts      <-- Server Actions (Save/Commit)
+│       └── types.ts        <-- Schema definitions
+├── nextviz-flow.json       <-- THE SOURCE OF TRUTH (The Workflow)
+├── .env.nextviz            <-- Secrets (Ignored by Git)
+└── next.config.mjs
+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 6. The "Vibe" Roadmap
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Foundation:** Setup the React Flow canvas in a blank Next.js app and enable "Save to File" via Server Actions.
+2. **Basic Nodes:** Create `onHTTP` (Trigger) and `logData` (Action).
+3. **AI Integration:** Create the `aiGenerate` node using the `.env.nextviz` OpenAI key.
+4. **Production Guard:** Implement the "Read-Only" UI overlay for non-localhost environments.
+5. **CLI Prep:** Move the working code into a template folder for the `npx` distributor.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
