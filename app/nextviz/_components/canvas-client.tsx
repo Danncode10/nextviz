@@ -19,31 +19,24 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { useRouter } from "next/navigation";
 import { nodeTypes } from "../nodes";
-import {
-  createFlow,
-  listFlows,
-  loadFlow,
-  saveFlow,
-} from "@/lib/nextviz/actions";
+import { createFlow, listFlows, loadFlow, saveFlow } from "@/lib/nextviz/actions";
 import { WorkflowJSON } from "@/lib/nextviz/types";
 import { useFlows } from "../_context/flows-context";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogDescription,
+  DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
+import { Plus, Undo2, Redo2 } from "lucide-react";
 import { NodePropertiesPanel } from "./node-properties-panel";
 
 interface CanvasClientProps {
   initialFlowId?: string;
 }
+
+const MAX_HISTORY = 30;
 
 export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   const router = useRouter();
@@ -54,11 +47,56 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   const [edges, setEdges] = useState<Edge[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // ── Properties panel ───────────────────────────────────────
+  // ── Properties panel ───────────────────────────────────────────────────────
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
-  const [addNodeMode, setAddNodeMode] = useState<string | null>(null); // tracks which node's + button was clicked
 
-  // ── Add-flow dialog ────────────────────────────────────────
+  // ── Undo / Redo history ────────────────────────────────────────────────────
+  const history    = useRef<Array<{ nodes: Node[]; edges: Edge[] }>>([]);
+  const historyIdx = useRef(-1);
+  const skipHistory = useRef(false); // prevents recording while restoring
+
+  const pushHistory = useCallback((n: Node[], e: Edge[]) => {
+    if (skipHistory.current) return;
+    // Discard any "future" states when a new change is made
+    history.current = history.current.slice(0, historyIdx.current + 1);
+    history.current.push({ nodes: n, edges: e });
+    if (history.current.length > MAX_HISTORY) history.current.shift();
+    historyIdx.current = history.current.length - 1;
+  }, []);
+
+  const undo = useCallback(() => {
+    if (historyIdx.current <= 0) return;
+    historyIdx.current -= 1;
+    const snap = history.current[historyIdx.current];
+    skipHistory.current = true;
+    setNodes(snap.nodes);
+    setEdges(snap.edges);
+    skipHistory.current = false;
+  }, []);
+
+  const redo = useCallback(() => {
+    if (historyIdx.current >= history.current.length - 1) return;
+    historyIdx.current += 1;
+    const snap = history.current[historyIdx.current];
+    skipHistory.current = true;
+    setNodes(snap.nodes);
+    setEdges(snap.edges);
+    skipHistory.current = false;
+  }, []);
+
+  // Keyboard shortcuts: Cmd/Ctrl+Z (undo), Cmd/Ctrl+Shift+Z or Ctrl+Y (redo)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (!mod) return;
+      if (e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+      if ((e.key === "z" && e.shiftKey) || e.key === "y") { e.preventDefault(); redo(); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [undo, redo]);
+
+  // ── Add-flow dialog ────────────────────────────────────────────────────────
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newFlowName, setNewFlowName] = useState("");
   const [newFlowDesc, setNewFlowDesc] = useState("");
@@ -66,158 +104,130 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
 
-  // Load flow on mount (key prop in page.tsx forces remount on flow change)
+  // Load flow on mount
   useEffect(() => {
     async function load() {
       let flowId = initialFlowId;
-
       if (!flowId) {
         const flows = await listFlows();
-        if (flows.length > 0) {
-          router.replace(`/nextviz?flowId=${flows[0].id}`);
-          return;
-        }
+        if (flows.length > 0) { router.replace(`/nextviz?flowId=${flows[0].id}`); return; }
         setIsLoaded(true);
         return;
       }
-
       const flow = await loadFlow(flowId);
       if (flow) {
         setActiveFlow(flow);
         setActiveFlowId(flowId);
-        // Patch nodes with onAddNode callback
-        const nodesWithCallback = (flow.nodes as Node[]).map((node) => ({
-          ...node,
-          data: {
-            ...node.data,
-            onAddNode: (sourceId: string) => setAddNodeMode(sourceId),
-          },
-        }));
-        setNodes(nodesWithCallback);
-        setEdges(flow.edges as Edge[]);
+        const loadedNodes = flow.nodes as Node[];
+        const loadedEdges = flow.edges as Edge[];
+        setNodes(loadedNodes);
+        setEdges(loadedEdges);
+        // Seed history with the initial state
+        history.current = [{ nodes: loadedNodes, edges: loadedEdges }];
+        historyIdx.current = 0;
       }
       setIsLoaded(true);
     }
-
     load();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-save with 500 ms debounce
+  // Auto-save (dev only)
   useEffect(() => {
-    if (!isLoaded || !activeFlow || process.env.NODE_ENV !== "development")
-      return;
-
+    if (!isLoaded || !activeFlow || process.env.NODE_ENV !== "development") return;
     const timeout = setTimeout(() => {
-      saveFlow({
-        ...activeFlow,
-        nodes,
-        edges,
-      } as unknown as WorkflowJSON).catch(console.error);
+      saveFlow({ ...activeFlow, nodes, edges } as unknown as WorkflowJSON).catch(console.error);
     }, 500);
-
     return () => clearTimeout(timeout);
   }, [nodes, edges, isLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── React Flow callbacks ───────────────────────────────────
+  // ── React Flow callbacks ───────────────────────────────────────────────────
 
-  const onNodesChange = useCallback(
-    (changes: NodeChange[]) =>
-      setNodes((nds) => applyNodeChanges(changes, nds)),
-    []
-  );
-  const onEdgesChange = useCallback(
-    (changes: EdgeChange[]) =>
-      setEdges((eds) => applyEdgeChanges(changes, eds)),
-    []
-  );
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    []
-  );
+  const onNodesChange = useCallback((changes: NodeChange[]) => {
+    setNodes((nds) => {
+      const next = applyNodeChanges(changes, nds);
+      // Only push to history on meaningful changes (add/remove), not selection or position drag
+      const isSignificant = changes.some((c) => c.type === "add" || c.type === "remove");
+      if (isSignificant) pushHistory(next, edges);
+      return next;
+    });
+  }, [edges, pushHistory]);
+
+  const onEdgesChange = useCallback((changes: EdgeChange[]) => {
+    setEdges((eds) => {
+      const next = applyEdgeChanges(changes, eds);
+      const isSignificant = changes.some((c) => c.type === "add" || c.type === "remove");
+      if (isSignificant) pushHistory(nodes, next);
+      return next;
+    });
+  }, [nodes, pushHistory]);
+
+  const onConnect = useCallback((params: Connection) => {
+    setEdges((eds) => {
+      const next = addEdge(params, eds);
+      pushHistory(nodes, next);
+      return next;
+    });
+  }, [nodes, pushHistory]);
+
+  // Save history on node drag end
+  const onNodeDragStop = useCallback((_: React.MouseEvent, node: Node) => {
+    setNodes((nds) => {
+      pushHistory(nds, edges);
+      return nds;
+    });
+  }, [edges, pushHistory]);
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
   }, []);
 
-  const onDrop = useCallback(
-    (event: React.DragEvent) => {
-      event.preventDefault();
-      if (!rfInstance || !reactFlowWrapper.current) return;
+  const onDrop = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    if (!rfInstance || !reactFlowWrapper.current) return;
 
-      const nodeType = event.dataTransfer.getData("application/reactflow");
-      const label = event.dataTransfer.getData("application/reactflow-label");
-      if (!nodeType) return;
+    const nodeType = event.dataTransfer.getData("application/reactflow");
+    const label    = event.dataTransfer.getData("application/reactflow-label");
+    if (!nodeType) return;
 
-      const bounds = reactFlowWrapper.current.getBoundingClientRect();
-      const position = rfInstance.project({
-        x: event.clientX - bounds.left,
-        y: event.clientY - bounds.top,
-      });
+    const bounds   = reactFlowWrapper.current.getBoundingClientRect();
+    const position = rfInstance.project({ x: event.clientX - bounds.left, y: event.clientY - bounds.top });
 
-      const newNode: Node = {
-        id: `node-${Date.now()}`,
-        type: nodeType,
-        position,
-        data: {
-          label,
-          onAddNode: (sourceId: string) => setAddNodeMode(sourceId),
-        },
-      };
+    const newNode: Node = { id: `node-${Date.now()}`, type: nodeType, position, data: { label } };
+    setNodes((nds) => {
+      const next = [...nds, newNode];
+      pushHistory(next, edges);
+      return next;
+    });
+  }, [rfInstance, edges, pushHistory]);
 
-      setNodes((nds) => [...nds, newNode]);
-    },
-    [rfInstance]
-  );
-
-  // ── Node click → open properties panel ────────────────────
-
-  const onNodeClick = useCallback(
-    (event: React.MouseEvent, node: Node) => {
-      // Don't open properties if the + button inside the node was clicked
-      if ((event.target as Element).closest("[data-add-node-button]")) return;
-      setSelectedNode(node);
-    },
-    []
-  );
-
-  // Click on canvas background → close properties panel
-  const onPaneClick = useCallback(() => {
-    setSelectedNode(null);
+  // ── Node click → open properties panel ────────────────────────────────────
+  const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+    setSelectedNode(node);
   }, []);
 
-  // ── Execute step handler (passed to properties panel) ─────
+  const onPaneClick = useCallback(() => setSelectedNode(null), []);
 
-  const handleExecuteStep = useCallback(
-    async (nodeId: string): Promise<Record<string, unknown>> => {
-      // TODO: wire to engine.executeFlow() in Phase 4
-      // For now returns a simulated trigger output
-      await new Promise((r) => setTimeout(r, 700));
-      return {
-        executedAt: new Date().toISOString(),
-        nodeId,
-        flowId: activeFlow?.id ?? "unknown",
-        payload: {},
-      };
-    },
-    [activeFlow]
-  );
+  // ── Execute step handler ───────────────────────────────────────────────────
+  const handleExecuteStep = useCallback(async (nodeId: string): Promise<Record<string, unknown>> => {
+    await new Promise((r) => setTimeout(r, 700));
+    return { executedAt: new Date().toISOString(), nodeId, flowId: activeFlow?.id ?? "unknown", payload: {} };
+  }, [activeFlow]);
 
-  // ── Create flow dialog ─────────────────────────────────────
-
+  // ── Create flow ────────────────────────────────────────────────────────────
   const handleCreateFlow = async () => {
     if (!newFlowName.trim()) return;
     const flow = await createFlow(newFlowName, newFlowDesc);
     await refreshFlows();
-    setNewFlowName("");
-    setNewFlowDesc("");
-    setIsAddOpen(false);
+    setNewFlowName(""); setNewFlowDesc(""); setIsAddOpen(false);
     router.push(`/nextviz?flowId=${flow.id}`);
   };
 
   const isDevelopment = process.env.NODE_ENV === "development";
+  const canUndo = historyIdx.current > 0;
+  const canRedo = historyIdx.current < history.current.length - 1;
 
-  // ── Render ─────────────────────────────────────────────────
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="flex-1 w-full h-full relative flex flex-col">
@@ -229,19 +239,24 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
       )}
 
       {/* Top bar */}
-      <div className="h-14 border-b border-border bg-card flex items-center justify-between px-4 shrink-0 z-40 shadow-sm">
-        <h1 className="text-sm font-semibold text-foreground">
+      <div className="h-14 border-b border-border bg-card flex items-center gap-2 px-4 shrink-0 z-40 shadow-sm">
+        <h1 className="text-sm font-semibold text-foreground flex-1">
           {activeFlow?.name ?? "NextViz"}
         </h1>
 
         {isDevelopment && (
           <>
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-2"
-              onClick={() => setIsAddOpen(true)}
-            >
+            {/* Undo / Redo */}
+            <Button size="sm" variant="ghost" onClick={undo} disabled={!canUndo} title="Undo (⌘Z)" className="px-2">
+              <Undo2 className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="ghost" onClick={redo} disabled={!canRedo} title="Redo (⌘⇧Z)" className="px-2">
+              <Redo2 className="h-4 w-4" />
+            </Button>
+
+            <div className="w-px h-5 bg-border mx-1" />
+
+            <Button size="sm" variant="outline" className="gap-2" onClick={() => setIsAddOpen(true)}>
               <Plus className="h-4 w-4" />
               Add Flow
             </Button>
@@ -250,37 +265,20 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle>Create New Flow</DialogTitle>
-                  <DialogDescription>
-                    Define a new automation workflow.
-                  </DialogDescription>
+                  <DialogDescription>Define a new automation workflow.</DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
                     <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      value={newFlowName}
-                      onChange={(e) => setNewFlowName(e.target.value)}
-                      placeholder="e.g. Slack Onboarding"
-                    />
+                    <Input id="name" value={newFlowName} onChange={(e) => setNewFlowName(e.target.value)} placeholder="e.g. Slack Onboarding" />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="description">Description</Label>
-                    <Input
-                      id="description"
-                      value={newFlowDesc}
-                      onChange={(e) => setNewFlowDesc(e.target.value)}
-                      placeholder="Briefly describe what this flow does…"
-                    />
+                    <Input id="description" value={newFlowDesc} onChange={(e) => setNewFlowDesc(e.target.value)} placeholder="Briefly describe what this flow does…" />
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button
-                    onClick={handleCreateFlow}
-                    disabled={!newFlowName.trim()}
-                  >
-                    Create Flow
-                  </Button>
+                  <Button onClick={handleCreateFlow} disabled={!newFlowName.trim()}>Create Flow</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -288,9 +286,8 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
         )}
       </div>
 
-      {/* Canvas + Properties Panel */}
+      {/* Canvas */}
       <div className="flex flex-1 min-h-0">
-        {/* React Flow canvas */}
         <div ref={reactFlowWrapper} className="flex-1 relative">
           <ReactFlow
             nodes={nodes}
@@ -303,47 +300,30 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
             onDragOver={isDevelopment ? onDragOver : undefined}
             onDrop={isDevelopment ? onDrop : undefined}
             onNodeClick={onNodeClick}
+            onNodeDragStop={isDevelopment ? onNodeDragStop : undefined}
             onPaneClick={onPaneClick}
             nodesDraggable={isDevelopment}
             nodesConnectable={isDevelopment}
             elementsSelectable={isDevelopment}
+            deleteKeyCode="Delete"
             fitView
             className="bg-zinc-950"
           >
-            <Background
-              variant={BackgroundVariant.Dots}
-              gap={16}
-              size={1}
-              color="#333"
-            />
-            <Controls
-              className="bg-card border-border fill-foreground"
-              showInteractive={false}
-            />
-            <MiniMap
-              className="bg-card border-border"
-              maskColor="rgba(0,0,0,0.2)"
-              nodeColor="#52525b"
-            />
-
-            {/* Properties Panel — slides in when a node is selected or + button clicked */}
-            {/* Must be inside ReactFlow to access useReactFlow() context */}
-            {(selectedNode || addNodeMode) && (
-              <NodePropertiesPanel
-                node={selectedNode}
-                mode={addNodeMode ? "addNode" : "view"}
-                sourceNodeId={addNodeMode || undefined}
-                setAddNodeMode={setAddNodeMode}
-                onClose={() => {
-                  setSelectedNode(null);
-                  setAddNodeMode(null);
-                }}
-                onExecuteStep={handleExecuteStep}
-              />
-            )}
+            <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#333" />
+            <Controls className="bg-card border-border fill-foreground" showInteractive={false} />
+            <MiniMap className="bg-card border-border" maskColor="rgba(0,0,0,0.2)" nodeColor="#52525b" />
           </ReactFlow>
         </div>
       </div>
+
+      {/* Properties modal — rendered OUTSIDE ReactFlow to avoid transform clipping */}
+      {selectedNode && (
+        <NodePropertiesPanel
+          node={selectedNode}
+          onClose={() => setSelectedNode(null)}
+          onExecuteStep={handleExecuteStep}
+        />
+      )}
     </div>
   );
 }

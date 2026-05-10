@@ -7,57 +7,51 @@
       "id": "1",
       "type": "manualTrigger",
       "position": {
-        "x": -1061.5189719605291,
-        "y": -1504.4796340743171
+        "x": -1131.6631720226424,
+        "y": -1567.609414130219
       },
       "data": {
         "label": "Trigger this workflow"
       },
-      "selected": false,
+      "selected": true,
       "width": 108,
       "height": 108
-    },
-    {
-      "id": "node-1778404679558",
-      "type": "onHTTP",
-      "position": {
-        "x": -602.0988674457915,
-        "y": -1374.166786294615
-      },
-      "data": {
-        "label": "HTTP Trigger"
-      },
-      "selected": false,
-      "width": 256,
-      "height": 111
     },
     {
       "id": "node-1778406351858",
       "type": "openaiAction",
       "position": {
-        "x": -851.3056230277576,
-        "y": -1364.2064405306178
+        "x": -838.8496912610373,
+        "y": -1442.178937626999
       },
       "data": {
         "label": "OpenAI / Anthropic"
       },
-      "selected": true,
+      "selected": false,
       "width": 150,
       "height": 40
+    },
+    {
+      "id": "node-1778407125882",
+      "type": "onHTTP",
+      "position": {
+        "x": -732.4772743834187,
+        "y": -1780.4213701579995
+      },
+      "data": {
+        "label": "HTTP Trigger"
+      },
+      "width": 256,
+      "height": 111
     }
   ],
   "edges": [
     {
-      "id": "edge-1-node-1778404679558",
-      "source": "1",
-      "target": "node-1778404679558",
-      "animated": false
-    },
-    {
-      "id": "edge-1-node-1778406351858",
+      "id": "reactflow__edge-1-node-1778406351858",
       "source": "1",
       "target": "node-1778406351858",
-      "animated": false
+      "sourceHandle": null,
+      "targetHandle": null
     }
   ]
 }
