@@ -56,6 +56,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
 
   // ── Properties panel ───────────────────────────────────────
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [addNodeMode, setAddNodeMode] = useState<string | null>(null); // tracks which node's + button was clicked
 
   // ── Add-flow dialog ────────────────────────────────────────
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -84,7 +85,15 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
       if (flow) {
         setActiveFlow(flow);
         setActiveFlowId(flowId);
-        setNodes(flow.nodes as Node[]);
+        // Patch nodes with onAddNode callback
+        const nodesWithCallback = (flow.nodes as Node[]).map((node) => ({
+          ...node,
+          data: {
+            ...node.data,
+            onAddNode: (sourceId: string) => setAddNodeMode(sourceId),
+          },
+        }));
+        setNodes(nodesWithCallback);
         setEdges(flow.edges as Edge[]);
       }
       setIsLoaded(true);
@@ -150,7 +159,10 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
         id: `node-${Date.now()}`,
         type: nodeType,
         position,
-        data: { label },
+        data: {
+          label,
+          onAddNode: (sourceId: string) => setAddNodeMode(sourceId),
+        },
       };
 
       setNodes((nds) => [...nds, newNode]);
@@ -316,11 +328,17 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
           </ReactFlow>
         </div>
 
-        {/* Properties Panel — slides in when a node is selected */}
-        {selectedNode && (
+        {/* Properties Panel — slides in when a node is selected or + button clicked */}
+        {(selectedNode || addNodeMode) && (
           <NodePropertiesPanel
             node={selectedNode}
-            onClose={() => setSelectedNode(null)}
+            mode={addNodeMode ? "addNode" : "view"}
+            sourceNodeId={addNodeMode || undefined}
+            setAddNodeMode={setAddNodeMode}
+            onClose={() => {
+              setSelectedNode(null);
+              setAddNodeMode(null);
+            }}
             onExecuteStep={handleExecuteStep}
           />
         )}

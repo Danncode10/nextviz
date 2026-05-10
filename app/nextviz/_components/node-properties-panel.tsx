@@ -2,11 +2,22 @@
 
 import { useState } from "react";
 import { Node } from "reactflow";
+import { useReactFlow } from "reactflow";
 import {
   X,
   ExternalLink,
   MousePointer2,
   Zap,
+  Webhook,
+  Globe,
+  ScrollText,
+  Clock,
+  BrainCircuit,
+  Database,
+  GitBranch,
+  Code2,
+  MessageSquare,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,10 +26,64 @@ import { cn } from "@/lib/utils";
 type Tab = "parameters" | "settings";
 
 interface NodePropertiesPanelProps {
-  node: Node;
+  node: Node | null;
+  mode: "view" | "addNode";
+  sourceNodeId?: string;
+  setAddNodeMode: (nodeId: string | null) => void;
   onClose: () => void;
   onExecuteStep?: (nodeId: string) => Promise<Record<string, unknown>>;
+  onNodeAdd?: (nodeType: string, label: string) => void;
 }
+
+// ── Node catalogue ─────────────────────────────────────────────────────────────
+
+const NODE_GROUPS = [
+  {
+    label: "Triggers",
+    color: "text-orange-400",
+    bg: "bg-orange-500/10",
+    nodes: [
+      { type: "onHTTP",          label: "HTTP Trigger",       description: "Fires when a webhook is called",     icon: Webhook },
+      { type: "scheduleTrigger", label: "Schedule (Cron)",    description: "Run on an interval or cron expr.",   icon: Clock },
+    ],
+  },
+  {
+    label: "AI",
+    color: "text-violet-400",
+    bg: "bg-violet-500/10",
+    nodes: [
+      { type: "openaiAction",    label: "OpenAI / Anthropic", description: "Generate with LLMs",                icon: BrainCircuit },
+    ],
+  },
+  {
+    label: "Logic",
+    color: "text-yellow-400",
+    bg: "bg-yellow-500/10",
+    nodes: [
+      { type: "ifElseNode",      label: "Filter / If-Else",   description: "Branch on a condition",             icon: GitBranch },
+      { type: "codeNode",        label: "Code (JS)",           description: "Run raw JavaScript",               icon: Code2 },
+    ],
+  },
+  {
+    label: "Data",
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+    nodes: [
+      { type: "supabaseNode",    label: "Supabase DB",         description: "Read / write rows",                icon: Database },
+      { type: "httpAction",      label: "HTTP Request",        description: "Call any REST API",                icon: Globe },
+      { type: "logData",         label: "Log Data",            description: "Print to server console",          icon: ScrollText },
+    ],
+  },
+  {
+    label: "Messaging",
+    color: "text-pink-400",
+    bg: "bg-pink-500/10",
+    nodes: [
+      { type: "discordNode",     label: "Discord / Slack",     description: "Send a message to a channel",      icon: MessageSquare },
+      { type: "emailNode",       label: "Gmail / Resend",      description: "Send an email",                    icon: Mail },
+    ],
+  },
+];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -58,46 +123,138 @@ function Toggle({
 
 export function NodePropertiesPanel({
   node,
+  mode,
+  sourceNodeId,
+  setAddNodeMode,
   onClose,
   onExecuteStep,
+  onNodeAdd,
 }: NodePropertiesPanelProps) {
+  const { getNode, setNodes, setEdges } = useReactFlow();
   const [activeTab, setActiveTab] = useState<Tab>("parameters");
 
   // Settings state (mirrors n8n's per-node settings)
   const [alwaysOutputData, setAlwaysOutputData] = useState(
-    node.data?.alwaysOutputData ?? false
+    node?.data?.alwaysOutputData ?? false
   );
-  const [executeOnce, setExecuteOnce] = useState(node.data?.executeOnce ?? false);
-  const [retryOnFail, setRetryOnFail] = useState(node.data?.retryOnFail ?? false);
+  const [executeOnce, setExecuteOnce] = useState(node?.data?.executeOnce ?? false);
+  const [retryOnFail, setRetryOnFail] = useState(node?.data?.retryOnFail ?? false);
   const [onError, setOnError] = useState<string>(
-    node.data?.onError ?? "stopWorkflow"
+    node?.data?.onError ?? "stopWorkflow"
   );
-  const [notes, setNotes] = useState<string>(node.data?.notes ?? "");
-  const [displayNote, setDisplayNote] = useState(node.data?.displayNote ?? false);
+  const [notes, setNotes] = useState<string>(node?.data?.notes ?? "");
+  const [displayNote, setDisplayNote] = useState(node?.data?.displayNote ?? false);
 
   // Execution state
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState<Record<string, unknown> | null>(null);
 
-  const nodeTitle: string =
-    node.data?.label ?? "When clicking 'Execute workflow'";
+  const nodeTitle: string = node?.data?.label ?? "When clicking 'Execute workflow'";
 
   const handleExecuteStep = async () => {
     setIsRunning(true);
     try {
-      if (onExecuteStep) {
+      if (onExecuteStep && node) {
         const result = await onExecuteStep(node.id);
         setOutput(result);
       } else {
         // Simulation fallback
         await new Promise((r) => setTimeout(r, 600));
-        setOutput({ executedAt: new Date().toISOString(), nodeId: node.id });
+        setOutput({ executedAt: new Date().toISOString(), nodeId: node?.id });
       }
     } finally {
       setIsRunning(false);
     }
   };
 
+  // Add node handler (for addNode mode)
+  const handleAddNode = (nodeType: string, label: string) => {
+    if (!sourceNodeId) return;
+
+    const source = getNode(sourceNodeId);
+    if (!source) return;
+
+    const newId = `node-${Date.now()}`;
+    const newNode = {
+      id: newId,
+      type: nodeType,
+      position: {
+        x: source.position.x + (source.width ?? 120) + 220,
+        y: source.position.y,
+      },
+      data: {
+        label,
+        // Pass the onAddNode callback for future + button clicks on this node
+        onAddNode: (sourceId: string) => setAddNodeMode(sourceId),
+      },
+    };
+    const newEdge = {
+      id: `edge-${sourceNodeId}-${newId}`,
+      source: sourceNodeId,
+      target: newId,
+      animated: false,
+    };
+
+    setNodes((nds) => [...nds, newNode]);
+    setEdges((eds) => [...eds, newEdge]);
+    onClose();
+  };
+
+  // Render add-node mode
+  if (mode === "addNode") {
+    return (
+      <div className="w-[500px] border-l border-zinc-800 bg-zinc-950 flex flex-col h-full shrink-0 overflow-hidden">
+        {/* ── Header ─────────────────────────────────────────────── */}
+        <div className="h-12 border-b border-zinc-800 flex items-center gap-3 px-4 shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
+            <Zap className="w-3.5 h-3.5 text-orange-400" />
+          </div>
+          <span className="text-sm font-semibold text-zinc-200 flex-1">
+            Add next step
+          </span>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-800 transition-colors"
+          >
+            <X className="w-4 h-4 text-zinc-400" />
+          </button>
+        </div>
+
+        {/* ── Node list ─────────────────────────────────────────── */}
+        <div className="flex-1 overflow-y-auto py-1 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+          {NODE_GROUPS.map((group) => (
+            <div key={group.label}>
+              <p className={cn("px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-widest", group.color)}>
+                {group.label}
+              </p>
+              {group.nodes.map((node) => {
+                const IconComponent = node.icon;
+                return (
+                  <button
+                    key={node.type}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-800 transition-colors text-left"
+                    onClick={() => {
+                      handleAddNode(node.type, node.label);
+                    }}
+                  >
+                    <div className={cn("w-7 h-7 rounded-md flex items-center justify-center shrink-0", group.bg)}>
+                      <IconComponent className={cn("w-3.5 h-3.5", group.color)} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-medium text-zinc-200 truncate">{node.label}</p>
+                      <p className="text-[10px] text-zinc-500 truncate">{node.description}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Render view mode (normal properties panel)
   return (
     <div className="w-[500px] border-l border-zinc-800 bg-zinc-950 flex flex-col h-full shrink-0 overflow-hidden">
 

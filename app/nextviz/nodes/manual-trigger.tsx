@@ -1,19 +1,30 @@
 "use client";
 
 import { Handle, Position, NodeProps } from "reactflow";
-import { MousePointer2, Zap, Plus } from "lucide-react";
+import { MousePointer2, Zap, Plus, Copy, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { AddNodePopover } from "../_components/add-node-popover";
 
-export default function ManualTriggerNode({ id, selected }: NodeProps) {
-  const [showPopover, setShowPopover] = useState(false);
+export default function ManualTriggerNode({ id, selected, data }: NodeProps) {
+  const [showHoverMenu, setShowHoverMenu] = useState(false);
+
+  const handleAddNodeClick = () => {
+    // Call the onAddNode callback passed via node.data if available
+    if (data?.onAddNode) {
+      data.onAddNode(id);
+    }
+  };
 
   return (
     // Root is exactly the node's visual bounding box (108×108).
     // Absolutely-positioned children (Zap, label, + button) extend
     // outside this box without affecting React Flow's hit-test size.
-    <div className="relative" style={{ width: 108, height: 108 }}>
+    <div
+      className="relative group"
+      style={{ width: 108, height: 108 }}
+      onMouseEnter={() => setShowHoverMenu(true)}
+      onMouseLeave={() => setShowHoverMenu(false)}
+    >
 
       {/* ── Node body ──────────────────────────────────────────── */}
       <div
@@ -54,29 +65,38 @@ export default function ManualTriggerNode({ id, selected }: NodeProps) {
           "nodrag nopan absolute top-1/2 -translate-y-1/2 w-7 h-7",
           "rounded-lg bg-zinc-800 border border-zinc-600",
           "flex items-center justify-center transition-colors z-10",
-          "hover:bg-zinc-700 hover:border-zinc-400",
-          showPopover && "bg-zinc-700 border-zinc-400"
+          "hover:bg-zinc-700 hover:border-zinc-400"
         )}
         style={{ right: -48 }}
         onClick={(e) => {
           e.stopPropagation();
-          setShowPopover((v) => !v);
+          handleAddNodeClick();
         }}
       >
         <Plus className="w-3.5 h-3.5 text-zinc-300" />
       </button>
 
-      {/* ── Add-node popover ──────────────────────────────────── */}
-      {showPopover && (
+      {/* ── Hover menu (top-right) ────────────────────────────── */}
+      {showHoverMenu && (
         <div
-          className="nodrag nopan absolute z-50"
-          style={{ left: 124, top: -12 }}
+          className="nodrag nopan absolute bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg z-50"
+          style={{ top: -8, right: -8 }}
           onClick={(e) => e.stopPropagation()}
         >
-          <AddNodePopover
-            sourceNodeId={id}
-            onClose={() => setShowPopover(false)}
-          />
+          <div className="flex items-center gap-1 p-1">
+            <button
+              className="p-1.5 hover:bg-zinc-700 rounded transition-colors"
+              title="Copy node"
+            >
+              <Copy className="w-3.5 h-3.5 text-zinc-400 hover:text-zinc-200" />
+            </button>
+            <button
+              className="p-1.5 hover:bg-red-900/30 rounded transition-colors"
+              title="Delete node"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-zinc-400 hover:text-red-400" />
+            </button>
+          </div>
         </div>
       )}
     </div>
