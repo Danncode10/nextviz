@@ -21,8 +21,8 @@
       "id": "node-1778404679558",
       "type": "onHTTP",
       "position": {
-        "x": -747.839453259169,
-        "y": -1491.9037318881053
+        "x": -602.0988674457915,
+        "y": -1374.166786294615
       },
       "data": {
         "label": "HTTP Trigger"
@@ -30,6 +30,20 @@
       "selected": false,
       "width": 256,
       "height": 111
+    },
+    {
+      "id": "node-1778406351858",
+      "type": "openaiAction",
+      "position": {
+        "x": -851.3056230277576,
+        "y": -1364.2064405306178
+      },
+      "data": {
+        "label": "OpenAI / Anthropic"
+      },
+      "selected": true,
+      "width": 150,
+      "height": 40
     }
   ],
   "edges": [
@@ -37,6 +51,12 @@
       "id": "edge-1-node-1778404679558",
       "source": "1",
       "target": "node-1778404679558",
+      "animated": false
+    },
+    {
+      "id": "edge-1-node-1778406351858",
+      "source": "1",
+      "target": "node-1778406351858",
       "animated": false
     }
   ]
