@@ -1,0 +1,192 @@
+import * as registry from "./registry";
+import { nodeExecutors } from "./node-executors";
+import {
+  ExecutionPlan,
+  FlowExecutionResult,
+  NextVizEdge,
+  NextVizNode,
+  NodeExecutionContext,
+  WorkflowJSON,
+} from "./types";
+
+// ─── Execution Plan Cache ──────────────────────────────────────────────────
+//
+// Topological sort is computed once per flow and stored here.
+// Subsequent calls to executeFlow skip parsing and sorting entirely.
+// Key: flowId.
+
+const planCache = new Map<string, ExecutionPlan>();
+
+/** Invalidate the cached plan for a flow (call after editing a flow in the canvas). */
+export function invalidatePlan(flowId: string): void {
+  planCache.delete(flowId);
+}
+
+/** Wipe the entire cache (e.g. on hot-reload in development). */
+export function clearPlanCache(): void {
+  planCache.clear();
+}
+
+// ─── Topological Sort (Kahn's Algorithm) ──────────────────────────────────
+
+function buildExecutionPlan(flow: WorkflowJSON): ExecutionPlan {
+  const { nodes, edges } = flow;
+
+  // Build lookup structures
+  const nodeMap = new Map<string, NextVizNode>(nodes.map((n) => [n.id, n]));
+  const inDegree = new Map<string, number>(nodes.map((n) => [n.id, 0]));
+  const adjacency = new Map<string, string[]>(nodes.map((n) => [n.id, []]));
+  const incomingEdges = new Map<string, string[]>(nodes.map((n) => [n.id, []]));
+
+  for (const edge of edges) {
+    adjacency.get(edge.source)?.push(edge.target);
+    incomingEdges.get(edge.target)?.push(edge.source);
+    inDegree.set(edge.target, (inDegree.get(edge.target) ?? 0) + 1);
+  }
+
+  // Kahn's BFS — nodes with no incoming edges start the queue
+  const queue: string[] = [];
+  for (const [id, degree] of inDegree) {
+    if (degree === 0) queue.push(id);
+  }
+
+  const sortedNodeIds: string[] = [];
+  while (queue.length > 0) {
+    const id = queue.shift()!;
+    sortedNodeIds.push(id);
+    for (const neighbor of adjacency.get(id) ?? []) {
+      const next = (inDegree.get(neighbor) ?? 0) - 1;
+      inDegree.set(neighbor, next);
+      if (next === 0) queue.push(neighbor);
+    }
+  }
+
+  if (sortedNodeIds.length !== nodes.length) {
+    throw new Error(
+      `Flow "${flow.id}" has a cycle — execution plans must be acyclic.`
+    );
+  }
+
+  return { flowId: flow.id, sortedNodeIds, nodeMap, incomingEdges };
+}
+
+function getOrBuildPlan(flow: WorkflowJSON): ExecutionPlan {
+  const cached = planCache.get(flow.id);
+  if (cached) return cached;
+  const plan = buildExecutionPlan(flow);
+  planCache.set(flow.id, plan);
+  return plan;
+}
+
+// ─── executeFlow ───────────────────────────────────────────────────────────
+
+/**
+ * Execute a named flow with an optional payload.
+ *
+ * ```ts
+ * // From an API route or Server Action:
+ * const result = await executeFlow("chatbot-flow", { message: "Hello" });
+ * ```
+ *
+ * @param flowId   The flow's `id` field (matches `flows/{flowId}.json`).
+ * @param payload  Initial data injected into trigger nodes.
+ */
+export async function executeFlow(
+  flowId: string,
+  payload: Record<string, unknown> = {}
+): Promise<FlowExecutionResult> {
+  const executionId = crypto.randomUUID();
+  const startedAt = new Date().toISOString();
+
+  // 1. Load flow from disk (or in-memory cache via registry)
+  let flow: WorkflowJSON | null;
+  try {
+    flow = await registry.loadFlow(flowId);
+  } catch (err: unknown) {
+    return failure(flowId, executionId, startedAt, `Failed to load flow: ${String(err)}`);
+  }
+
+  if (!flow) {
+    return failure(flowId, executionId, startedAt, `Flow "${flowId}" not found.`);
+  }
+
+  // 2. Get (or build + cache) the topologically sorted execution plan
+  let plan: ExecutionPlan;
+  try {
+    plan = getOrBuildPlan(flow);
+  } catch (err: unknown) {
+    return failure(flowId, executionId, startedAt, String(err));
+  }
+
+  // 3. Execute nodes in sorted order
+  const nodeOutputs = new Map<string, Record<string, unknown>>();
+  const context: NodeExecutionContext = { flowId, executionId, payload, nodeOutputs };
+
+  for (const nodeId of plan.sortedNodeIds) {
+    const node = plan.nodeMap.get(nodeId);
+    if (!node) continue;
+
+    const executor = nodeExecutors[node.type ?? ""];
+
+    if (!executor) {
+      // Unknown node types are skipped with an empty output (non-fatal)
+      console.warn(`[NextViz] No executor for node type "${node.type}" — skipping.`);
+      nodeOutputs.set(nodeId, {});
+      continue;
+    }
+
+    // Merge outputs of all upstream nodes as this node's inputs.
+    // Root nodes (no incoming edges) receive the raw trigger payload instead.
+    const upstream = plan.incomingEdges.get(nodeId) ?? [];
+    const inputs: Record<string, unknown> =
+      upstream.length === 0
+        ? { ...payload }
+        : upstream.reduce<Record<string, unknown>>(
+            (acc, srcId) => ({ ...acc, ...(nodeOutputs.get(srcId) ?? {}) }),
+            {}
+          );
+
+    try {
+      const output = await executor(node.data, inputs, context);
+      nodeOutputs.set(nodeId, output);
+    } catch (err: unknown) {
+      return {
+        ...failure(
+          flowId,
+          executionId,
+          startedAt,
+          `Node "${nodeId}" (${node.type}) threw: ${String(err)}`
+        ),
+        nodeOutputs: Object.fromEntries(nodeOutputs),
+      };
+    }
+  }
+
+  return {
+    success: true,
+    flowId,
+    executionId,
+    startedAt,
+    completedAt: new Date().toISOString(),
+    nodeOutputs: Object.fromEntries(nodeOutputs),
+  };
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+
+function failure(
+  flowId: string,
+  executionId: string,
+  startedAt: string,
+  error: string
+): FlowExecutionResult {
+  return {
+    success: false,
+    flowId,
+    executionId,
+    startedAt,
+    completedAt: new Date().toISOString(),
+    nodeOutputs: {},
+    error,
+  };
+}

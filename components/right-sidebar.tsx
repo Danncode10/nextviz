@@ -1,7 +1,7 @@
 "use client";
 
 import { Sidebar, SidebarContent, SidebarHeader, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "./ui/sidebar"
-import { Play, Globe, Plus } from "lucide-react"
+import { Globe, Play, Plus, ScrollText, Webhook } from "lucide-react"
 
 export default function RightSidebar() {
   const onDragStart = (event: React.DragEvent, nodeType: string, label: string) => {
@@ -24,7 +24,7 @@ export default function RightSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton 
+                <SidebarMenuButton
                   className="cursor-grab active:cursor-grabbing"
                   draggable
                   onDragStart={(e) => onDragStart(e, 'manualTrigger', 'Manual Trigger')}
@@ -33,22 +33,42 @@ export default function RightSidebar() {
                   <span>Manual Trigger</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  className="cursor-grab active:cursor-grabbing"
+                  draggable
+                  onDragStart={(e) => onDragStart(e, 'onHTTP', 'HTTP Trigger')}
+                >
+                  <Webhook className="w-4 h-4 text-violet-400 shrink-0" />
+                  <span>HTTP Trigger</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        
+
         <SidebarGroup>
           <SidebarGroupLabel>Actions</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton 
+                <SidebarMenuButton
                   className="cursor-grab active:cursor-grabbing"
                   draggable
                   onDragStart={(e) => onDragStart(e, 'httpAction', 'HTTP Action')}
                 >
                   <Globe className="w-4 h-4 text-orange-500 shrink-0" />
                   <span>HTTP Action</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  className="cursor-grab active:cursor-grabbing"
+                  draggable
+                  onDragStart={(e) => onDragStart(e, 'logData', 'Log Data')}
+                >
+                  <ScrollText className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Log Data</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

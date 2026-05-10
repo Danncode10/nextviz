@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+// ─── Schema Definitions ────────────────────────────────────────────────────
+
 export const NextVizNodeSchema = z.object({
   id: z.string(),
   type: z.string().optional(),
@@ -30,6 +32,55 @@ export const WorkflowSchema = z.object({
   edges: z.array(NextVizEdgeSchema),
 });
 
+// ─── Inferred Types ────────────────────────────────────────────────────────
+
 export type NextVizNode = z.infer<typeof NextVizNodeSchema>;
 export type NextVizEdge = z.infer<typeof NextVizEdgeSchema>;
 export type WorkflowJSON = z.infer<typeof WorkflowSchema>;
+
+// ─── Engine Types ──────────────────────────────────────────────────────────
+
+/** Context passed to every node executor during a flow run. */
+export interface NodeExecutionContext {
+  flowId: string;
+  executionId: string;
+  /** Initial payload that triggered the flow (webhook body, manual args, etc.) */
+  payload: Record<string, unknown>;
+  /** Accumulated outputs from all previously executed nodes. */
+  nodeOutputs: Map<string, Record<string, unknown>>;
+}
+
+/**
+ * Every node type must export an executor matching this signature.
+ * - `nodeData` — the node's `data` field from the flow JSON (config set in the canvas)
+ * - `inputs`   — merged outputs of all upstream nodes (or the trigger payload for root nodes)
+ * - `context`  — full execution context
+ */
+export type NodeExecutorFn = (
+  nodeData: Record<string, unknown>,
+  inputs: Record<string, unknown>,
+  context: NodeExecutionContext
+) => Promise<Record<string, unknown>>;
+
+/** Cached, pre-computed execution plan for a flow. Built once, reused forever. */
+export interface ExecutionPlan {
+  flowId: string;
+  /** Node IDs in topologically sorted order (safe execution sequence). */
+  sortedNodeIds: string[];
+  /** Fast node lookup by ID. */
+  nodeMap: Map<string, NextVizNode>;
+  /** nodeId → IDs of all nodes whose output feeds into it. */
+  incomingEdges: Map<string, string[]>;
+}
+
+/** Result returned by `executeFlow`. */
+export interface FlowExecutionResult {
+  success: boolean;
+  flowId: string;
+  executionId: string;
+  startedAt: string;
+  completedAt: string;
+  /** Each node's output, keyed by node ID. */
+  nodeOutputs: Record<string, Record<string, unknown>>;
+  error?: string;
+}
