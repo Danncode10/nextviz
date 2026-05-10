@@ -7,37 +7,37 @@
       "id": "1",
       "type": "manualTrigger",
       "position": {
-        "x": -938.6261275014288,
-        "y": -959.0033591000725
+        "x": -997.8299565193462,
+        "y": -1185.9176284280577
       },
       "data": {
         "label": "Trigger this workflow"
       },
-      "selected": true,
-      "width": 256,
-      "height": 88
+      "selected": false,
+      "width": 108,
+      "height": 108
     },
     {
-      "id": "2",
-      "type": "httpAction",
+      "id": "node-1778404679558",
+      "type": "onHTTP",
       "position": {
-        "x": -525.4365763337894,
-        "y": -965.4268399195341
+        "x": -671.8714678647917,
+        "y": -1184.8968727553354
       },
       "data": {
-        "label": "Fetch data from API"
+        "label": "HTTP Trigger"
       },
-      "selected": false,
+      "selected": true,
       "width": 256,
-      "height": 88
+      "height": 111
     }
   ],
   "edges": [
     {
-      "id": "e1-2",
+      "id": "edge-1-node-1778404679558",
       "source": "1",
-      "target": "2",
-      "animated": true
+      "target": "node-1778404679558",
+      "animated": false
     }
   ]
 }
