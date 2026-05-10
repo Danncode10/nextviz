@@ -18,6 +18,8 @@ import {
   Code2,
   MessageSquare,
   Mail,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +35,7 @@ interface NodePropertiesPanelProps {
   onClose: () => void;
   onExecuteStep?: (nodeId: string) => Promise<Record<string, unknown>>;
   onNodeAdd?: (nodeType: string, label: string) => void;
+  defaultCollapsed?: boolean;
 }
 
 // ── Node catalogue ─────────────────────────────────────────────────────────────
@@ -129,9 +132,11 @@ export function NodePropertiesPanel({
   onClose,
   onExecuteStep,
   onNodeAdd,
+  defaultCollapsed = false,
 }: NodePropertiesPanelProps) {
   const { getNode, setNodes, setEdges } = useReactFlow();
   const [activeTab, setActiveTab] = useState<Tab>("parameters");
+  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
 
   // Settings state (mirrors n8n's per-node settings)
   const [alwaysOutputData, setAlwaysOutputData] = useState(
@@ -202,8 +207,21 @@ export function NodePropertiesPanel({
 
   // Render add-node mode
   if (mode === "addNode") {
+    // Collapsed state: show small tab button
+    if (isCollapsed) {
+      return (
+        <button
+          onClick={() => setIsCollapsed(false)}
+          className="fixed right-0 top-1/2 -translate-y-1/2 w-12 h-24 bg-zinc-800 border-l border-zinc-700 flex items-center justify-center hover:bg-zinc-700 transition-colors z-40 rounded-l-lg"
+          title="Expand node palette"
+        >
+          <ChevronLeft className="w-5 h-5 text-zinc-400" />
+        </button>
+      );
+    }
+
     return (
-      <div className="fixed right-0 top-0 w-[500px] h-full border-l border-zinc-800 bg-zinc-950 flex flex-col shrink-0 overflow-hidden z-40">
+      <div className="fixed right-0 top-0 w-[500px] h-full border-l border-zinc-800 bg-zinc-950 flex flex-col shrink-0 overflow-hidden z-40 transition-transform duration-300">
         {/* ── Header ─────────────────────────────────────────────── */}
         <div className="h-12 border-b border-zinc-800 flex items-center gap-3 px-4 shrink-0">
           <div className="w-7 h-7 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
@@ -212,6 +230,13 @@ export function NodePropertiesPanel({
           <span className="text-sm font-semibold text-zinc-200 flex-1">
             Add next step
           </span>
+          <button
+            onClick={() => setIsCollapsed(true)}
+            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-800 transition-colors"
+            title="Collapse"
+          >
+            <ChevronRight className="w-4 h-4 text-zinc-400" />
+          </button>
           <button
             onClick={onClose}
             className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-800 transition-colors"
@@ -255,8 +280,21 @@ export function NodePropertiesPanel({
   }
 
   // Render view mode (normal properties panel)
+  // Collapsed state: show small tab button
+  if (isCollapsed) {
+    return (
+      <button
+        onClick={() => setIsCollapsed(false)}
+        className="fixed right-0 top-1/2 -translate-y-1/2 w-12 h-24 bg-zinc-800 border-l border-zinc-700 flex items-center justify-center hover:bg-zinc-700 transition-colors z-40 rounded-l-lg"
+        title="Expand properties panel"
+      >
+        <ChevronLeft className="w-5 h-5 text-zinc-400" />
+      </button>
+    );
+  }
+
   return (
-    <div className="fixed right-0 top-0 w-[500px] h-full border-l border-zinc-800 bg-zinc-950 flex flex-col shrink-0 overflow-hidden z-40">
+    <div className="fixed right-0 top-0 w-[500px] h-full border-l border-zinc-800 bg-zinc-950 flex flex-col shrink-0 overflow-hidden z-40 transition-transform duration-300">
 
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="h-12 border-b border-zinc-800 flex items-center gap-3 px-4 shrink-0">
@@ -270,8 +308,15 @@ export function NodePropertiesPanel({
           Docs <ExternalLink className="w-3 h-3" />
         </button>
         <button
-          onClick={onClose}
+          onClick={() => setIsCollapsed(true)}
           className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-800 transition-colors ml-1"
+          title="Collapse"
+        >
+          <ChevronRight className="w-4 h-4 text-zinc-400" />
+        </button>
+        <button
+          onClick={onClose}
+          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-zinc-800 transition-colors"
         >
           <X className="w-4 h-4 text-zinc-400" />
         </button>

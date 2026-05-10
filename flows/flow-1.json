@@ -7,8 +7,8 @@
       "id": "1",
       "type": "manualTrigger",
       "position": {
-        "x": -847.3752398226425,
-        "y": -1433.3436493760153
+        "x": -1061.5189719605291,
+        "y": -1504.4796340743171
       },
       "data": {
         "label": "Trigger this workflow"
@@ -21,13 +21,13 @@
       "id": "node-1778404679558",
       "type": "onHTTP",
       "position": {
-        "x": -579.6266070806155,
-        "y": -1448.1478584273575
+        "x": -747.839453259169,
+        "y": -1491.9037318881053
       },
       "data": {
         "label": "HTTP Trigger"
       },
-      "selected": true,
+      "selected": false,
       "width": 256,
       "height": 111
     }
