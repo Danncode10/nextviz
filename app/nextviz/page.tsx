@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import ReactFlow, {
   Background,
   Controls,
@@ -16,6 +16,7 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { nodeTypes } from "./nodes";
+import { getWorkflow, saveWorkflow } from "@/lib/nextviz/actions";
 
 const initialNodes: Node[] = [
   {
@@ -37,6 +38,30 @@ const initialEdges: Edge[] = [{ id: "e1-2", source: "1", target: "2", animated: 
 export default function NextVizPage() {
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // 1. Load initial state from Source of Truth
+  useEffect(() => {
+    getWorkflow().then((data) => {
+      if (data) {
+        // If data exists on disk, override placeholders
+        setNodes(data.nodes);
+        setEdges(data.edges);
+      }
+      setIsLoaded(true);
+    });
+  }, []);
+
+  // 2. Auto-save (Live-Sync) to Source of Truth with Debounce
+  useEffect(() => {
+    if (!isLoaded) return;
+    
+    const timeout = setTimeout(() => {
+      saveWorkflow({ nodes, edges, version: "1.0" }).catch(console.error);
+    }, 500); // 500ms debounce
+    
+    return () => clearTimeout(timeout);
+  }, [nodes, edges, isLoaded]);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),

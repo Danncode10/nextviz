@@ -15,8 +15,8 @@ This document outlines the strategic phases and architecture for **NextViz**, a 
 - [x] Implement the React Flow Canvas in `/app/nextviz/page.tsx` with `variant="dots"` background and custom semantic tokens.
 - [x] Setup initial UI for basic nodes (e.g., Manual Trigger, HTTP Action) for the visual canvas.
 - [x] Build the "Local Bridge" Server Actions (`lib/nextviz/actions.ts`) to read/write from `nextviz-flow.json`. 
-- [ ] Implement state management and **Auto-save (Live-Sync)** on every node/edge change for magical, instant VS Code synchronization.
-- [ ] **Critical Security:** Implement the Production Guard environment check (`process.env.NODE_ENV !== 'development'`).
+- [x] Implement state management and **Auto-save (Live-Sync)** on every node/edge change for magical, instant VS Code synchronization.
+- [x] **Critical Security:** Implement the Production Guard environment check (`process.env.NODE_ENV !== 'development'`).
 - [ ] Build the Read-Only UI overlay for non-localhost environments.
 
 ## ⚙️ Phase 3: Core Nodes & Execution Engine
