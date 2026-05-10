@@ -1,41 +1,49 @@
 {
-  "nodes": [
+  "version": "1.0",
+  "activeFlowId": "flow-1",
+  "flows": [
     {
-      "id": "1",
-      "type": "manualTrigger",
-      "position": {
-        "x": -652.6860923078917,
-        "y": -484.79935783003924
-      },
-      "data": {
-        "label": "Trigger this workflow"
-      },
-      "selected": true,
-      "width": 256,
-      "height": 88
-    },
-    {
-      "id": "2",
-      "type": "httpAction",
-      "position": {
-        "x": -293.28913107767767,
-        "y": -487.6344726413307
-      },
-      "data": {
-        "label": "Fetch data from API"
-      },
-      "selected": false,
-      "width": 256,
-      "height": 88
+      "id": "flow-1",
+      "name": "nextviz example",
+      "description": "Default example workflow",
+      "nodes": [
+        {
+          "id": "1",
+          "type": "manualTrigger",
+          "position": {
+            "x": -659.1140885349366,
+            "y": -487.5542133559157
+          },
+          "data": {
+            "label": "Trigger this workflow"
+          },
+          "selected": false,
+          "width": 256,
+          "height": 88
+        },
+        {
+          "id": "2",
+          "type": "httpAction",
+          "position": {
+            "x": -265.7405758189131,
+            "y": -491.30761334249934
+          },
+          "data": {
+            "label": "Fetch data from API"
+          },
+          "selected": false,
+          "width": 256,
+          "height": 88
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1-2",
+          "source": "1",
+          "target": "2",
+          "animated": true
+        }
+      ]
     }
-  ],
-  "edges": [
-    {
-      "id": "e1-2",
-      "source": "1",
-      "target": "2",
-      "animated": true
-    }
-  ],
-  "version": "1.0"
+  ]
 }

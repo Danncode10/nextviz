@@ -15,7 +15,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { HistoryIcon, KeyIcon, WorkflowIcon, ChevronRight } from "lucide-react"
+import { HistoryIcon, KeyIcon, WorkflowIcon, ChevronRight, Plus } from "lucide-react"
 
 export const routes = [
     {
@@ -61,6 +61,12 @@ const AppSideBarLinks = () => {
                                                 <SidebarMenuSubItem>
                                                     <SidebarMenuSubButton render={<Link href="/nextviz" />} isActive={true}>
                                                         <span>nextviz example</span>
+                                                    </SidebarMenuSubButton>
+                                                </SidebarMenuSubItem>
+                                                <SidebarMenuSubItem>
+                                                    <SidebarMenuSubButton className="text-muted-foreground">
+                                                        <Plus className="mr-2 h-4 w-4" />
+                                                        <span>Add Flow</span>
                                                     </SidebarMenuSubButton>
                                                 </SidebarMenuSubItem>
                                             </SidebarMenuSub>

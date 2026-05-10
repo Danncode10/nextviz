@@ -30,10 +30,20 @@ export const NextVizEdgeSchema = z.object({
 });
 
 // --- Workflow Schema ---
-// The absolute source of truth for nextviz-flow.json
+// A single workflow (flow) inside the project
 export const WorkflowSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
   nodes: z.array(NextVizNodeSchema),
   edges: z.array(NextVizEdgeSchema),
+});
+
+// --- Project Schema ---
+// The absolute source of truth for nextviz-flow.json
+export const NextVizProjectSchema = z.object({
+  flows: z.array(WorkflowSchema),
+  activeFlowId: z.string().optional(),
   version: z.string().default("1.0"),
 });
 
@@ -42,3 +52,4 @@ export const WorkflowSchema = z.object({
 export type NextVizNode = z.infer<typeof NextVizNodeSchema>;
 export type NextVizEdge = z.infer<typeof NextVizEdgeSchema>;
 export type WorkflowJSON = z.infer<typeof WorkflowSchema>;
+export type NextVizProject = z.infer<typeof NextVizProjectSchema>;

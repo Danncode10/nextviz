@@ -21,6 +21,7 @@ This document outlines the strategic phases and architecture for **NextViz**, a 
 - [x] Implement multi-sidebar architecture (Left Flows Dropdown, Right Draggable Components).
 
 ## ⚙️ Phase 3: Core Nodes & Execution Engine
+- [x] Support multi-flow management and custom Add Flow modals with name/description in JSON schema.
 - [ ] Define the strict TypeScript interfaces (`NextVizNode`, `WorkflowJSON`) in `lib/nextviz/types.ts`.
 - [ ] Implement the primary Execution Engine (`lib/nextviz/engine.ts`) using the `executeFlow("name", payload)` direct invocation pattern.
 - [ ] **Performance:** Build a topological sort mechanism that parses the graph and caches the "Execution Plan" in memory to eliminate JSON parsing overhead on subsequent runs.

@@ -2,7 +2,7 @@
 
 import fs from "fs/promises";
 import path from "path";
-import { WorkflowJSON, WorkflowSchema } from "./types";
+import { NextVizProject, NextVizProjectSchema } from "./types";
 
 const FLOW_FILE_PATH = path.join(process.cwd(), "nextviz-flow.json");
 
@@ -10,12 +10,12 @@ const FLOW_FILE_PATH = path.join(process.cwd(), "nextviz-flow.json");
  * Reads the workflow from the local file system.
  * This is the source of truth for NextViz.
  */
-export async function getWorkflow(): Promise<WorkflowJSON | null> {
+export async function getWorkflow(): Promise<NextVizProject | null> {
   try {
     const data = await fs.readFile(FLOW_FILE_PATH, "utf-8");
     const parsed = JSON.parse(data);
     // Validate with Zod
-    return WorkflowSchema.parse(parsed);
+    return NextVizProjectSchema.parse(parsed);
   } catch (error: any) {
     // If the file doesn't exist, return null
     if (error.code === "ENOENT") {
@@ -30,7 +30,7 @@ export async function getWorkflow(): Promise<WorkflowJSON | null> {
  * Saves the workflow to the local file system.
  * Includes the Production Guard to prevent file system modifications in production.
  */
-export async function saveWorkflow(workflow: WorkflowJSON): Promise<{ success: boolean; error?: string }> {
+export async function saveWorkflow(project: NextVizProject): Promise<{ success: boolean; error?: string }> {
   // CRITICAL: Production Guard
   if (process.env.NODE_ENV !== "development") {
     throw new Error("NextViz Local Bridge Error: File system writes are strictly forbidden outside of development mode.");
@@ -38,7 +38,7 @@ export async function saveWorkflow(workflow: WorkflowJSON): Promise<{ success: b
 
   try {
     // Ensure strict validation before writing to disk
-    const validWorkflow = WorkflowSchema.parse(workflow);
+    const validWorkflow = NextVizProjectSchema.parse(project);
     
     await fs.writeFile(
       FLOW_FILE_PATH,
