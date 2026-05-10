@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Node } from "reactflow";
 import { X, ExternalLink, MousePointer2, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -56,10 +57,10 @@ export function NodePropertiesPanel({ node, onClose, onExecuteStep }: NodeProper
     }
   };
 
-  return (
+  const modal = (
     /* Backdrop */
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
       style={{ backgroundColor: "rgba(0,0,0,0.65)" }}
       onClick={onClose}
     >
@@ -214,4 +215,9 @@ export function NodePropertiesPanel({ node, onClose, onExecuteStep }: NodeProper
       </div>
     </div>
   );
+
+  // Portal to document.body so fixed positioning is never clipped by
+  // parent transforms (shadcn SidebarProvider, overflow-hidden on <main>, etc.)
+  if (typeof document === "undefined") return null;
+  return createPortal(modal, document.body);
 }

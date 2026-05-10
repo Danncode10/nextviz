@@ -203,7 +203,9 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
 
   // ── Node click → open properties panel ────────────────────────────────────
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
-    setSelectedNode(node);
+    if (node.type === "manualTrigger") {
+      setSelectedNode(node);
+    }
   }, []);
 
   const onPaneClick = useCallback(() => setSelectedNode(null), []);
