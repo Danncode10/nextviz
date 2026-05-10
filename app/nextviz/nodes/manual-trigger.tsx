@@ -6,12 +6,12 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { NodeHoverMenu } from "../_components/node-hover-menu";
 
-export default function ManualTriggerNode({ id, selected }: NodeProps) {
+export default function ManualTriggerNode({ id, data, selected }: NodeProps) {
   const [hovered, setHovered] = useState(false);
 
   return (
     <div
-      className="relative"
+      className={cn("relative transition-opacity duration-200", data?.disabled && "opacity-50 grayscale-[0.5]")}
       style={{ width: 108, height: 108 }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -22,7 +22,8 @@ export default function ManualTriggerNode({ id, selected }: NodeProps) {
           "absolute inset-0 rounded-[22px] bg-zinc-800 border-2 flex items-center justify-center transition-all duration-150",
           selected
             ? "border-orange-500 shadow-[0_0_0_3px_rgba(249,115,22,0.18)]"
-            : "border-zinc-700 hover:border-zinc-500"
+            : "border-zinc-700 hover:border-zinc-500",
+          data?.disabled && "border-zinc-800 bg-zinc-900"
         )}
       >
         <MousePointer2 className="w-11 h-11 text-zinc-200" strokeWidth={1.5} />

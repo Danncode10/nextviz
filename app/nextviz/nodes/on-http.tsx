@@ -3,14 +3,20 @@
 import { Handle, Position, NodeProps } from "reactflow";
 import { Webhook } from "lucide-react";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { NodeHoverMenu } from "../_components/node-hover-menu";
 
 export default function OnHttpNode({ id, data, selected }: NodeProps) {
   const [hovered, setHovered] = useState(false);
+  const isDisabled = data?.disabled;
   const method = data.method ?? "POST";
+
   return (
     <div
-      className="relative w-64 bg-card border-2 text-card-foreground rounded-xl shadow-sm overflow-visible transition-colors"
+      className={cn(
+        "relative w-64 bg-card border-2 text-card-foreground rounded-xl shadow-sm overflow-visible transition-all duration-200",
+        isDisabled && "opacity-50 grayscale-[0.5] scale-[0.98]"
+      )}
       style={{ borderColor: selected ? "rgb(249,115,22)" : "hsl(var(--border))" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}

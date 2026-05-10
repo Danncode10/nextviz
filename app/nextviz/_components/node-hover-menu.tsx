@@ -1,7 +1,8 @@
 "use client";
 
 import { useReactFlow } from "reactflow";
-import { Copy, Trash2 } from "lucide-react";
+import { Copy, Trash2, Play, Power, MoreHorizontal } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface NodeHoverMenuProps {
   nodeId: string;
@@ -9,6 +10,8 @@ interface NodeHoverMenuProps {
 
 export function NodeHoverMenu({ nodeId }: NodeHoverMenuProps) {
   const { getNode, setNodes, setEdges } = useReactFlow();
+  const node = getNode(nodeId);
+  const isDisabled = node?.data?.disabled ?? false;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -18,7 +21,6 @@ export function NodeHoverMenu({ nodeId }: NodeHoverMenuProps) {
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const node = getNode(nodeId);
     if (!node) return;
     const newId = `node-${Date.now()}`;
     setNodes((nds) => [
@@ -32,25 +34,57 @@ export function NodeHoverMenu({ nodeId }: NodeHoverMenuProps) {
     ]);
   };
 
+  const handleDeactivate = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setNodes((nds) =>
+      nds.map((n) => {
+        if (n.id === nodeId) {
+          return { ...n, data: { ...n.data, disabled: !isDisabled } };
+        }
+        return n;
+      })
+    );
+  };
+
+  const handlePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // In a real engine, this would trigger an execution bridge
+    console.log("Playing node:", nodeId);
+  };
+
   return (
     <div
-      className="nodrag nopan absolute bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl z-50 flex items-center gap-0.5 p-1"
-      style={{ top: -10, right: -6 }}
+      className="nodrag nopan absolute -top-12 left-1/2 -translate-x-1/2 bg-[#1a1a1b] border border-zinc-800 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] z-50 flex items-center gap-1.5 p-1 px-2.5 animate-in fade-in zoom-in-95 duration-150"
       onClick={(e) => e.stopPropagation()}
     >
       <button
-        className="p-1.5 rounded hover:bg-zinc-700 transition-colors group/copy"
-        title="Duplicate node"
-        onClick={handleCopy}
+        className="p-1.5 rounded-full hover:bg-zinc-800 transition-all group/play"
+        title="Execute node"
+        onClick={handlePlay}
       >
-        <Copy className="w-3.5 h-3.5 text-zinc-400 group-hover/copy:text-zinc-200 transition-colors" />
+        <Play className="w-3.5 h-3.5 text-zinc-400 group-hover/play:text-zinc-100 fill-zinc-400 group-hover/play:fill-zinc-100 transition-colors" />
       </button>
+
       <button
-        className="p-1.5 rounded hover:bg-red-900/40 transition-colors group/del"
+        className={cn(
+          "p-1.5 rounded-full hover:bg-zinc-800 transition-all group/power",
+          isDisabled && "bg-orange-500/10"
+        )}
+        title={isDisabled ? "Activate node" : "Deactivate node"}
+        onClick={handleDeactivate}
+      >
+        <Power className={cn(
+          "w-3.5 h-3.5 transition-colors",
+          isDisabled ? "text-orange-500" : "text-zinc-400 group-hover/power:text-zinc-100"
+        )} />
+      </button>
+
+      <button
+        className="p-1.5 rounded-full hover:bg-red-500/10 transition-all group/del"
         title="Delete node"
         onClick={handleDelete}
       >
-        <Trash2 className="w-3.5 h-3.5 text-zinc-400 group-hover/del:text-red-400 transition-colors" />
+        <Trash2 className="w-3.5 h-3.5 text-zinc-400 group-hover/del:text-red-500 transition-colors" />
       </button>
     </div>
   );

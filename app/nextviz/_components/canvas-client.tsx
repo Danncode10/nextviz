@@ -135,7 +135,10 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   useEffect(() => {
     if (!isLoaded || !activeFlow || process.env.NODE_ENV !== "development") return;
     const timeout = setTimeout(() => {
-      saveFlow({ ...activeFlow, nodes, edges } as unknown as WorkflowJSON).catch(console.error);
+      // Sanitize nodes/edges to remove symbols (React Flow internals) that break Server Actions
+      const sanitizedNodes = JSON.parse(JSON.stringify(nodes));
+      const sanitizedEdges = JSON.parse(JSON.stringify(edges));
+      saveFlow({ ...activeFlow, nodes: sanitizedNodes, edges: sanitizedEdges } as unknown as WorkflowJSON).catch(console.error);
     }, 500);
     return () => clearTimeout(timeout);
   }, [nodes, edges, isLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
