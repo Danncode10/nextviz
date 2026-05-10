@@ -4,7 +4,7 @@ This document outlines the strategic phases and architecture for **NextViz**, a 
 
 ## 🏗️ Phase 1: Foundation & Project Scaffolding
 - [x] Initialize Next.js 15+ App Router project.
-- [ ] Install core visual engine & UI dependencies (`reactflow`, `lucide-react`, `shadcn/ui`, `tailwind-merge`).
+- [x] Install core visual engine & UI dependencies (`reactflow`, `lucide-react`, `shadcn/ui`, `tailwind-merge`).
 - [ ] Scaffold NextViz specific directory structure (`app/nextviz`, `app/api/nextviz`, `lib/nextviz`).
 - [ ] Establish environment configuration rules (`.env.nextviz` isolated from standard `.env`).
 - [ ] Ensure `.gitignore` ignores `.env.nextviz` and local agent logs.
