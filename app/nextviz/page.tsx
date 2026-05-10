@@ -55,6 +55,7 @@ export default function NextVizPage() {
   // 2. Auto-save (Live-Sync) to Source of Truth with Debounce
   useEffect(() => {
     if (!isLoaded) return;
+    if (process.env.NODE_ENV !== "development") return; // CRITICAL: Disable save in read-only mode
     
     const timeout = setTimeout(() => {
       saveWorkflow({ nodes, edges, version: "1.0" }).catch(console.error);
@@ -78,26 +79,38 @@ export default function NextVizPage() {
     []
   );
 
+  const isDevelopment = process.env.NODE_ENV === "development";
+
   return (
-    <div className="flex-1 w-full h-full relative">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        fitView
-        className="bg-zinc-950"
-      >
-        <Background variant="dots" gap={16} size={1} color="#333" />
-        <Controls className="bg-card border-border fill-foreground" />
-        <MiniMap 
-          className="bg-card border-border" 
-          maskColor="rgba(0,0,0,0.2)"
-          nodeColor="#52525b" // zinc-600
-        />
-      </ReactFlow>
+    <div className="flex-1 w-full h-full relative flex flex-col">
+      {!isDevelopment && (
+        <div className="w-full bg-yellow-500/10 border-b border-yellow-500/20 text-yellow-500 text-center py-2 text-sm font-medium z-50">
+          Read-Only Mode: Edit in Localhost to sync with Git.
+        </div>
+      )}
+      <div className="flex-1 w-full relative">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          onNodesChange={isDevelopment ? onNodesChange : undefined}
+          onEdgesChange={isDevelopment ? onEdgesChange : undefined}
+          onConnect={isDevelopment ? onConnect : undefined}
+          nodesDraggable={isDevelopment}
+          nodesConnectable={isDevelopment}
+          elementsSelectable={isDevelopment}
+          fitView
+          className="bg-zinc-950"
+        >
+          <Background variant="dots" gap={16} size={1} color="#333" />
+          <Controls className="bg-card border-border fill-foreground" showInteractive={false} />
+          <MiniMap 
+            className="bg-card border-border" 
+            maskColor="rgba(0,0,0,0.2)"
+            nodeColor="#52525b" // zinc-600
+          />
+        </ReactFlow>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,41 @@
+{
+  "nodes": [
+    {
+      "id": "1",
+      "type": "manualTrigger",
+      "position": {
+        "x": -190.8164331821109,
+        "y": -162.75590482176827
+      },
+      "data": {
+        "label": "Trigger this workflow"
+      },
+      "selected": false,
+      "width": 256,
+      "height": 88
+    },
+    {
+      "id": "2",
+      "type": "httpAction",
+      "position": {
+        "x": 250.21183260108853,
+        "y": -161.80821825910115
+      },
+      "data": {
+        "label": "Fetch data from API"
+      },
+      "selected": true,
+      "width": 256,
+      "height": 88
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1-2",
+      "source": "1",
+      "target": "2",
+      "animated": true
+    }
+  ],
+  "version": "1.0"
+}
