@@ -10,9 +10,12 @@ This document outlines the strategic phases and architecture for **NextViz**, a 
 - [x] Ensure `.gitignore` ignores `.env.nextviz` and local agent logs.
 
 ## 🌉 Phase 2: The Local Bridge & Visual Canvas
-- [ ] Implement the React Flow Canvas in `/app/nextviz/page.tsx`.
-- [ ] Apply **NextViz Aesthetics**: Dark mode default (`bg-zinc-950`), custom semantic tokens, and `variant="dots"` for the background.
-- [ ] Build the "Local Bridge" Server Actions (`lib/nextviz/actions.ts`) to read/write from `nextviz-flow.json`. Implement **Auto-save (Live-Sync)** on every node change for magical, instant VS Code synchronization.
+- [ ] Setup core UI foundation: shadcn/ui components, NextViz dark theme aesthetic (`bg-zinc-950`), and sidebar layout.
+- [ ] Define precise Workflow Schema (nodes and edges) using Zod for type-safe validation.
+- [ ] Implement the React Flow Canvas in `/app/nextviz/page.tsx` with `variant="dots"` background and custom semantic tokens.
+- [ ] Setup initial UI for basic nodes (e.g., Manual Trigger, HTTP Action) for the visual canvas.
+- [ ] Build the "Local Bridge" Server Actions (`lib/nextviz/actions.ts`) to read/write from `nextviz-flow.json`. 
+- [ ] Implement state management and **Auto-save (Live-Sync)** on every node/edge change for magical, instant VS Code synchronization.
 - [ ] **Critical Security:** Implement the Production Guard environment check (`process.env.NODE_ENV !== 'development'`).
 - [ ] Build the Read-Only UI overlay for non-localhost environments.
 
