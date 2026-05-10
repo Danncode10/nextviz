@@ -5,9 +5,9 @@ This document outlines the strategic phases and architecture for **NextViz**, a 
 ## 🏗️ Phase 1: Foundation & Project Scaffolding
 - [x] Initialize Next.js 15+ App Router project.
 - [x] Install core visual engine & UI dependencies (`reactflow`, `lucide-react`, `shadcn/ui`, `tailwind-merge`).
-- [ ] Scaffold NextViz specific directory structure (`app/nextviz`, `app/api/nextviz`, `lib/nextviz`).
-- [ ] Establish environment configuration rules (`.env.nextviz` isolated from standard `.env`).
-- [ ] Ensure `.gitignore` ignores `.env.nextviz` and local agent logs.
+- [x] Scaffold NextViz specific directory structure (`app/nextviz`, `app/api/nextviz`, `lib/nextviz`).
+- [x] Establish environment configuration rules (`.env.nextviz` isolated from standard `.env`).
+- [x] Ensure `.gitignore` ignores `.env.nextviz` and local agent logs.
 
 ## 🌉 Phase 2: The Local Bridge & Visual Canvas
 - [ ] Implement the React Flow Canvas in `/app/nextviz/page.tsx`.
