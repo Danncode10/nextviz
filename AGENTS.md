@@ -64,6 +64,60 @@ If tasked with updating the `npx nextviz` logic:
 2. **Direct Invocation**: Flows are executed in code via `executeFlow("flow-name", payload)`. This allows Next.js API Routes and Server Actions to seamlessly trigger visual workflows.
 3. **Execution Caching**: To prevent runtime overhead, the Engine (`engine.ts`) MUST cache the topological sort (the parsed execution plan) in memory so that high-frequency loops are not bottlenecked by JSON parsing and edge resolution.
 
+## 🔥 The Heavy Hitters (Phase 4 Rules)
+
+> Build these 10 nodes in priority order. Each unlocks a new category of automation.
+
+### Node Priority Roster
+
+| Priority | Node              | Category  | Key Dependency                    |
+|----------|-------------------|-----------|-----------------------------------|
+| 1        | Schedule (Cron)   | Trigger   | `node-schedule`                   |
+| 2        | OpenAI/Anthropic  | AI        | `openai` / `@anthropic-ai/sdk`    |
+| 3        | Supabase DB       | Data      | `@supabase/supabase-js`           |
+| 4        | HTTP Request      | Data      | `fetch` (native)                  |
+| 5        | Filter / If-Else  | Logic     | none (pure logic)                 |
+| 6        | Code (JS)         | Logic     | sandboxed `vm2` or edge runtime   |
+| 7        | Vector Store      | AI        | Supabase `pgvector`               |
+| 8        | Discord / Slack   | Messaging | REST API / Webhooks               |
+| 9        | Gmail / Resend    | Messaging | `resend` SDK                      |
+
+### The Manifest Rule (Two-File Pattern)
+Every Phase 4+ node **MUST** be a self-contained two-file folder. Never mix UI and executor:
+```
+app/nextviz/nodes/{node-name}/
+├── node.tsx    ← React canvas component (UI only — no server calls, no process.env)
+└── logic.ts    ← NodeExecutorFn (server-side executor — no React, no browser APIs)
+```
+
+### Secret Management Rule
+Node `data` fields store the **env variable name**, never the raw secret:
+```json
+{ "apiKeyRef": "OPENAI_API_KEY" }    ← CORRECT — key name stored in flow JSON
+{ "apiKey": "sk-abc123..." }          ← FORBIDDEN — secret value in flow JSON
+```
+Executors resolve the secret at runtime with `process.env[nodeData.apiKeyRef as string]`.
+
+### Variable Mapping Rule
+Fields referencing upstream outputs use template syntax that the engine resolves at runtime. Store the raw template string in `node.data` — never pre-resolve it in the UI layer:
+```
+{{ $node["NodeName"].data.email }}   ← n8n-compatible form (verbose)
+{{ user_email }}                      ← NextViz shorthand (preferred in UI dropdowns)
+```
+
+### viz-* Sidebar Primitives Rule
+When building a node's Properties Sidebar, use **only** the shared primitives from `components/nextviz/viz-*`. Do not build custom form inputs per node:
+- `viz-input` — text / number / URL input
+- `viz-select` — static option dropdown
+- `viz-code-editor` — Monaco / CodeMirror pane for JS snippets
+- `viz-connection` — API key picker that auto-reads `.env.nextviz` key names
+
+### Execution Visual Feedback Rule
+The canvas must reflect live execution state. Apply these styles when execution events are received:
+- `running` → `border-primary` + pulse animation
+- `success` → `border-green-500` + ✅ overlay badge
+- `error` → `border-destructive` + ❌ overlay + tooltip with error message
+
 ---
 
 ## Code Architecture Summary

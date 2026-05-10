@@ -97,12 +97,97 @@ Your blank Next.js project will eventually be structured as follows:
 
 ---
 
-## 6. The "Vibe" Roadmap
+## 6. The Complete Masterplan (5 Phases)
 
-1. **Foundation:** Setup the React Flow canvas in a blank Next.js app and enable "Save to File" via Server Actions.
-2. **Basic Nodes:** Create `onHTTP` (Trigger) and `logData` (Action).
-3. **AI Integration:** Create the `aiGenerate` node using the `.env.nextviz` OpenAI key.
-4. **Production Guard:** Implement the "Read-Only" UI overlay for non-localhost environments.
-5. **CLI Prep:** Move the working code into a template folder for the `npx` distributor.
+### Phase 1: Canvas & Core Infrastructure ✅
+**Goal:** Build the foundational React Flow canvas and file-based persistence.
+- [x] Setup Next.js App Router with React Flow integration
+- [x] Implement `FlowRegistry` for auto-discovery of individual flow files
+- [x] Create Server Actions for Save/Load operations (The "Local Bridge")
+- [x] Define TypeScript interfaces (`NextVizNode`, `WorkflowJSON`, etc.)
+- [x] Setup `.env.nextviz` isolation and `.gitignore` configuration
+
+### Phase 2: Multi-Flow Management & UI Polish ✅
+**Goal:** Enable users to manage multiple workflows and improve UX.
+- [x] Build "Add Flow" modal with name/description input
+- [x] Implement flow switching in the sidebar
+- [x] Add delete/rename/export operations for flows
+- [x] Create a "Recent Flows" history
+- [x] Implement dark mode default styling (`bg-zinc-950`, semantic tokens)
+
+### Phase 3: Headless Engine & Fundamental Nodes ✅
+**Goal:** Build the execution engine and foundational trigger/action nodes.
+- [x] Implement `executeFlow("flow-name", payload)` direct invocation pattern
+- [x] Build Kahn's algorithm topological sort with plan caching
+- [x] Create `onHTTP` trigger node (Webhook receiver)
+- [x] Create `logData` action node (Console/File logger)
+- [x] Ensure engine is completely decoupled from UI (Headless design)
+
+### Phase 4: Heavy Hitters — n8n Component Recreation 🚀
+**Goal:** Implement the 9 most essential nodes that power 90% of automations.
+
+#### Tier 1: Triggers & Scheduling
+- [ ] **Schedule (Cron)** — Runs flows on intervals (hourly, daily, custom cron expressions)
+  - UI: Time picker + Cron expression editor
+  - Executor: Uses Node.js `cron` or node-schedule library
+  - Output: `{ executedAt: ISO string }`
+
+#### Tier 2: AI & Intelligence
+- [ ] **OpenAI / Anthropic** — The "Brain" for natural language processing
+  - UI: Prompt editor + Model selector (gpt-4, gpt-3.5, claude-opus, etc.)
+  - Config: Temperature, max_tokens, system_role
+  - Output: `{ response: string, usage: { tokens_used, cost } }`
+- [ ] **Vector Store (pgvector)** — Supabase RAG integration
+  - UI: Query/Embed/Upsert actions selector
+  - Operations: Store embeddings, similarity search, retrieval augmented generation
+  - Output: `{ results: [], similarity_scores: [] }`
+
+#### Tier 3: Logic & Control Flow
+- [ ] **Filter / If-Else** — The fork in the road
+  - UI: Visual condition builder (field > value, equals, contains, regex)
+  - Support: AND/OR logic, multiple branches
+  - Output: Routes to different downstream nodes based on condition
+- [ ] **Code (JavaScript)** — The "Escaper" for custom logic
+  - UI: Monaco Editor with syntax highlighting
+  - Runtime: Sandboxed `eval()` or V8 isolate
+  - Input: Access all upstream node outputs via context
+  - Output: Whatever the user returns
+
+#### Tier 4: Data & Persistence
+- [ ] **Supabase DB (CRUD)** — The "Memory"
+  - UI: Table/RPC selector + Query builder
+  - Operations: SELECT, INSERT, UPDATE, DELETE, RPC calls
+  - Output: `{ data: [], rowCount: number }`
+- [ ] **HTTP Request** — The "Universal Connector"
+  - UI: Method selector (GET/POST/PUT/DELETE) + URL + Headers + Body
+  - Auth: Basic, Bearer token, API key support
+  - Output: `{ status: number, body: any, headers: {} }`
+
+#### Tier 5: Messaging & Notifications
+- [ ] **Discord / Slack** — The "Voice"
+  - UI: Channel selector + Message formatter (plain text/markdown/rich embeds)
+  - Operations: Send to channel, thread, DM
+  - Output: `{ messageId: string, timestamp: number }`
+- [ ] **Gmail / Resend** — The "Letters"
+  - UI: Recipient + Subject + HTML body editor + attachment support
+  - Template: Support for variables from upstream nodes
+  - Output: `{ emailId: string, status: 'sent' | 'queued' }`
+
+**Implementation Strategy:**
+- Create each node as a **pair:** UI component (`app/nextviz/nodes/{name}.tsx`) + Executor (`lib/nextviz/node-executors/{name}.ts`)
+- All node configs are stored in the flow JSON's `node.data` field
+- Use `.env.nextviz` for all API keys (OpenAI, Anthropic, Discord token, etc.)
+- Executors follow the `NodeExecutorFn` signature: `(nodeData, inputs, context) => Promise<output>`
+- Add a **Node Library** sidebar showing all 9 nodes with drag-to-canvas support
+
+### Phase 5: Advanced Features & Polish 🎯
+**Goal:** Add enterprise-grade capabilities and optimization.
+- [ ] **Error Handling & Retries** — Automatic retry logic with exponential backoff
+- [ ] **Flow Versioning** — Store historical versions of flows in Git
+- [ ] **Execution Logs & Monitoring** — Store execution history in Supabase
+- [ ] **Team Collaboration** — Multi-user support with real-time updates (via Supabase Realtime)
+- [ ] **Node Marketplace** — Community node sharing via GitHub/NPM
+- [ ] **Performance Monitoring** — Track execution time, token usage, cost analytics
+- [ ] **Production Hardening** — Rate limiting, security audits, API key rotation
 
 ---

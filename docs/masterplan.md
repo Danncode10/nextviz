@@ -64,10 +64,121 @@ Migrated from monolithic `nextviz-flow.json` to individual flow files in `flows/
 - [x] Develop the fundamental **Trigger** node: `onHTTP` (Webhook receiver).
 - [x] Develop the fundamental **Action** node: `logData` (Console/File logger).
 
-## 🧠 Phase 4: Advanced Integrations (Services)
-- [ ] Implement the `aiGenerate` action node utilizing OpenAI.
-- [ ] Implement Supabase service nodes (Database read/write) keeping Service Role keys strictly in the server.
-- [ ] Add the Logic Nodes (If/Else branching).
+## 🔥 Phase 4: Heavy Hitters — n8n Component Recreation
+
+> **Philosophy:** To build NextViz into a powerhouse, you don't need to copy all 400+ n8n nodes. You just need the "Heavy Hitters"—the ones that power 90% of real automations.
+
+### 4.1 — The Node Roster
+
+| Category  | Node Name            | Purpose in NextViz                                                          |
+|-----------|----------------------|-----------------------------------------------------------------------------|
+| Triggers  | Webhook (onHTTP)     | ✅ Done — Starts a flow when an external service sends a POST/GET request.  |
+| Triggers  | Schedule (Cron)      | Runs a flow every hour, day, or specific minute.                            |
+| AI        | OpenAI / Anthropic   | The "Brain." Sends prompts and gets structured responses.                   |
+| AI        | Vector Store         | Connects to Supabase `pgvector` for RAG (retrieval augmented generation).  |
+| Logic     | Filter / If-Else     | The fork in the road. `if (user.paid) -> allow`.                            |
+| Logic     | Code (JS)            | The "Escaper." For when the UI isn't enough—write raw JS logic.             |
+| Data      | Supabase DB          | The "Memory." Create, Read, Update, or Delete rows.                         |
+| Data      | HTTP Request         | The "Universal Connector." Connects to any API that doesn't have a node.   |
+| Messaging | Discord / Slack      | The "Voice." Sends notifications to a channel.                              |
+| Messaging | Gmail / Resend       | The "Letters." Sends emails to users or yourself.                           |
+
+### 4.2 — Implementation Checklist
+
+#### Tier 1: Triggers & Scheduling
+- [x] **Webhook (onHTTP)** — HTTP Trigger node (complete, Phase 3)
+- [ ] **Schedule (Cron)** — UI: time picker + cron expression editor. Executor: `node-schedule`. Output: `{ executedAt: string }`
+
+#### Tier 2: AI & Intelligence
+- [ ] **OpenAI / Anthropic** — UI: prompt editor, model selector (gpt-4o, claude-opus). Config: temperature, max_tokens, system_role. Output: `{ response: string, usage: { tokens_used, cost } }`
+- [ ] **Vector Store (pgvector)** — UI: action selector (embed/query/upsert). Supabase RAG integration. Output: `{ results: [], similarity_scores: [] }`
+
+#### Tier 3: Logic & Control Flow
+- [ ] **Filter / If-Else** — UI: visual condition builder (field > value, equals, contains, regex), AND/OR logic, multiple branches
+- [ ] **Code (JavaScript)** — UI: Monaco editor with syntax highlighting. Runtime: sandboxed execution. Input: all upstream outputs via context
+
+#### Tier 4: Data & Persistence
+- [ ] **Supabase DB (CRUD)** — UI: table/RPC selector + query builder. Ops: SELECT, INSERT, UPDATE, DELETE, RPC. Output: `{ data: [], rowCount: number }`
+- [ ] **HTTP Request** — UI: method selector + URL + headers + body. Auth: Basic, Bearer, API key. Output: `{ status: number, body: any, headers: {} }`
+
+#### Tier 5: Messaging & Notifications
+- [ ] **Discord / Slack** — UI: channel selector + message formatter. Ops: send to channel, thread, DM. Output: `{ messageId: string, timestamp: number }`
+- [ ] **Gmail / Resend** — UI: recipient + subject + HTML body + attachments. Template: variable injection from upstream nodes. Output: `{ emailId: string, status: 'sent' | 'queued' }`
+
+---
+
+### 4.3 — Customizability: The "Vibe Coder" Properties Sidebar
+
+In n8n, the UI is often cluttered. NextViz aims for clean UI for simple tasks, raw power for complex ones.
+
+**When a user clicks a node, a sidebar slides out.** Here's how it should work:
+
+#### Variable Mapping (Output → Input)
+If Node A fetches a user, Node B can reference it via a **variable picker**. Use template syntax:
+```
+{{ $node["NodeName"].data.email }}     ← n8n-style (verbose but explicit)
+{{ user_email }}                        ← NextViz-style (modern dropdown picker)
+```
+Both are resolved at runtime by the engine's context injector.
+
+#### Secret Management Bridge
+API keys are **never typed directly** into a node's UI field. Instead, a `viz-connection` dropdown reads available keys from `.env.nextviz` and presents them by name:
+```
+OpenAI Key:  [ OPENAI_API_KEY ▼ ]   ← dropdown, not a text field
+             [ SECONDARY_AI_KEY  ]
+```
+The node stores the **key name** (e.g., `"OPENAI_API_KEY"`) in its `data` field. The executor resolves `process.env[keyName]` at runtime.
+
+#### The "Raw Toggle"
+Every field in the Properties Sidebar should support two modes:
+| Mode           | Behavior                                         |
+|----------------|--------------------------------------------------|
+| Fixed Value    | Static text input                                |
+| Expression     | Inline JS/template evaluated at runtime          |
+
+A small toggle icon (e.g., a `</>` button) switches between modes inline.
+
+---
+
+### 4.4 — Custom Node Design: The NextViz Manifest Pattern
+
+Since NextViz is designed for developers to extend, every custom node is a **two-file folder**:
+
+```
+app/nextviz/nodes/my-node/
+├── node.tsx       ← UI: how the node looks on the canvas
+└── logic.ts       ← Executor: the server-side code that runs
+```
+
+This mirrors the `NodeExecutorFn` signature already defined in `lib/nextviz/types.ts`.
+
+#### Pre-Built `viz-*` Sidebar UI Primitives
+The engine should provide these reusable components so node builders don't start from scratch:
+
+| Component          | Purpose                                                        |
+|--------------------|----------------------------------------------------------------|
+| `viz-input`        | Basic text / number input                                      |
+| `viz-select`       | Dropdown for static options                                    |
+| `viz-code-editor`  | Small Monaco / CodeMirror window for JS snippets               |
+| `viz-connection`   | API key picker — reads keys from `.env.nextviz` automatically  |
+
+---
+
+### 4.5 — Execution Flow Logic (Visual Feedback)
+
+When a user hits "Run" or a Webhook is triggered:
+
+1. **Hydration** — The engine reads `flows/{flowId}.json` (or uses the cached execution plan).
+2. **Context Injection** — Variables from `.env.nextviz` are injected into the execution context.
+3. **Step-by-Step** — Node 1 executes, its output is passed to Node 2, and so on (topological order).
+4. **Visual Feedback** — The UI polls for execution state and renders node status in real-time:
+   - `running` → pulsing `border-primary`
+   - `success` → `border-green-500` + ✅ checkmark overlay
+   - `error` → `border-destructive` + ❌ overlay with error message tooltip
+
+> **Vibe Feature:** Right-click a node → "Convert to Code." The UI settings are serialized into a raw TypeScript function the user can copy-paste and own forever. Peak Vibe Coding.
+
+---
 
 ## 📦 Phase 5: The CLI Engine (Distributor)
 - [ ] Package the working implementation into a CLI template structure.

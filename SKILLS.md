@@ -56,3 +56,25 @@ This document defines the core actionable "skills" or procedures the AI agent mu
 **Action:**
 1. Ensure the `templates/` folder matches the current working `app/nextviz` structure.
 2. Ensure the CLI automatically injects `.env.nextviz` into the target user's `.gitignore`.
+
+## Skill 9: Build a Phase 4 Heavy Hitter Node
+**When to use:** When implementing any of the 10 Heavy Hitter nodes (Schedule, OpenAI, Supabase DB, HTTP Request, If-Else, Code JS, Vector Store, Discord/Slack, Gmail/Resend).
+**Action:**
+1. Create a two-file folder following the **Manifest Pattern**:
+   - `app/nextviz/nodes/{node-name}/node.tsx` — React canvas UI only.
+   - `app/nextviz/nodes/{node-name}/logic.ts` — `NodeExecutorFn` server executor only.
+2. **node.tsx rules:** Import `Handle` and `Position` from `reactflow`. Use `bg-card`, `border-border`, and semantic tokens. Display a category-colored header icon using `lucide-react`.
+3. **logic.ts rules:** Match the signature `(nodeData, inputs, context) => Promise<Record<string, unknown>>`. Resolve secrets via `process.env[nodeData.apiKeyRef as string]` — never hardcode.
+4. Register the executor in `lib/nextviz/node-executors/index.ts`.
+5. Add any required npm packages to `package.json` and install them.
+6. Use `viz-*` sidebar primitives (never build custom inputs per node). Add the `viz-connection` component for any API key field.
+
+## Skill 10: Implement the Properties Sidebar
+**When to use:** When building or updating the node configuration panel that slides out on node click.
+**Action:**
+1. The sidebar reads from and writes to `node.data` in the active flow JSON via Server Actions.
+2. Use only `viz-*` primitive components (`viz-input`, `viz-select`, `viz-code-editor`, `viz-connection`).
+3. Implement the **Raw Toggle** on every field: a `</>` icon switches between `Fixed Value` (static string) and `Expression` (template string evaluated at runtime). Store `isExpression: boolean` in `node.data` alongside the value.
+4. For API key fields, use `viz-connection` which auto-reads key names from `.env.nextviz`. **Never** render a free-text input for secrets.
+5. For variable mapping fields, render a dropdown of available `{{ node.output }}` references built from the current flow's upstream nodes. Store the raw template string in `node.data`.
+6. On every field change, auto-save to `flows/{flowId}.json` via the existing `saveFlow` Server Action.
