@@ -325,23 +325,24 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
               maskColor="rgba(0,0,0,0.2)"
               nodeColor="#52525b"
             />
+
+            {/* Properties Panel — slides in when a node is selected or + button clicked */}
+            {/* Must be inside ReactFlow to access useReactFlow() context */}
+            {(selectedNode || addNodeMode) && (
+              <NodePropertiesPanel
+                node={selectedNode}
+                mode={addNodeMode ? "addNode" : "view"}
+                sourceNodeId={addNodeMode || undefined}
+                setAddNodeMode={setAddNodeMode}
+                onClose={() => {
+                  setSelectedNode(null);
+                  setAddNodeMode(null);
+                }}
+                onExecuteStep={handleExecuteStep}
+              />
+            )}
           </ReactFlow>
         </div>
-
-        {/* Properties Panel — slides in when a node is selected or + button clicked */}
-        {(selectedNode || addNodeMode) && (
-          <NodePropertiesPanel
-            node={selectedNode}
-            mode={addNodeMode ? "addNode" : "view"}
-            sourceNodeId={addNodeMode || undefined}
-            setAddNodeMode={setAddNodeMode}
-            onClose={() => {
-              setSelectedNode(null);
-              setAddNodeMode(null);
-            }}
-            onExecuteStep={handleExecuteStep}
-          />
-        )}
       </div>
     </div>
   );

@@ -203,7 +203,7 @@ export function NodePropertiesPanel({
   // Render add-node mode
   if (mode === "addNode") {
     return (
-      <div className="w-[500px] border-l border-zinc-800 bg-zinc-950 flex flex-col h-full shrink-0 overflow-hidden">
+      <div className="fixed right-0 top-0 w-[500px] h-full border-l border-zinc-800 bg-zinc-950 flex flex-col shrink-0 overflow-hidden z-40">
         {/* ── Header ─────────────────────────────────────────────── */}
         <div className="h-12 border-b border-zinc-800 flex items-center gap-3 px-4 shrink-0">
           <div className="w-7 h-7 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
@@ -256,7 +256,7 @@ export function NodePropertiesPanel({
 
   // Render view mode (normal properties panel)
   return (
-    <div className="w-[500px] border-l border-zinc-800 bg-zinc-950 flex flex-col h-full shrink-0 overflow-hidden">
+    <div className="fixed right-0 top-0 w-[500px] h-full border-l border-zinc-800 bg-zinc-950 flex flex-col shrink-0 overflow-hidden z-40">
 
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="h-12 border-b border-zinc-800 flex items-center gap-3 px-4 shrink-0">
