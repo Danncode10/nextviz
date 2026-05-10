@@ -12,25 +12,34 @@ interface NodePropertiesPanelProps {
   node: Node;
   onClose: () => void;
   onExecuteStep?: (nodeId: string) => Promise<Record<string, unknown>>;
+  onNodeChange?: (node: Node) => void;
 }
 
 function Toggle({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
-    <div className="flex items-center justify-between py-2.5 border-b border-zinc-800/60 last:border-0">
-      <p className="text-sm text-zinc-300">{label}</p>
+    <div className="flex items-center justify-between py-3 border-b border-zinc-800/40 last:border-0 group">
+      <p className="text-sm font-medium text-zinc-300 group-hover:text-zinc-100 transition-colors">{label}</p>
       <button
         onClick={() => onChange(!value)}
         aria-checked={value}
         role="switch"
-        className={cn("relative w-10 h-5 rounded-full transition-colors duration-200", value ? "bg-orange-600" : "bg-zinc-700")}
+        className={cn(
+          "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+          value ? "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.3)]" : "bg-zinc-700 hover:bg-zinc-600"
+        )}
       >
-        <span className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200", value ? "translate-x-[22px]" : "translate-x-0.5")} />
+        <span
+          className={cn(
+            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out",
+            value ? "translate-x-5" : "translate-x-0"
+          )}
+        />
       </button>
     </div>
   );
 }
 
-export function NodePropertiesPanel({ node, onClose, onExecuteStep }: NodePropertiesPanelProps) {
+export function NodePropertiesPanel({ node, onClose, onExecuteStep, onNodeChange }: NodePropertiesPanelProps) {
   const [activeTab, setActiveTab]         = useState<Tab>("parameters");
   const [alwaysOutputData, setAlways]     = useState(node.data?.alwaysOutputData ?? false);
   const [executeOnce, setExecuteOnce]     = useState(node.data?.executeOnce ?? false);
@@ -66,7 +75,7 @@ export function NodePropertiesPanel({ node, onClose, onExecuteStep }: NodeProper
     >
       {/* Modal */}
       <div
-        className="relative w-[90vw] max-w-[1100px] h-[88vh] bg-zinc-900 rounded-2xl border border-zinc-700/60 shadow-2xl flex flex-col overflow-hidden"
+        className="relative w-[90vw] max-w-[1100px] h-[88vh] bg-zinc-950 rounded-2xl border border-zinc-800/60 shadow-2xl flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Header ─────────────────────────────────────── */}
@@ -134,17 +143,42 @@ export function NodePropertiesPanel({ node, onClose, onExecuteStep }: NodeProper
 
               {activeTab === "settings" && (
                 <div className="space-y-0 max-w-lg divide-y divide-zinc-800/40">
-                  <Toggle label="Always Output Data"  value={alwaysOutputData} onChange={setAlways} />
-                  <Toggle label="Execute Once"         value={executeOnce}      onChange={setExecuteOnce} />
-                  <Toggle label="Retry On Fail"        value={retryOnFail}      onChange={setRetryOnFail} />
+                  <Toggle 
+                    label="Always Output Data"  
+                    value={alwaysOutputData} 
+                    onChange={(v) => {
+                      setAlways(v);
+                      onNodeChange?.({ ...node, data: { ...node.data, alwaysOutputData: v } });
+                    }} 
+                  />
+                  <Toggle 
+                    label="Execute Once"         
+                    value={executeOnce}      
+                    onChange={(v) => {
+                      setExecuteOnce(v);
+                      onNodeChange?.({ ...node, data: { ...node.data, executeOnce: v } });
+                    }} 
+                  />
+                  <Toggle 
+                    label="Retry On Fail"        
+                    value={retryOnFail}      
+                    onChange={(v) => {
+                      setRetryOnFail(v);
+                      onNodeChange?.({ ...node, data: { ...node.data, retryOnFail: v } });
+                    }} 
+                  />
 
                   <div className="py-2.5">
                     <p className="text-sm text-zinc-400 mb-2">On Error</p>
                     <div className="relative">
                       <select
                         value={onError}
-                        onChange={(e) => setOnError(e.target.value)}
-                        className="w-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:border-zinc-500 cursor-pointer"
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setOnError(v);
+                          onNodeChange?.({ ...node, data: { ...node.data, onError: v } });
+                        }}
+                        className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:border-zinc-700 cursor-pointer transition-colors"
                       >
                         <option value="stopWorkflow">Stop Workflow</option>
                         <option value="continueRegular">Continue (Regular Output)</option>
@@ -158,14 +192,25 @@ export function NodePropertiesPanel({ node, onClose, onExecuteStep }: NodeProper
                     <p className="text-sm text-zinc-400 mb-2">Notes</p>
                     <textarea
                       value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setNotes(v);
+                        onNodeChange?.({ ...node, data: { ...node.data, notes: v } });
+                      }}
                       rows={4}
                       placeholder="Add notes about this node…"
-                      className="w-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-2.5 resize-none focus:outline-none focus:border-zinc-500 placeholder:text-zinc-600"
+                      className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2.5 resize-none focus:outline-none focus:border-zinc-700 placeholder:text-zinc-600 transition-colors"
                     />
                   </div>
 
-                  <Toggle label="Display Note in Flow?" value={displayNote} onChange={setDisplayNote} />
+                  <Toggle 
+                    label="Display Note in Flow?" 
+                    value={displayNote} 
+                    onChange={(v) => {
+                      setDisplayNote(v);
+                      onNodeChange?.({ ...node, data: { ...node.data, displayNote: v } });
+                    }} 
+                  />
 
                   <div className="pt-4">
                     <p className="text-xs text-zinc-600">Manual Trigger node version 1 (Latest)</p>

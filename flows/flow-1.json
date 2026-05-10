@@ -11,9 +11,13 @@
         "y": -1806.0595736632242
       },
       "data": {
-        "label": "Trigger this workflow"
+        "label": "Trigger this workflow",
+        "alwaysOutputData": false,
+        "executeOnce": false,
+        "retryOnFail": false,
+        "displayNote": false
       },
-      "selected": true,
+      "selected": false,
       "width": 108,
       "height": 108
     },
@@ -35,8 +39,8 @@
       "id": "node-1778407125882",
       "type": "onHTTP",
       "position": {
-        "x": -910.0486242008506,
-        "y": -1811.8102451257273
+        "x": -889.2134106455145,
+        "y": -1787.849749537091
       },
       "data": {
         "label": "HTTP Trigger"

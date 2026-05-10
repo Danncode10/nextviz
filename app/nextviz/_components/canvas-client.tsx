@@ -324,6 +324,10 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
           node={selectedNode}
           onClose={() => setSelectedNode(null)}
           onExecuteStep={handleExecuteStep}
+          onNodeChange={(updatedNode) => {
+            setNodes((nds) => nds.map((n) => (n.id === updatedNode.id ? updatedNode : n)));
+            setSelectedNode(updatedNode);
+          }}
         />
       )}
     </div>
