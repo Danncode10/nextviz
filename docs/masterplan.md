@@ -11,13 +11,13 @@ This document outlines the strategic phases and architecture for **NextViz**, a 
 
 ## 🌉 Phase 2: The Local Bridge & Visual Canvas
 - [ ] Implement the React Flow Canvas in `/app/nextviz/page.tsx`.
-- [ ] Apply **Vizzy Aesthetics**: Dark mode default (`bg-zinc-950`), custom semantic tokens, and `variant="dots"` for the background.
+- [ ] Apply **NextViz Aesthetics**: Dark mode default (`bg-zinc-950`), custom semantic tokens, and `variant="dots"` for the background.
 - [ ] Build the "Local Bridge" Server Actions (`lib/nextviz/actions.ts`) to read/write from `nextviz-flow.json`. Implement **Auto-save (Live-Sync)** on every node change for magical, instant VS Code synchronization.
 - [ ] **Critical Security:** Implement the Production Guard environment check (`process.env.NODE_ENV !== 'development'`).
 - [ ] Build the Read-Only UI overlay for non-localhost environments.
 
 ## ⚙️ Phase 3: Core Nodes & Execution Engine
-- [ ] Define the strict TypeScript interfaces (`VizzyNode`, `WorkflowJSON`) in `lib/nextviz/types.ts`.
+- [ ] Define the strict TypeScript interfaces (`NextVizNode`, `WorkflowJSON`) in `lib/nextviz/types.ts`.
 - [ ] Implement the primary Execution Engine (`lib/nextviz/engine.ts`) capable of traversing the graph and resolving inputs/outputs.
 - [ ] Ensure a **"Headless" Engine** design: `engine.ts` must be completely decoupled from the UI, allowing Vercel to run automations via Webhooks without ever loading the `/nextviz` page.
 - [ ] Develop the fundamental **Trigger** node: `onHTTP` (Webhook receiver).

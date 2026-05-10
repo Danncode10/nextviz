@@ -18,9 +18,9 @@ Before modifying the codebase, verify the following environment state:
 2. **The Production Guard**: **CRITICAL**. Any Server Action involving `fs` (File System) must be wrapped in a check: `if (process.env.NODE_ENV !== 'development') throw new Error(...)`.
 3. **Node Modularity**: Every node (Trigger, Action, Logic) must be a self-contained component in `app/nextviz/nodes/`.
 4. **Local Secrets**: All sensitive keys (OpenAI, Supabase Service Role) MUST be stored in `.env.nextviz`. Never commit this file.
-5. **Type Safety**: Use the `VizzyNode` and `WorkflowJSON` interfaces for all flow manipulations. No `any`.
+5. **Type Safety**: Use the `NextVizNode` and `WorkflowJSON` interfaces for all flow manipulations. No `any`.
 
-## 🎨 UI & UX Standards (The "Vizzy" Aesthetic)
+## 🎨 UI & UX Standards (The "NextViz" Aesthetic)
 
 1. **Dark Mode Default**: Use `bg-zinc-950` and `text-zinc-50`. Avoid pure `#000`.
 2. **The Canvas**: React Flow backgrounds should use `variant="dots"` with a subtle color (`#333`).
@@ -36,7 +36,7 @@ Before modifying the codebase, verify the following environment state:
 
 1. **Commit Checkpoints**: When requested to "checkpoint," use the Terminal/GitHub MCP to:
 * `git add nextviz-flow.json .env.nextviz.example`
-* `git commit -m "vizzy: [detailed description of workflow change]"`
+* `git commit -m "nextviz: [detailed description of workflow change]"`
 
 
 2. **Feature Blueprints**: Before building a new Node type (e.g., Discord, Slack), look for the schema definition in `lib/nextviz/registry.ts`.

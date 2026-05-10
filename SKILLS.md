@@ -13,7 +13,7 @@ This document defines the core actionable "skills" or procedures the AI agent mu
 **When to use:** When modifying the UI canvas or node connections.
 **Action:**
 1. Ensure all changes are synchronized to `nextviz-flow.json` via Server Actions.
-2. Maintain type safety using `VizzyNode` and `WorkflowJSON` interfaces. Do not use `any`.
+2. Maintain type safety using `NextVizNode` and `WorkflowJSON` interfaces. Do not use `any`.
 
 ## Skill 3: Enforce the Production Guard
 **When to use:** When creating or modifying Server Actions involving the File System (`fs`).
@@ -28,7 +28,7 @@ This document defines the core actionable "skills" or procedures the AI agent mu
 2. Build the visual node in `app/nextviz/nodes/` as a self-contained component.
 3. Place third-party integration logic in `lib/nextviz/services/`.
 
-## Skill 5: Apply "Vizzy" Aesthetics
+## Skill 5: Apply "NextViz" Aesthetics
 **When to use:** When building or modifying React components and UI elements.
 **Action:**
 1. Use `bg-zinc-950` and `text-zinc-50` for the dark mode default. Avoid pure `#000`.
@@ -47,7 +47,7 @@ This document defines the core actionable "skills" or procedures the AI agent mu
 **When to use:** When the user requests a "checkpoint" or a feature sprint is complete.
 **Action:**
 1. Use the terminal to stage critical files: `git add nextviz-flow.json .env.nextviz.example`.
-2. Commit with the standard prefix: `git commit -m "vizzy: [detailed description of workflow change]"`.
+2. Commit with the standard prefix: `git commit -m "nextviz: [detailed description of workflow change]"`.
 
 ## Skill 8: Implement CLI Engine Logic
 **When to use:** When tasked with updating the `npx nextviz` logic.
