@@ -71,19 +71,29 @@ Your blank Next.js project will eventually be structured as follows:
 ├── app/
 │   ├── nextviz/            <-- The Editor Route
 │   │   ├── page.tsx        <-- Main Canvas
-│   │   ├── nodes/          <-- Folder for custom Node components
+│   │   ├── nodes/          <-- Folder for custom Node components (user-created)
 │   │   └── layout.tsx
 │   └── api/nextviz/        <-- Runtime endpoints (Triggers)
 ├── lib/
-│   └── nextviz/
-│       ├── engine.ts       <-- The Execution Logic
-│       ├── actions.ts      <-- Server Actions (Save/Commit)
+│   └── nextviz/            <-- Shared Framework Code (Read-only)
+│       ├── engine.ts       <-- The Execution Logic & Headless Orchestrator
+│       ├── actions.ts      <-- Server Actions (Save/Load flows)
+│       ├── registry.ts     <-- Node registry & Flow discovery
+│       ├── services/       <-- Third-party integrations (Supabase, OpenAI, etc)
 │       └── types.ts        <-- Schema definitions
-├── nextviz-flow.json       <-- THE SOURCE OF TRUTH (The Workflow)
+├── flows/                  <-- 🎯 NEW: Individual Flow Storage
+│   ├── default.json        <-- Example: {id, name, nodes[], edges[]}
+│   └── (user creates more flows here)
+├── .nextviz/               <-- Optional: Flow metadata
+│   └── metadata.json       <-- Flow discovery & settings
 ├── .env.nextviz            <-- Secrets (Ignored by Git)
 └── next.config.mjs
 
 ```
+
+**Key Difference:** 
+- **Old:** `nextviz-flow.json` held all flows in one array → merge conflicts
+- **New:** `flows/` directory holds individual flow files → no conflicts, team-friendly
 
 ---
 

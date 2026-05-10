@@ -20,6 +20,38 @@ This document outlines the strategic phases and architecture for **NextViz**, a 
 - [x] Build the Read-Only UI overlay for non-localhost environments.
 - [x] Implement multi-sidebar architecture (Left Flows Dropdown, Right Draggable Components).
 
+## 🗂️ Phase 3.5: Flow Restructuring & Flow Registry (ARCHITECTURAL UPGRADE)
+
+### What's Changing
+
+Migrating from monolithic `nextviz-flow.json` to individual flow files in `flows/` directory:
+
+- [ ] Move each flow to `flows/{flow-id}.json` to eliminate git merge conflicts.
+- [ ] Build a `FlowRegistry` utility in `lib/nextviz/registry.ts` that auto-discovers flows in the `flows/` folder at runtime.
+- [ ] Update Server Actions (`lib/nextviz/actions.ts`) to save/load flows individually instead of the entire monolith.
+- [ ] Update the Canvas Editor to use `FlowRegistry.loadFlow(activeFlowId)` instead of reading from a static JSON file.
+- [ ] Maintain backward compatibility for in-memory active flow state (UI still tracks `activeFlowId`).
+
+### Design Decisions
+
+| Decision | Old (Monolithic) | New (Individual) | Benefit |
+|----------|------------------|------------------|---------|
+| **Storage** | `nextviz-flow.json` (all flows in one file) | `flows/{flow-id}.json` (one file per flow) | No merge conflicts |
+| **Git Strategy** | Track entire flow array | Track individual flows | Team members work independently |
+| **Scale** | ~1MB = ~100 flows before slowdown | Unlimited | Enterprise-ready |
+| **Discovery** | Manual array iteration | Auto-scan `flows/` directory | Developer ergonomics |
+| **CLI Template** | Confusing (is this an example?) | Clear (flows/ = user space) | Better onboarding |
+
+### Why This Matters
+
+- ✅ **No merge conflicts** when team members work on different flows.
+- ✅ **Clear separation** between framework code (`lib/nextviz/`) and user flows (`flows/`).
+- ✅ **Scales to 100+ flows** without file size bloat.
+- ✅ **Template clarity** for `npx nextviz init`—users know exactly where to put their flows.
+- ✅ **Future-proof** for CI/CD: can deploy individual flows independently.
+
+---
+
 ## ⚙️ Phase 3: Core Nodes & Execution Engine
 - [x] Support multi-flow management and custom Add Flow modals with name/description in JSON schema.
 - [ ] Define the strict TypeScript interfaces (`NextVizNode`, `WorkflowJSON`) in `lib/nextviz/types.ts`.
@@ -57,16 +89,18 @@ graph TD
     end
 
     subgraph FileSystem["Local File System"]
-        JSON["nextviz-flow.json (Source of Truth)"]
+        Flows["flows/ (Source of Truth)"]
+        Metadata[".nextviz/metadata.json"]
         Env[".env.nextviz (Secrets)"]
     end
 
     %% Editing Data Flow
     Canvas -- "onChange() / Save" --> Actions
-    Actions -- "fs.writeFile (dev only)" --> JSON
+    Actions -- "fs.writeFile (dev only)" --> Flows
     
     %% Execution Data Flow
-    Engine -- "Reads" --> JSON
+    Engine -- "FlowRegistry.load()" --> Flows
+    Engine -- "Reads" --> Metadata
     Engine -- "Reads Keys" --> Env
     Engine -- "Executes" --> NodeRegistry
 ```
@@ -82,3 +116,10 @@ flowchart LR
     B -- No --> E[Throw Error]
     E --> F[UI Banner: Read-Only Mode]
 ```
+
+---
+
+## 📖 Additional Documentation
+
+- **[FOLDER_STRUCTURE.md](./FOLDER_STRUCTURE.md)** — Detailed breakdown of the Phase 3.5 folder layout, responsibilities, and best practices.
+- **[engine-architecture.md](./engine-architecture.md)** — Engine design patterns, the `executeFlow` API, and orchestrator principles.

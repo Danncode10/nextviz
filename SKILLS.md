@@ -12,8 +12,9 @@ This document defines the core actionable "skills" or procedures the AI agent mu
 ## Skill 2: Manage Flow State (Source of Truth)
 **When to use:** When modifying the UI canvas or node connections.
 **Action:**
-1. Ensure all changes are synchronized to `nextviz-flow.json` via Server Actions.
-2. Maintain type safety using `NextVizNode` and `WorkflowJSON` interfaces. Do not use `any`.
+1. Ensure all changes are synchronized to the appropriate flow file in `flows/{activeFlowId}.json` via Server Actions.
+2. Use the `FlowRegistry` utility to load and discover flows from the `flows/` directory.
+3. Maintain type safety using `NextVizNode` and `WorkflowJSON` interfaces. Do not use `any`.
 
 ## Skill 3: Enforce the Production Guard
 **When to use:** When creating or modifying Server Actions involving the File System (`fs`).
@@ -46,8 +47,9 @@ This document defines the core actionable "skills" or procedures the AI agent mu
 ## Skill 7: Execute Vibe Workflow (Checkpointing)
 **When to use:** When the user requests a "checkpoint" or a feature sprint is complete.
 **Action:**
-1. Use the terminal to stage critical files: `git add nextviz-flow.json .env.nextviz.example`.
+1. Use the terminal to stage flow files and example env: `git add flows/ .env.nextviz.example`.
 2. Commit with the standard prefix: `git commit -m "nextviz: [detailed description of workflow change]"`.
+3. **Benefit:** Individual flows can be committed separately, reducing merge conflicts in team environments.
 
 ## Skill 8: Implement CLI Engine Logic
 **When to use:** When tasked with updating the `npx nextviz` logic.

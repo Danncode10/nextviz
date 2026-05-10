@@ -1,6 +1,4 @@
 {
-  "version": "1.0",
-  "activeFlowId": "flow-1",
   "flows": [
     {
       "id": "flow-1",
@@ -45,5 +43,7 @@
         }
       ]
     }
-  ]
+  ],
+  "activeFlowId": "flow-1",
+  "version": "1.0"
 }

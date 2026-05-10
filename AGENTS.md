@@ -14,7 +14,11 @@ Before modifying the codebase, verify the following environment state:
 
 ## 🏗 NextViz Architectural Guardrails
 
-1. **The Source of Truth (SOT)**: The file `nextviz-flow.json` is the absolute authority. Any UI change in the canvas must be synced to this file via Server Actions.
+1. **The Source of Truth (SOT)**: Individual flow files in `flows/{flow-id}.json` are the absolute authority. Any UI change in the canvas must be synced to the appropriate flow file via Server Actions.
+   - **Flow Discovery:** The `FlowRegistry` (in `lib/nextviz/registry.ts`) auto-scans the `flows/` directory at startup.
+   - **Active Flow State:** The UI tracks `activeFlowId` in memory, not persisted to a separate manifest.
+   - **Per-Flow Structure:** Each file contains `{id, name, description, nodes[], edges[]}`.
+
 2. **The Production Guard**: **CRITICAL**. Any Server Action involving `fs` (File System) must be wrapped in a check: `if (process.env.NODE_ENV !== 'development') throw new Error(...)`.
 3. **Node Modularity**: Every node (Trigger, Action, Logic) must be a self-contained component in `app/nextviz/nodes/`.
 4. **Local Secrets**: All sensitive keys (OpenAI, Supabase Service Role) MUST be stored in `.env.nextviz`. Never commit this file.
@@ -35,9 +39,9 @@ Before modifying the codebase, verify the following environment state:
 ## 🔄 Vibe Workflow & Git Integration
 
 1. **Commit Checkpoints**: When requested to "checkpoint," use the Terminal/GitHub MCP to:
-* `git add nextviz-flow.json .env.nextviz.example`
+* `git add flows/ .env.nextviz.example` (individual flow files, not a monolithic file)
 * `git commit -m "nextviz: [detailed description of workflow change]"`
-
+* **Benefits:** Each developer can commit their own flows without merge conflicts.
 
 2. **Feature Blueprints**: Before building a new Node type (e.g., Discord, Slack), look for the schema definition in `lib/nextviz/registry.ts`.
 3. **Atomic Services**: Logic for third-party integrations (Supabase, OpenAI) must live in `lib/nextviz/services/` and be imported by the Node components.
@@ -64,8 +68,10 @@ If tasked with updating the `npx nextviz` logic:
 
 ## Code Architecture Summary
 
-* **Primary Data**: `nextviz-flow.json`
-* **Secrets**: `.env.nextviz`
+* **Primary Data**: `flows/{flow-id}.json` (Source of Truth) + `FlowRegistry` (auto-discovery)
+* **Framework Code**: `lib/nextviz/` (engine, actions, registry, services, types)
+* **Custom Nodes**: `app/nextviz/nodes/` (user-created node components)
+* **Secrets**: `.env.nextviz` (isolated from `.env`)
 * **Frontend**: Next.js 15+ App Router + React Flow
 * **Backend**: Next.js Server Actions (The "Local Bridge")
 * **Deployment**: Vercel (Running in Read-Only Mode)
