@@ -88,6 +88,9 @@ export default function NextVizPage() {
           Read-Only Mode: Edit in Localhost to sync with Git.
         </div>
       )}
+      <div className="h-14 border-b border-border bg-card flex items-center px-4 shrink-0 z-40 shadow-sm">
+        <h1 className="text-sm font-semibold text-foreground">nextviz example</h1>
+      </div>
       <div className="flex-1 w-full relative">
         <ReactFlow
           nodes={nodes}

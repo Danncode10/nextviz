@@ -18,6 +18,7 @@ This document outlines the strategic phases and architecture for **NextViz**, a 
 - [x] Implement state management and **Auto-save (Live-Sync)** on every node/edge change for magical, instant VS Code synchronization.
 - [x] **Critical Security:** Implement the Production Guard environment check (`process.env.NODE_ENV !== 'development'`).
 - [x] Build the Read-Only UI overlay for non-localhost environments.
+- [x] Implement multi-sidebar architecture (Left Flows Dropdown, Right Draggable Components).
 
 ## ⚙️ Phase 3: Core Nodes & Execution Engine
 - [ ] Define the strict TypeScript interfaces (`NextVizNode`, `WorkflowJSON`) in `lib/nextviz/types.ts`.

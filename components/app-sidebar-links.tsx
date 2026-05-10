@@ -1,10 +1,21 @@
 "use client"
 
 import React from 'react'
-import {  SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar"
+import {  
+    SidebarGroup, 
+    SidebarGroupContent, 
+    SidebarGroupLabel, 
+    SidebarMenu, 
+    SidebarMenuButton, 
+    SidebarMenuItem,
+    SidebarMenuSub,
+    SidebarMenuSubItem,
+    SidebarMenuSubButton
+} from "./ui/sidebar"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { HistoryIcon, KeyIcon, WorkflowIcon } from "lucide-react"
+import { HistoryIcon, KeyIcon, WorkflowIcon, ChevronRight } from "lucide-react"
 
 export const routes = [
     {
@@ -34,16 +45,38 @@ const AppSideBarLinks = () => {
                     </SidebarGroupLabel>
                    <SidebarMenu>
                      {routes.map((route,i)=>{
-                        const isActive = pathname.includes(route.href)
+                        const isActive = pathname.includes(route.href) || pathname === '/nextviz'; // Also active on root for Flows
+
+                        if (route.name === "Flows") {
+                            return (
+                                <Collapsible defaultOpen className="group/collapsible" key={i}>
+                                    <SidebarMenuItem>
+                                        <SidebarMenuButton render={<CollapsibleTrigger />} isActive={isActive}>
+                                            <route.icon/>
+                                            {route.name}
+                                            <ChevronRight className="ml-auto transition-transform group-data-open/collapsible:rotate-90" />
+                                        </SidebarMenuButton>
+                                        <CollapsibleContent>
+                                            <SidebarMenuSub>
+                                                <SidebarMenuSubItem>
+                                                    <SidebarMenuSubButton render={<Link href="/nextviz" />} isActive={true}>
+                                                        <span>nextviz example</span>
+                                                    </SidebarMenuSubButton>
+                                                </SidebarMenuSubItem>
+                                            </SidebarMenuSub>
+                                        </CollapsibleContent>
+                                    </SidebarMenuItem>
+                                </Collapsible>
+                            )
+                        }
+
                         return (
                             <React.Fragment key={i}>
                                 <SidebarMenuItem>
-                                  <Link href={route.href}>
-                                    <SidebarMenuButton isActive={isActive} >
-                                        <route.icon/>
-                                        {route.name}
-                                    </SidebarMenuButton>
-                                  </Link>
+                                  <SidebarMenuButton render={<Link href={route.href} />} isActive={isActive} >
+                                      <route.icon/>
+                                      {route.name}
+                                  </SidebarMenuButton>
                                 </SidebarMenuItem>
                             </React.Fragment>
                         )
