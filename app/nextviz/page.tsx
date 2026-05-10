@@ -15,20 +15,20 @@ import ReactFlow, {
   EdgeChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
+import { nodeTypes } from "./nodes";
 
 const initialNodes: Node[] = [
   {
     id: "1",
-    type: "input",
-    data: { label: "Trigger Node" },
-    position: { x: 250, y: 100 },
-    className: "bg-card border-border text-card-foreground rounded-xl shadow-sm",
+    type: "manualTrigger",
+    data: { label: "Trigger this workflow" },
+    position: { x: 150, y: 150 },
   },
   {
     id: "2",
-    data: { label: "Action Node" },
-    position: { x: 250, y: 250 },
-    className: "bg-card border-border text-card-foreground rounded-xl shadow-sm",
+    type: "httpAction",
+    data: { label: "Fetch data from API" },
+    position: { x: 500, y: 150 },
   },
 ];
 
@@ -58,6 +58,7 @@ export default function NextVizPage() {
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}

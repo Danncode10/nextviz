@@ -13,7 +13,7 @@ This document outlines the strategic phases and architecture for **NextViz**, a 
 - [x] Setup core UI foundation: shadcn/ui components, NextViz dark theme aesthetic (`bg-zinc-950`), and sidebar layout.
 - [x] Define precise Workflow Schema (nodes and edges) using Zod for type-safe validation.
 - [x] Implement the React Flow Canvas in `/app/nextviz/page.tsx` with `variant="dots"` background and custom semantic tokens.
-- [ ] Setup initial UI for basic nodes (e.g., Manual Trigger, HTTP Action) for the visual canvas.
+- [x] Setup initial UI for basic nodes (e.g., Manual Trigger, HTTP Action) for the visual canvas.
 - [ ] Build the "Local Bridge" Server Actions (`lib/nextviz/actions.ts`) to read/write from `nextviz-flow.json`. 
 - [ ] Implement state management and **Auto-save (Live-Sync)** on every node/edge change for magical, instant VS Code synchronization.
 - [ ] **Critical Security:** Implement the Production Guard environment check (`process.env.NODE_ENV !== 'development'`).
