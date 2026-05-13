@@ -7,8 +7,8 @@
       "id": "node-1778649040920",
       "type": "chatTrigger",
       "position": {
-        "x": -393.02929704311083,
-        "y": -156.46934418738067
+        "x": -459.9607531435437,
+        "y": -168.20088531768863
       },
       "data": {
         "label": "Chat Trigger"
@@ -21,8 +21,8 @@
       "id": "node-1778650097267",
       "type": "aiAgent",
       "position": {
-        "x": -212.15973281807095,
-        "y": -139.27994865416073
+        "x": -228.77662319738647,
+        "y": -151.91032212676188
       },
       "data": {
         "label": "AI Agent",
@@ -33,7 +33,16 @@
           "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
         },
         "memory": {
-          "type": "simple"
+          "type": "supabase",
+          "supabase": {
+            "urlRef": "NEXTVIZ_SUPABASE_URL",
+            "keyRef": "NEXTVIZ_SUPABASE_SERVICE_ROLE_KEY",
+            "table": "case_summaries",
+            "columns": [
+              "summary_text"
+            ],
+            "rowFilter": "Lesterdannlopez7@gmail.com"
+          }
         }
       },
       "selected": false,
@@ -44,8 +53,8 @@
       "id": "node-1778650097267-model",
       "type": "chatModelNode",
       "position": {
-        "x": -334.4392013918037,
-        "y": 78.13357486990753
+        "x": -427.68090681424997,
+        "y": 77.68813456495187
       },
       "data": {
         "chatModel": {
@@ -62,16 +71,25 @@
       "id": "node-1778650097267-memory",
       "type": "memoryNode",
       "position": {
-        "x": -158.30653422855465,
-        "y": 180.7087604557925
+        "x": -170.2199195522239,
+        "y": 120.73523156677538
       },
       "data": {
         "memory": {
-          "type": "simple"
+          "type": "supabase",
+          "supabase": {
+            "urlRef": "NEXTVIZ_SUPABASE_URL",
+            "keyRef": "NEXTVIZ_SUPABASE_SERVICE_ROLE_KEY",
+            "table": "case_summaries",
+            "columns": [
+              "summary_text"
+            ],
+            "rowFilter": "Lesterdannlopez7@gmail.com"
+          }
         }
       },
       "selected": true,
-      "width": 160,
+      "width": 163,
       "height": 56
     }
   ],

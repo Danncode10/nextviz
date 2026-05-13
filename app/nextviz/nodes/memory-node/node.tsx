@@ -1,26 +1,42 @@
 "use client";
 
 import { NodeProps, Handle, Position } from "reactflow";
-import { Brain } from "lucide-react";
+import { Brain, Database } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MemoryData {
   memory?: {
-    type: "none" | "simple" | "summary" | "entity";
+    type: "none" | "simple" | "summary" | "entity" | "supabase";
     maxMessages?: number;
+    supabase?: {
+      urlRef?: string;
+      keyRef?: string;
+      table?: string;
+      columns?: string;
+      rowFilter?: string;
+    };
   };
 }
 
-const MEMORY_LABELS: Record<string, string> = {
-  simple:  "Simple Memory",
-  summary: "Summary Memory",
-  entity:  "Entity Memory",
+const TYPE_LABELS: Record<string, string> = {
+  simple:   "Simple Memory",
+  summary:  "Summary Memory",
+  entity:   "Entity Memory",
+  supabase: "Supabase",
 };
 
 export default function MemoryNode({ data, selected }: NodeProps<MemoryData>) {
   const memory = data.memory;
-  const label  = memory?.type ? (MEMORY_LABELS[memory.type] ?? "Memory") : "Memory";
-  const detail = memory?.maxMessages ? `Last ${memory.maxMessages} msgs` : undefined;
+  const isSupabase = memory?.type === "supabase";
+
+  const label  = memory?.type ? (TYPE_LABELS[memory.type] ?? "Memory") : "Memory";
+  const detail = isSupabase
+    ? memory?.supabase?.table
+      ? `${memory.supabase.table}${memory.supabase.columns?.length ? ` · ${memory.supabase.columns.length} col${memory.supabase.columns.length !== 1 ? "s" : ""}` : ""}`
+      : "Not configured"
+    : memory?.maxMessages
+      ? `Last ${memory.maxMessages} msgs`
+      : undefined;
 
   return (
     <div
@@ -39,8 +55,15 @@ export default function MemoryNode({ data, selected }: NodeProps<MemoryData>) {
         className="!w-2.5 !h-2.5 !bg-zinc-600 !border-2 !border-zinc-400"
       />
 
-      <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-700 flex items-center justify-center shrink-0">
-        <Brain className="w-4 h-4 text-purple-400" />
+      <div className={cn(
+        "w-8 h-8 rounded-lg border flex items-center justify-center shrink-0",
+        isSupabase
+          ? "bg-emerald-500/10 border-emerald-500/30"
+          : "bg-zinc-900 border-zinc-700"
+      )}>
+        {isSupabase
+          ? <Database className="w-4 h-4 text-emerald-400" />
+          : <Brain className="w-4 h-4 text-purple-400" />}
       </div>
 
       <div className="flex-1 min-w-0">
