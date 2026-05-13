@@ -34,6 +34,8 @@ import Link from "next/link";
 import { NodePropertiesPanel } from "./node-properties-panel";
 import { ChatWindow } from "./chat-window";
 import { ModelSelectorPopup } from "../nodes/ai-agent/_components/model-selector-popup";
+import { MemoryPopup } from "../nodes/ai-agent/_components/memory-popup";
+import { ToolPopup } from "../nodes/ai-agent/_components/tool-popup";
 
 interface CanvasClientProps {
   initialFlowId?: string;
@@ -56,20 +58,27 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   // ── Chat window ────────────────────────────────────────────────────────────
   const [chatWindowOpen, setChatWindowOpen] = useState(false);
 
-  // ── Model selector popup (opened from canvas node sub-port) ───────────────
-  const [modelPopupNode, setModelPopupNode] = useState<Node | null>(null);
+  // ── Sub-component popups (opened from canvas node sub-ports) ─────────────
+  const [modelPopupNode,  setModelPopupNode]  = useState<Node | null>(null);
+  const [memoryPopupNode, setMemoryPopupNode] = useState<Node | null>(null);
+  const [toolPopupNode,   setToolPopupNode]   = useState<Node | null>(null);
 
   useEffect(() => {
-    const handler = (e: Event) => {
+    const findNode = (e: Event, setter: (n: Node) => void) => {
       const { nodeId } = (e as CustomEvent<{ nodeId: string }>).detail;
-      setNodes((nds) => {
-        const found = nds.find((n) => n.id === nodeId);
-        if (found) setModelPopupNode(found);
-        return nds;
-      });
+      setNodes((nds) => { const found = nds.find((n) => n.id === nodeId); if (found) setter(found); return nds; });
     };
-    document.addEventListener("nextviz:open-model-popup", handler);
-    return () => document.removeEventListener("nextviz:open-model-popup", handler);
+    const onModel  = (e: Event) => findNode(e, setModelPopupNode);
+    const onMemory = (e: Event) => findNode(e, setMemoryPopupNode);
+    const onTool   = (e: Event) => findNode(e, setToolPopupNode);
+    document.addEventListener("nextviz:open-model-popup",  onModel);
+    document.addEventListener("nextviz:open-memory-popup", onMemory);
+    document.addEventListener("nextviz:open-tool-popup",   onTool);
+    return () => {
+      document.removeEventListener("nextviz:open-model-popup",  onModel);
+      document.removeEventListener("nextviz:open-memory-popup", onMemory);
+      document.removeEventListener("nextviz:open-tool-popup",   onTool);
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Undo / Redo history ────────────────────────────────────────────────────
@@ -244,6 +253,9 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
 
       if (updatedNode.type === "aiAgent") {
         const chatModel = updatedNode.data?.chatModel as { type?: string; provider?: string; apiKeyRef?: string } | undefined;
+        const memory    = updatedNode.data?.memory    as { type?: string; maxMessages?: number } | undefined;
+
+        // Sync chatModelNode
         const modelNodeId = `${updatedNode.id}-model`;
         if (chatModel?.type) {
           const existsIdx = next.findIndex((n) => n.id === modelNodeId);
@@ -258,6 +270,25 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
             }];
           }
         }
+
+        // Sync memoryNode (only when type is set and not "none")
+        const memoryNodeId = `${updatedNode.id}-memory`;
+        if (memory?.type && memory.type !== "none") {
+          const existsIdx = next.findIndex((n) => n.id === memoryNodeId);
+          if (existsIdx >= 0) {
+            next = next.map((n) => n.id === memoryNodeId ? { ...n, data: { memory } } : n);
+          } else {
+            next = [...next, {
+              id: memoryNodeId,
+              type: "memoryNode",
+              position: { x: updatedNode.position.x + 110, y: updatedNode.position.y + 230 },
+              data: { memory },
+            }];
+          }
+        } else {
+          // Remove memoryNode if type set back to "none"
+          next = next.filter((n) => n.id !== memoryNodeId);
+        }
       }
 
       return next;
@@ -265,22 +296,50 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
 
     if (updatedNode.type === "aiAgent") {
       const chatModel = updatedNode.data?.chatModel as { type?: string } | undefined;
-      if (chatModel?.type) {
-        const modelNodeId = `${updatedNode.id}-model`;
-        const edgeId = `${updatedNode.id}-to-model`;
-        setEdges((eds) => {
-          if (eds.find((e) => e.id === edgeId)) return eds;
-          return [...eds, {
-            id: edgeId,
-            source: updatedNode.id,
-            target: modelNodeId,
-            sourceHandle: "model-out",
-            targetHandle: "model-in",
-            type: "smoothstep",
-            style: { stroke: "#52525b", strokeWidth: 2 },
-          }];
-        });
-      }
+      const memory    = updatedNode.data?.memory    as { type?: string } | undefined;
+
+      setEdges((eds) => {
+        let next = eds;
+
+        // Model edge
+        if (chatModel?.type) {
+          const modelNodeId = `${updatedNode.id}-model`;
+          const edgeId = `${updatedNode.id}-to-model`;
+          if (!next.find((e) => e.id === edgeId)) {
+            next = [...next, {
+              id: edgeId,
+              source: updatedNode.id,
+              target: modelNodeId,
+              sourceHandle: "model-out",
+              targetHandle: "model-in",
+              type: "smoothstep",
+              style: { stroke: "#52525b", strokeWidth: 2 },
+            }];
+          }
+        }
+
+        // Memory edge
+        const memoryNodeId = `${updatedNode.id}-memory`;
+        const memEdgeId    = `${updatedNode.id}-to-memory`;
+        if (memory?.type && memory.type !== "none") {
+          if (!next.find((e) => e.id === memEdgeId)) {
+            next = [...next, {
+              id: memEdgeId,
+              source: updatedNode.id,
+              target: memoryNodeId,
+              sourceHandle: "memory-out",
+              targetHandle: "memory-in",
+              type: "smoothstep",
+              style: { stroke: "#52525b", strokeWidth: 2 },
+            }];
+          }
+        } else {
+          // Remove memory edge if memory disabled
+          next = next.filter((e) => e.id !== memEdgeId);
+        }
+
+        return next;
+      });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -418,15 +477,26 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
         />
       )}
 
-      {/* Model selector popup — opened directly from canvas node sub-port */}
+      {/* Sub-component popups — opened directly from canvas node sub-ports */}
       {modelPopupNode && (
         <ModelSelectorPopup
           node={modelPopupNode}
           onClose={() => setModelPopupNode(null)}
-          onNodeChange={(updatedNode) => {
-            handleNodeChange(updatedNode);
-            setModelPopupNode(null);
-          }}
+          onNodeChange={(updatedNode) => { handleNodeChange(updatedNode); setModelPopupNode(null); }}
+        />
+      )}
+      {memoryPopupNode && (
+        <MemoryPopup
+          node={memoryPopupNode}
+          onClose={() => setMemoryPopupNode(null)}
+          onNodeChange={(updatedNode) => { handleNodeChange(updatedNode); setMemoryPopupNode(null); }}
+        />
+      )}
+      {toolPopupNode && (
+        <ToolPopup
+          node={toolPopupNode}
+          onClose={() => setToolPopupNode(null)}
+          onNodeChange={(updatedNode) => { handleNodeChange(updatedNode); setToolPopupNode(null); }}
         />
       )}
     </div>

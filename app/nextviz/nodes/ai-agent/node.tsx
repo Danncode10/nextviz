@@ -100,13 +100,25 @@ export default function AIAgentNode({ id, data, selected }: NodeProps<AIAgentDat
           configured={hasModel}
           onClick={(e) => {
             e.stopPropagation();
-            document.dispatchEvent(
-              new CustomEvent("nextviz:open-model-popup", { detail: { nodeId: id } })
-            );
+            document.dispatchEvent(new CustomEvent("nextviz:open-model-popup", { detail: { nodeId: id } }));
           }}
         />
-        <SubPort label="Memory" />
-        <SubPort label="Tool" />
+        <SubPort
+          label="Memory"
+          configured={!!data.memory?.type && data.memory.type !== "none"}
+          onClick={(e) => {
+            e.stopPropagation();
+            document.dispatchEvent(new CustomEvent("nextviz:open-memory-popup", { detail: { nodeId: id } }));
+          }}
+        />
+        <SubPort
+          label="Tool"
+          configured={Array.isArray(data.tools) && (data.tools as unknown[]).length > 0}
+          onClick={(e) => {
+            e.stopPropagation();
+            document.dispatchEvent(new CustomEvent("nextviz:open-tool-popup", { detail: { nodeId: id } }));
+          }}
+        />
       </div>
 
       {/* ── React Flow Handles ─────────────────────────────────────────────── */}
@@ -123,12 +135,18 @@ export default function AIAgentNode({ id, data, selected }: NodeProps<AIAgentDat
         style={{ top: 38 }}
         className="!w-3 !h-3 !bg-zinc-600 !border-2 !border-zinc-400"
       />
-      {/* Bottom handle for model sub-node connection — positioned under Model sub-port */}
+      {/* Bottom handles for sub-node connections */}
       <Handle
         type="source"
         id="model-out"
         position={Position.Bottom}
         style={{ left: '22%', bottom: 0, opacity: 0, width: 6, height: 6 }}
+      />
+      <Handle
+        type="source"
+        id="memory-out"
+        position={Position.Bottom}
+        style={{ left: '50%', bottom: 0, opacity: 0, width: 6, height: 6 }}
       />
     </div>
   );

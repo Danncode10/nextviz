@@ -21,8 +21,8 @@
       "id": "node-1778650097267",
       "type": "aiAgent",
       "position": {
-        "x": -208.15973281807095,
-        "y": -140.27994865416073
+        "x": -212.15973281807095,
+        "y": -139.27994865416073
       },
       "data": {
         "label": "AI Agent",
@@ -31,6 +31,9 @@
           "provider": "openai",
           "type": "gpt-4o-mini",
           "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
+        },
+        "memory": {
+          "type": "simple"
         }
       },
       "selected": false,
@@ -54,6 +57,22 @@
       "selected": false,
       "width": 160,
       "height": 56
+    },
+    {
+      "id": "node-1778650097267-memory",
+      "type": "memoryNode",
+      "position": {
+        "x": -158.30653422855465,
+        "y": 180.7087604557925
+      },
+      "data": {
+        "memory": {
+          "type": "simple"
+        }
+      },
+      "selected": true,
+      "width": 160,
+      "height": 56
     }
   ],
   "edges": [
@@ -70,6 +89,14 @@
       "target": "node-1778650097267-model",
       "sourceHandle": "model-out",
       "targetHandle": "model-in",
+      "type": "smoothstep"
+    },
+    {
+      "id": "node-1778650097267-to-memory",
+      "source": "node-1778650097267",
+      "target": "node-1778650097267-memory",
+      "sourceHandle": "memory-out",
+      "targetHandle": "memory-in",
       "type": "smoothstep"
     }
   ]
