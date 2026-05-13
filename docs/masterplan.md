@@ -87,7 +87,7 @@ Migrated from monolithic `nextviz-flow.json` to individual flow files in `flows/
 
 #### Tier 1: Triggers & Scheduling
 - [x] **Webhook (onHTTP)** — HTTP Trigger node (complete, Phase 3)
-- [ ] **Schedule (Cron)** — UI: time picker + cron expression editor. Executor: `node-schedule`. Output: `{ executedAt: string }`
+- [x] **Schedule (Cron)** — UI: time picker + cron expression editor. Executor: `node-schedule`. Output: `{ executedAt: string }`
 
 #### Tier 2: AI & Intelligence
 - [ ] **OpenAI / Anthropic** — UI: prompt editor, model selector (gpt-4o, claude-opus). Config: temperature, max_tokens, system_role. Output: `{ response: string, usage: { tokens_used, cost } }`

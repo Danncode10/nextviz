@@ -8,12 +8,12 @@
       "type": "manualTrigger",
       "position": {
         "x": -221.40646170862948,
-        "y": -132.3031611680069
+        "y": -35.11286791293211
       },
       "data": {
         "label": "Manual Trigger"
       },
-      "selected": true,
+      "selected": false,
       "width": 108,
       "height": 108
     },
@@ -21,13 +21,13 @@
       "id": "node-1778647316686",
       "type": "httpAction",
       "position": {
-        "x": 216.87163905092956,
-        "y": -46.391826633978944
+        "x": 0.40234952826295967,
+        "y": -21.652479259959918
       },
       "data": {
         "label": "HTTP Action"
       },
-      "selected": false,
+      "selected": true,
       "width": 256,
       "height": 88
     }
