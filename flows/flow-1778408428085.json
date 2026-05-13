@@ -4,44 +4,25 @@
   "description": "Default example for NextViz",
   "nodes": [
     {
-      "id": "node-1778408433031",
+      "id": "node-1778410383727",
       "type": "manualTrigger",
       "position": {
-        "x": 140.03053801176202,
-        "y": 1.4489203134474735
+        "x": 205.3965657814258,
+        "y": -4.056774413693816
       },
       "data": {
-        "label": "Manual Trigger",
-        "alwaysOutputData": false,
-        "executeOnce": false,
-        "retryOnFail": false,
-        "displayNote": false,
-        "disabled": false
+        "label": "Manual Trigger"
       },
       "selected": false,
       "width": 108,
       "height": 108
     },
     {
-      "id": "node-1778408465986",
-      "type": "onHTTP",
-      "position": {
-        "x": 370.93014416531423,
-        "y": 218.14439060241574
-      },
-      "data": {
-        "label": "HTTP Trigger"
-      },
-      "selected": false,
-      "width": 256,
-      "height": 111
-    },
-    {
-      "id": "node-1778408664351",
+      "id": "node-1778410386409",
       "type": "httpAction",
       "position": {
-        "x": 374.3703638973434,
-        "y": 26.953290466169477
+        "x": 467.2530656291591,
+        "y": 5.113297565409695
       },
       "data": {
         "label": "HTTP Action"
@@ -51,5 +32,13 @@
       "height": 88
     }
   ],
-  "edges": []
+  "edges": [
+    {
+      "id": "reactflow__edge-node-1778410383727-node-1778410386409",
+      "source": "node-1778410383727",
+      "target": "node-1778410386409",
+      "sourceHandle": null,
+      "targetHandle": null
+    }
+  ]
 }

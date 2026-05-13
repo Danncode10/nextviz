@@ -7,8 +7,8 @@
       "id": "node-1778397766275",
       "type": "manualTrigger",
       "position": {
-        "x": 165.346610441706,
-        "y": 56.53218774328346
+        "x": -49.879435968663216,
+        "y": -151.452876667121
       },
       "data": {
         "label": "Manual Trigger"
@@ -18,19 +18,27 @@
       "height": 108
     },
     {
-      "id": "node-1778397770242",
-      "type": "onHTTP",
+      "id": "node-1778458146396",
+      "type": "httpAction",
       "position": {
-        "x": 361.1481865691551,
-        "y": 52.0902050966404
+        "x": 187.96556111553826,
+        "y": -150.79843076812236
       },
       "data": {
-        "label": "HTTP Trigger"
+        "label": "HTTP Action"
       },
-      "selected": false,
+      "selected": true,
       "width": 256,
-      "height": 111
+      "height": 88
     }
   ],
-  "edges": []
+  "edges": [
+    {
+      "id": "reactflow__edge-node-1778397766275-node-1778458146396",
+      "source": "node-1778397766275",
+      "target": "node-1778458146396",
+      "sourceHandle": null,
+      "targetHandle": null
+    }
+  ]
 }
