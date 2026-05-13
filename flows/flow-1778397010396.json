@@ -7,8 +7,8 @@
       "id": "node-1778649040920",
       "type": "chatTrigger",
       "position": {
-        "x": -459.9607531435437,
-        "y": -168.20088531768863
+        "x": -563.2862647476364,
+        "y": -345.3303337818477
       },
       "data": {
         "label": "Chat Trigger"
@@ -21,8 +21,8 @@
       "id": "node-1778650097267",
       "type": "aiAgent",
       "position": {
-        "x": -228.77662319738647,
-        "y": -151.91032212676188
+        "x": -293.4969985977523,
+        "y": -330.17521577338346
       },
       "data": {
         "label": "AI Agent",
@@ -33,7 +33,7 @@
           "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
         },
         "memory": {
-          "type": "supabase",
+          "type": "simple",
           "supabase": {
             "urlRef": "NEXTVIZ_SUPABASE_URL",
             "keyRef": "NEXTVIZ_SUPABASE_SERVICE_ROLE_KEY",
@@ -54,7 +54,7 @@
       "type": "chatModelNode",
       "position": {
         "x": -427.68090681424997,
-        "y": 77.68813456495187
+        "y": -57.42984214809253
       },
       "data": {
         "chatModel": {
@@ -71,12 +71,12 @@
       "id": "node-1778650097267-memory",
       "type": "memoryNode",
       "position": {
-        "x": -170.2199195522239,
-        "y": 120.73523156677538
+        "x": -225.44926125573303,
+        "y": 11.661670212770048
       },
       "data": {
         "memory": {
-          "type": "supabase",
+          "type": "simple",
           "supabase": {
             "urlRef": "NEXTVIZ_SUPABASE_URL",
             "keyRef": "NEXTVIZ_SUPABASE_SERVICE_ROLE_KEY",
@@ -88,8 +88,8 @@
           }
         }
       },
-      "selected": true,
-      "width": 163,
+      "selected": false,
+      "width": 160,
       "height": 56
     }
   ],

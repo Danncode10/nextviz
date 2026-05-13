@@ -41,7 +41,7 @@ export function NodeHoverMenu({ nodeId, onMouseEnter, onMouseLeave }: NodeHoverM
 
   const handlePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log("Playing node:", nodeId);
+    document.dispatchEvent(new CustomEvent("nextviz:execute-flow", { detail: { nodeId } }));
   };
 
   return (

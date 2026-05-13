@@ -1,6 +1,7 @@
 "use server";
 
 import * as registry from "./registry";
+import { executeFlow } from "./engine";
 import { WorkflowJSON } from "./types";
 
 function guardDev() {
@@ -54,6 +55,18 @@ export async function deleteFlow(
   try {
     await registry.deleteFlow(flowId);
     return { success: true };
+  } catch (e: any) {
+    return { success: false, error: e.message };
+  }
+}
+
+export async function executeFlowAction(
+  flowId: string,
+  payload: Record<string, unknown> = {}
+) {
+  try {
+    const result = await executeFlow(flowId, payload);
+    return { success: true, result };
   } catch (e: any) {
     return { success: false, error: e.message };
   }

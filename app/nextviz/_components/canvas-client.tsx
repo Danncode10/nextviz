@@ -36,6 +36,7 @@ import { ChatWindow } from "./chat-window";
 import { ModelSelectorPopup } from "../nodes/ai-agent/_components/model-selector-popup";
 import { MemoryPopup } from "../nodes/ai-agent/_components/memory-popup";
 import { ToolPopup } from "../nodes/ai-agent/_components/tool-popup";
+import { executeFlowAction } from "@/lib/nextviz/actions";
 
 interface CanvasClientProps {
   initialFlowId?: string;
@@ -57,6 +58,8 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
 
   // ── Chat window ────────────────────────────────────────────────────────────
   const [chatWindowOpen, setChatWindowOpen] = useState(false);
+  const [executionResult, setExecutionResult] = useState<any>(null);
+  const [isExecuting, setIsExecuting] = useState(false);
 
   // ── Sub-component popups (opened from canvas node sub-ports) ─────────────
   const [modelPopupNode,  setModelPopupNode]  = useState<Node | null>(null);
@@ -80,6 +83,20 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
       document.removeEventListener("nextviz:open-tool-popup",   onTool);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Flow execution listener ────────────────────────────────────────────────
+  useEffect(() => {
+    const handleExecuteFlow = async (e: Event) => {
+      if (!activeFlow) return;
+      setIsExecuting(true);
+      const result = await executeFlowAction(activeFlow.id);
+      setExecutionResult(result);
+      setChatWindowOpen(true);
+      setIsExecuting(false);
+    };
+    document.addEventListener("nextviz:execute-flow", handleExecuteFlow);
+    return () => document.removeEventListener("nextviz:execute-flow", handleExecuteFlow);
+  }, [activeFlow]);
 
   // ── Undo / Redo history ────────────────────────────────────────────────────
   const history    = useRef<Array<{ nodes: Node[]; edges: Edge[] }>>([]);
@@ -460,7 +477,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
       </div>
 
       {/* Chat window — slides up from bottom when a chatTrigger is open */}
-      {chatWindowOpen && <ChatWindow onClose={() => setChatWindowOpen(false)} />}
+      {chatWindowOpen && <ChatWindow onClose={() => setChatWindowOpen(false)} executionResult={executionResult} isExecuting={isExecuting} />}
       </div>
 
       {/* Properties modal — portal to body, not affected by canvas transforms */}

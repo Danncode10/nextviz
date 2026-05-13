@@ -15,6 +15,8 @@ interface ChatMessage {
 
 export interface ChatWindowProps {
   onClose: () => void;
+  executionResult?: any;
+  isExecuting?: boolean;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -25,11 +27,19 @@ function generateSessionId() {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export function ChatWindow({ onClose }: ChatWindowProps) {
+export function ChatWindow({ onClose, executionResult, isExecuting }: ChatWindowProps) {
   const [messages, setMessages]   = useState<ChatMessage[]>([]);
   const [input, setInput]         = useState("");
   const [sessionId, setSessionId] = useState(generateSessionId);
-  const [logs]                    = useState<string[]>([]);
+
+  const logs = executionResult
+    ? [
+        executionResult.success
+          ? `✅ Execution succeeded in ${executionResult.result?.completedAt ? new Date(executionResult.result.completedAt).getTime() - new Date(executionResult.result.startedAt).getTime() : '?'}ms`
+          : `❌ Error: ${executionResult.error}`,
+        ...(executionResult.result?.nodeOutputs ? [`Total nodes executed: ${Object.keys(executionResult.result.nodeOutputs).length}`] : []),
+      ]
+    : [];
 
   const inputRef      = useRef<HTMLTextAreaElement>(null);
   const messagesEnd   = useRef<HTMLDivElement>(null);
