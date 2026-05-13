@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Undo2, Redo2 } from "lucide-react";
 import { NodePropertiesPanel } from "./node-properties-panel";
+import { ChatWindow } from "./chat-window";
 
 interface CanvasClientProps {
   initialFlowId?: string;
@@ -49,6 +50,9 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
 
   // ── Properties panel ───────────────────────────────────────────────────────
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+
+  // ── Chat window ────────────────────────────────────────────────────────────
+  const [chatWindowOpen, setChatWindowOpen] = useState(false);
 
   // ── Undo / Redo history ────────────────────────────────────────────────────
   const history    = useRef<Array<{ nodes: Node[]; edges: Edge[] }>>([]);
@@ -205,7 +209,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   }, [rfInstance, edges, pushHistory]);
 
   // ── Node click → open properties panel ────────────────────────────────────
-  const NODES_WITH_PANEL = new Set(["manualTrigger", "scheduleTrigger"]);
+  const NODES_WITH_PANEL = new Set(["manualTrigger", "scheduleTrigger", "chatTrigger"]);
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     if (NODES_WITH_PANEL.has(node.type ?? "")) {
@@ -293,7 +297,8 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
         )}
       </div>
 
-      {/* Canvas */}
+      {/* Canvas + Chat Window */}
+      <div className="flex flex-col flex-1 min-h-0">
       <div className="flex flex-1 min-h-0">
         <div ref={reactFlowWrapper} className="flex-1 relative">
           <ReactFlow
@@ -323,12 +328,17 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
         </div>
       </div>
 
-      {/* Properties modal — rendered OUTSIDE ReactFlow to avoid transform clipping */}
+      {/* Chat window — slides up from bottom when a chatTrigger is open */}
+      {chatWindowOpen && <ChatWindow onClose={() => setChatWindowOpen(false)} />}
+      </div>
+
+      {/* Properties modal — portal to body, not affected by canvas transforms */}
       {selectedNode && (
         <NodePropertiesPanel
           node={selectedNode}
           onClose={() => setSelectedNode(null)}
           onExecuteStep={handleExecuteStep}
+          onOpenChat={() => { setSelectedNode(null); setChatWindowOpen(true); }}
           onNodeChange={(updatedNode) => {
             setNodes((nds) => nds.map((n) => (n.id === updatedNode.id ? updatedNode : n)));
             setSelectedNode(updatedNode);

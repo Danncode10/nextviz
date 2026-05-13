@@ -4,12 +4,14 @@ import { Node } from "reactflow";
 import { MousePointer2, Zap } from "lucide-react";
 import { NodeModalShell } from "../nodes/_base/node-modal-shell";
 import { ScheduleTriggerPanel } from "../nodes/schedule-trigger/panel";
+import { ChatTriggerPanel } from "../nodes/chat-trigger/panel";
 
 interface NodePropertiesPanelProps {
   node: Node;
   onClose: () => void;
   onExecuteStep?: (nodeId: string) => Promise<Record<string, unknown>>;
   onNodeChange?: (node: Node) => void;
+  onOpenChat?: () => void;
 }
 
 // ── Manual Trigger parameters tab ─────────────────────────────────────────────
@@ -40,12 +42,24 @@ function ManualTriggerParameters() {
 
 // ── Dispatcher ────────────────────────────────────────────────────────────────
 
-export function NodePropertiesPanel({ node, onClose, onExecuteStep, onNodeChange }: NodePropertiesPanelProps) {
+export function NodePropertiesPanel({ node, onClose, onExecuteStep, onNodeChange, onOpenChat }: NodePropertiesPanelProps) {
   if (node.type === "scheduleTrigger") {
     return (
       <ScheduleTriggerPanel
         node={node}
         onClose={onClose}
+        onExecuteStep={onExecuteStep}
+        onNodeChange={onNodeChange}
+      />
+    );
+  }
+
+  if (node.type === "chatTrigger") {
+    return (
+      <ChatTriggerPanel
+        node={node}
+        onClose={onClose}
+        onOpenChat={onOpenChat}
         onExecuteStep={onExecuteStep}
         onNodeChange={onNodeChange}
       />

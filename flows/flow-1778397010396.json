@@ -4,25 +4,11 @@
   "description": "sample chatbot",
   "nodes": [
     {
-      "id": "node-1778397766275",
-      "type": "manualTrigger",
-      "position": {
-        "x": -221.40646170862948,
-        "y": -35.11286791293211
-      },
-      "data": {
-        "label": "Manual Trigger"
-      },
-      "selected": false,
-      "width": 108,
-      "height": 108
-    },
-    {
       "id": "node-1778647316686",
       "type": "httpAction",
       "position": {
-        "x": 0.40234952826295967,
-        "y": -21.652479259959918
+        "x": 9.97577064259707,
+        "y": -141.40493190183935
       },
       "data": {
         "label": "HTTP Action"
@@ -30,12 +16,26 @@
       "selected": true,
       "width": 256,
       "height": 88
+    },
+    {
+      "id": "node-1778649040920",
+      "type": "chatTrigger",
+      "position": {
+        "x": -212.1829848002145,
+        "y": -84.46641113274028
+      },
+      "data": {
+        "label": "Chat Trigger"
+      },
+      "selected": false,
+      "width": 108,
+      "height": 108
     }
   ],
   "edges": [
     {
-      "id": "reactflow__edge-node-1778397766275-node-1778647316686",
-      "source": "node-1778397766275",
+      "id": "reactflow__edge-node-1778649040920-node-1778647316686",
+      "source": "node-1778649040920",
       "target": "node-1778647316686",
       "sourceHandle": null,
       "targetHandle": null

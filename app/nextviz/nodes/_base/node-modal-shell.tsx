@@ -42,6 +42,8 @@ export interface NodeModalShellProps {
   onNodeChange?: (node: Node) => void;
   parametersContent: ReactNode;
   executeButtonLabel?: string;
+  /** Optional button rendered in the tab bar, to the left of the Execute button. */
+  actionButton?: ReactNode;
 }
 
 export function NodeModalShell({
@@ -54,6 +56,7 @@ export function NodeModalShell({
   onNodeChange,
   parametersContent,
   executeButtonLabel = "Execute step",
+  actionButton,
 }: NodeModalShellProps) {
   const [activeTab, setActiveTab]     = useState<Tab>("parameters");
   const [nodeLabel, setNodeLabel]     = useState<string>((node.data?.label as string) ?? "");
@@ -128,6 +131,7 @@ export function NodeModalShell({
                 </button>
               ))}
               <div className="flex-1" />
+              {actionButton}
               <button
                 onClick={handleExecuteStep}
                 disabled={isRunning}
