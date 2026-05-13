@@ -56,6 +56,7 @@ export function NodeModalShell({
   executeButtonLabel = "Execute step",
 }: NodeModalShellProps) {
   const [activeTab, setActiveTab]     = useState<Tab>("parameters");
+  const [nodeLabel, setNodeLabel]     = useState<string>((node.data?.label as string) ?? "");
   const [alwaysOutputData, setAlways] = useState(node.data?.alwaysOutputData ?? false);
   const [executeOnce, setExecuteOnce] = useState(node.data?.executeOnce ?? false);
   const [retryOnFail, setRetryOnFail] = useState(node.data?.retryOnFail ?? false);
@@ -144,7 +145,27 @@ export function NodeModalShell({
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {activeTab === "parameters" && parametersContent}
+              {activeTab === "parameters" && (
+                <div className="space-y-5">
+                  {/* Universal node label — every node gets this */}
+                  <div>
+                    <label className="text-xs font-medium text-zinc-500 block mb-1.5">Node Name</label>
+                    <input
+                      type="text"
+                      value={nodeLabel}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setNodeLabel(v);
+                        onNodeChange?.({ ...node, data: { ...node.data, label: v } });
+                      }}
+                      placeholder={title}
+                      className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:border-zinc-700 placeholder:text-zinc-600 transition-colors"
+                    />
+                    <p className="text-[11px] text-zinc-600 mt-1">This name is shown below the node on the canvas.</p>
+                  </div>
+                  {parametersContent && <div className="border-t border-zinc-800/40 pt-4">{parametersContent}</div>}
+                </div>
+              )}
 
               {activeTab === "settings" && (
                 <div className="space-y-0 max-w-lg divide-y divide-zinc-800/40">
