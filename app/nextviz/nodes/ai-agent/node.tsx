@@ -9,28 +9,46 @@ import { NodeHoverMenu } from "../../_components/node-hover-menu";
 interface AIAgentData {
   label?: string;
   disabled?: boolean;
-  chatModel?: { type: string };
+  chatModel?: { type?: string; provider?: string; apiKeyRef?: string };
   memory?: { type: string };
   tools?: Array<{ id: string; type: string }>;
 }
 
-// ── Sub-port: diamond + label + + button ──────────────────────────────────────
-function SubPort({ label, required }: { label: string; required?: boolean }) {
+// ── Sub-port: diamond connection point ────────────────────────────────────────
+function SubPort({
+  label, required, configured, onClick,
+}: {
+  label: string;
+  required?: boolean;
+  configured?: boolean;
+  onClick?: (e: React.MouseEvent) => void;
+}) {
   return (
-    <div className="flex flex-col items-center gap-1.5 nodrag nopan">
-      {/* Connecting line from node bottom */}
+    <div
+      className="flex flex-col items-center gap-1.5 nodrag nopan"
+      onClick={onClick}
+    >
       <div className="w-px h-5 bg-zinc-600" />
-      {/* Diamond */}
-      <div className="w-3 h-3 bg-zinc-900 border-2 border-zinc-500 rotate-45 shrink-0" />
-      {/* Label */}
+      <div className={cn(
+        "w-3 h-3 rotate-45 shrink-0 transition-colors",
+        configured
+          ? "bg-orange-500/30 border-2 border-orange-500"
+          : "bg-zinc-900 border-2 border-zinc-500"
+      )} />
       <p className="text-[11px] text-zinc-500 whitespace-nowrap leading-none">
         {label}
         {required && <span className="text-red-400 ml-0.5">*</span>}
       </p>
-      {/* + button */}
-      <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center hover:bg-zinc-700 hover:border-zinc-500 cursor-pointer transition-colors">
-        <Plus className="w-3.5 h-3.5 text-zinc-400" />
-      </div>
+      {!configured && (
+        <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center hover:bg-zinc-700 hover:border-zinc-500 cursor-pointer transition-colors">
+          <Plus className="w-3.5 h-3.5 text-zinc-400" />
+        </div>
+      )}
+      {configured && (
+        <div className="w-7 h-7 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center hover:bg-orange-500/20 cursor-pointer transition-colors">
+          <div className="w-2 h-2 rounded-full bg-orange-500" />
+        </div>
+      )}
     </div>
   );
 }
@@ -63,17 +81,12 @@ export default function AIAgentNode({ id, data, selected }: NodeProps<AIAgentDat
         )}
         style={{ width: 280 }}
       >
-        {/* Icon */}
         <div className="w-11 h-11 rounded-xl bg-zinc-700 flex items-center justify-center shrink-0">
           <Bot className="w-6 h-6 text-zinc-200" strokeWidth={1.5} />
         </div>
-
-        {/* Title */}
         <span className="text-sm font-semibold text-zinc-100 flex-1">
           {data.label || "AI Agent"}
         </span>
-
-        {/* Warning if no model configured */}
         {!hasModel && (
           <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
         )}
@@ -81,12 +94,23 @@ export default function AIAgentNode({ id, data, selected }: NodeProps<AIAgentDat
 
       {/* ── Sub-component ports ────────────────────────────────────────────── */}
       <div className="flex justify-around pt-1 px-6">
-        <SubPort label="Chat Model" required />
+        <SubPort
+          label="Model"
+          required
+          configured={hasModel}
+          onClick={(e) => {
+            e.stopPropagation();
+            document.dispatchEvent(
+              new CustomEvent("nextviz:open-model-popup", { detail: { nodeId: id } })
+            );
+          }}
+        />
         <SubPort label="Memory" />
         <SubPort label="Tool" />
       </div>
 
       {/* ── React Flow Handles ─────────────────────────────────────────────── */}
+      {/* Left/Right main flow handles */}
       <Handle
         type="target"
         position={Position.Left}
@@ -98,6 +122,13 @@ export default function AIAgentNode({ id, data, selected }: NodeProps<AIAgentDat
         position={Position.Right}
         style={{ top: 38 }}
         className="!w-3 !h-3 !bg-zinc-600 !border-2 !border-zinc-400"
+      />
+      {/* Bottom handle for model sub-node connection — positioned under Model sub-port */}
+      <Handle
+        type="source"
+        id="model-out"
+        position={Position.Bottom}
+        style={{ left: '22%', bottom: 0, opacity: 0, width: 6, height: 6 }}
       />
     </div>
   );

@@ -111,10 +111,10 @@ export function ModelSelectorPopup({ node, onClose, onNodeChange }: ModelSelecto
           </div>
           <button
             onClick={handleSave}
-            disabled={saving || !providerId || !modelType}
+            disabled={saving}
             className={cn(
               "flex items-center gap-1.5 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors",
-              saving || !providerId || !modelType
+              saving
                 ? "bg-zinc-700 cursor-not-allowed opacity-60"
                 : "bg-orange-600 hover:bg-orange-500 shadow-lg shadow-orange-900/20"
             )}
@@ -142,7 +142,9 @@ export function ModelSelectorPopup({ node, onClose, onNodeChange }: ModelSelecto
                     "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-colors",
                     providerId === p.id
                       ? "border-orange-500 bg-orange-500/5"
-                      : "border-zinc-800 bg-zinc-900/50 hover:border-zinc-700"
+                      : error === "Select a provider"
+                        ? "border-red-500/50 bg-zinc-900/50 hover:border-red-400"
+                        : "border-zinc-800 bg-zinc-900/50 hover:border-zinc-700"
                   )}
                 >
                   <div className={cn("w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold", p.iconColor)}>
@@ -152,6 +154,11 @@ export function ModelSelectorPopup({ node, onClose, onNodeChange }: ModelSelecto
                 </button>
               ))}
             </div>
+            {error === "Select a provider" && (
+              <p className="text-[11px] text-red-400 mt-1.5 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 shrink-0" /> Choose a provider first.
+              </p>
+            )}
           </div>
 
           {provider && (
@@ -161,14 +168,24 @@ export function ModelSelectorPopup({ node, onClose, onNodeChange }: ModelSelecto
                 <label className="text-xs font-medium text-zinc-500 block mb-2">Model *</label>
                 <select
                   value={modelType}
-                  onChange={(e) => setModelType(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:border-zinc-700 appearance-none cursor-pointer"
+                  onChange={(e) => { setModelType(e.target.value); setError(null); }}
+                  className={cn(
+                    "w-full bg-zinc-900 border text-zinc-300 text-sm rounded-lg px-3 py-2.5 focus:outline-none appearance-none cursor-pointer",
+                    error === "Select a model"
+                      ? "border-red-500 focus:border-red-400"
+                      : "border-zinc-800 focus:border-zinc-700"
+                  )}
                 >
                   <option value="">Select a model…</option>
                   {provider.models.map((m) => (
                     <option key={m.value} value={m.value}>{m.label}</option>
                   ))}
                 </select>
+                {error === "Select a model" && (
+                  <p className="text-[11px] text-red-400 mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3 shrink-0" /> Please select a model to continue.
+                  </p>
+                )}
               </div>
 
               {/* Credential */}
@@ -266,8 +283,8 @@ export function ModelSelectorPopup({ node, onClose, onNodeChange }: ModelSelecto
                 )}
               </div>
 
-              {/* Error */}
-              {error && (
+              {/* Generic error (only for errors not shown inline above) */}
+              {error && error !== "Select a provider" && error !== "Select a model" && (
                 <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2.5">
                   <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
                   <p className="text-xs text-red-300">{error}</p>

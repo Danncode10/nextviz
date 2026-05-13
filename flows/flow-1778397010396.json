@@ -7,8 +7,8 @@
       "id": "node-1778649040920",
       "type": "chatTrigger",
       "position": {
-        "x": -447.60561285235315,
-        "y": -156.4086018082484
+        "x": -393.02929704311083,
+        "y": -156.46934418738067
       },
       "data": {
         "label": "Chat Trigger"
@@ -26,11 +26,34 @@
       },
       "data": {
         "label": "AI Agent",
-        "agentOptions": []
+        "agentOptions": [],
+        "chatModel": {
+          "provider": "openai",
+          "type": "gpt-4o-mini",
+          "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
+        }
       },
-      "selected": true,
+      "selected": false,
       "width": 280,
       "height": 173
+    },
+    {
+      "id": "node-1778650097267-model",
+      "type": "chatModelNode",
+      "position": {
+        "x": -334.4392013918037,
+        "y": 78.13357486990753
+      },
+      "data": {
+        "chatModel": {
+          "provider": "openai",
+          "type": "gpt-4o-mini",
+          "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
+        }
+      },
+      "selected": false,
+      "width": 160,
+      "height": 56
     }
   ],
   "edges": [
@@ -40,6 +63,14 @@
       "target": "node-1778650097267",
       "sourceHandle": null,
       "targetHandle": null
+    },
+    {
+      "id": "node-1778650097267-to-model",
+      "source": "node-1778650097267",
+      "target": "node-1778650097267-model",
+      "sourceHandle": "model-out",
+      "targetHandle": "model-in",
+      "type": "smoothstep"
     }
   ]
 }

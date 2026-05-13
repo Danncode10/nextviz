@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { Plus, Trash2, KeyRound, ArrowLeft, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Plus, Trash2, KeyRound, ArrowLeft, CheckCircle2, AlertCircle, Eye, EyeOff, Pencil, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { listAllEnvVars, setEnvVar, deleteEnvVar, type EnvVarInfo } from "@/lib/nextviz/credentials/actions";
 
@@ -16,6 +16,13 @@ export default function CredentialsPage() {
   const [saving, setSaving]       = useState(false);
   const [error, setError]         = useState<string | null>(null);
   const [deleting, setDeleting]   = useState<string | null>(null);
+
+  // Inline edit state
+  const [editingKey, setEditingKey]   = useState<string | null>(null);
+  const [editVal, setEditVal]         = useState("");
+  const [showEditVal, setShowEditVal] = useState(false);
+  const [editSaving, setEditSaving]   = useState(false);
+  const [editError, setEditError]     = useState<string | null>(null);
 
   const isDevelopment = process.env.NODE_ENV === "development";
 
@@ -44,6 +51,26 @@ export default function CredentialsPage() {
     await deleteEnvVar(key);
     await refresh();
     setDeleting(null);
+  };
+
+  const startEdit = (key: string) => {
+    setEditingKey(key);
+    setEditVal("");
+    setShowEditVal(false);
+    setEditError(null);
+  };
+
+  const cancelEdit = () => { setEditingKey(null); setEditError(null); };
+
+  const handleEditSave = async () => {
+    if (!editVal.trim()) { setEditError("Value is required"); return; }
+    setEditSaving(true);
+    setEditError(null);
+    const result = await setEnvVar(editingKey!, editVal.trim());
+    setEditSaving(false);
+    if (!result.success) { setEditError(result.error ?? "Failed to save"); return; }
+    setEditingKey(null);
+    await refresh();
   };
 
   return (
@@ -114,9 +141,7 @@ export default function CredentialsPage() {
                     onClick={() => setShowVal((v) => !v)}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-zinc-800 transition-colors"
                   >
-                    {showVal
-                      ? <EyeOff className="w-3.5 h-3.5 text-zinc-500" />
-                      : <Eye className="w-3.5 h-3.5 text-zinc-500" />}
+                    {showVal ? <EyeOff className="w-3.5 h-3.5 text-zinc-500" /> : <Eye className="w-3.5 h-3.5 text-zinc-500" />}
                   </button>
                 </div>
               </div>
@@ -170,30 +195,96 @@ export default function CredentialsPage() {
           ) : (
             <div className="space-y-2">
               {vars.map((v) => (
-                <div key={v.key} className="bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3 flex items-center gap-3">
-                  <code className="text-sm font-mono text-zinc-200 flex-1">{v.key}</code>
-                  {v.hasValue ? (
-                    <span className="flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
-                      <CheckCircle2 className="w-2.5 h-2.5" /> Active
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 text-[10px] text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 px-1.5 py-0.5 rounded">
-                      <AlertCircle className="w-2.5 h-2.5" /> Empty
-                    </span>
-                  )}
-                  <button
-                    onClick={() => handleDelete(v.key)}
-                    disabled={!!deleting || !isDevelopment}
-                    className={cn(
-                      "p-1.5 rounded-lg transition-colors",
-                      !isDevelopment
-                        ? "text-zinc-700 cursor-not-allowed"
-                        : "text-zinc-500 hover:text-red-400 hover:bg-red-500/10"
+                <div key={v.key} className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
+                  {/* Row */}
+                  <div className="px-4 py-3 flex items-center gap-3">
+                    <code className="text-sm font-mono text-zinc-200 flex-1">{v.key}</code>
+                    {v.hasValue ? (
+                      <span className="flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded shrink-0">
+                        <CheckCircle2 className="w-2.5 h-2.5" /> Active
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-[10px] text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 px-1.5 py-0.5 rounded shrink-0">
+                        <AlertCircle className="w-2.5 h-2.5" /> Empty
+                      </span>
                     )}
-                    title={isDevelopment ? "Delete" : "Read-only"}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                    {isDevelopment && (
+                      <>
+                        <button
+                          onClick={() => editingKey === v.key ? cancelEdit() : startEdit(v.key)}
+                          className={cn(
+                            "p-1.5 rounded-lg transition-colors shrink-0",
+                            editingKey === v.key
+                              ? "text-orange-400 bg-orange-500/10"
+                              : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800"
+                          )}
+                          title="Edit value"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(v.key)}
+                          disabled={!!deleting}
+                          className="p-1.5 rounded-lg transition-colors shrink-0 text-zinc-500 hover:text-red-400 hover:bg-red-500/10"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Inline edit form */}
+                  {editingKey === v.key && (
+                    <div className="border-t border-zinc-800 px-4 py-3 bg-zinc-900/80 space-y-2">
+                      <label className="text-xs font-medium text-zinc-500 block">New Value</label>
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex-1">
+                          <input
+                            autoFocus
+                            type={showEditVal ? "text" : "password"}
+                            value={editVal}
+                            onChange={(e) => setEditVal(e.target.value)}
+                            placeholder="Enter new value…"
+                            onKeyDown={(e) => { if (e.key === "Enter") handleEditSave(); if (e.key === "Escape") cancelEdit(); }}
+                            className="w-full bg-zinc-950 border border-zinc-700 text-zinc-200 text-sm rounded-lg px-3 py-2 pr-10 focus:outline-none focus:border-orange-600 placeholder:text-zinc-600"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowEditVal((s) => !s)}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-zinc-800 transition-colors"
+                          >
+                            {showEditVal ? <EyeOff className="w-3 h-3 text-zinc-500" /> : <Eye className="w-3 h-3 text-zinc-500" />}
+                          </button>
+                        </div>
+                        <button
+                          onClick={handleEditSave}
+                          disabled={editSaving || !editVal.trim()}
+                          className={cn(
+                            "p-2 rounded-lg transition-colors shrink-0",
+                            editSaving || !editVal.trim()
+                              ? "text-zinc-600 cursor-not-allowed"
+                              : "text-emerald-400 hover:bg-emerald-500/10"
+                          )}
+                          title="Save"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={cancelEdit}
+                          className="p-2 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition-colors shrink-0"
+                          title="Cancel"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {editError && (
+                        <p className="text-xs text-red-400 flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3 shrink-0" /> {editError}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

@@ -33,6 +33,7 @@ import { Plus, Undo2, Redo2, KeyRound } from "lucide-react";
 import Link from "next/link";
 import { NodePropertiesPanel } from "./node-properties-panel";
 import { ChatWindow } from "./chat-window";
+import { ModelSelectorPopup } from "../nodes/ai-agent/_components/model-selector-popup";
 
 interface CanvasClientProps {
   initialFlowId?: string;
@@ -54,6 +55,22 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
 
   // ── Chat window ────────────────────────────────────────────────────────────
   const [chatWindowOpen, setChatWindowOpen] = useState(false);
+
+  // ── Model selector popup (opened from canvas node sub-port) ───────────────
+  const [modelPopupNode, setModelPopupNode] = useState<Node | null>(null);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { nodeId } = (e as CustomEvent<{ nodeId: string }>).detail;
+      setNodes((nds) => {
+        const found = nds.find((n) => n.id === nodeId);
+        if (found) setModelPopupNode(found);
+        return nds;
+      });
+    };
+    document.addEventListener("nextviz:open-model-popup", handler);
+    return () => document.removeEventListener("nextviz:open-model-popup", handler);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Undo / Redo history ────────────────────────────────────────────────────
   const history    = useRef<Array<{ nodes: Node[]; edges: Edge[] }>>([]);
@@ -220,6 +237,53 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
 
   const onPaneClick = useCallback(() => setSelectedNode(null), []);
 
+  // ── Shared node change handler (updates node + auto-manages sub-nodes) ──────
+  const handleNodeChange = useCallback((updatedNode: Node) => {
+    setNodes((nds) => {
+      let next = nds.map((n) => (n.id === updatedNode.id ? updatedNode : n));
+
+      if (updatedNode.type === "aiAgent") {
+        const chatModel = updatedNode.data?.chatModel as { type?: string; provider?: string; apiKeyRef?: string } | undefined;
+        const modelNodeId = `${updatedNode.id}-model`;
+        if (chatModel?.type) {
+          const existsIdx = next.findIndex((n) => n.id === modelNodeId);
+          if (existsIdx >= 0) {
+            next = next.map((n) => n.id === modelNodeId ? { ...n, data: { chatModel } } : n);
+          } else {
+            next = [...next, {
+              id: modelNodeId,
+              type: "chatModelNode",
+              position: { x: updatedNode.position.x + 20, y: updatedNode.position.y + 230 },
+              data: { chatModel },
+            }];
+          }
+        }
+      }
+
+      return next;
+    });
+
+    if (updatedNode.type === "aiAgent") {
+      const chatModel = updatedNode.data?.chatModel as { type?: string } | undefined;
+      if (chatModel?.type) {
+        const modelNodeId = `${updatedNode.id}-model`;
+        const edgeId = `${updatedNode.id}-to-model`;
+        setEdges((eds) => {
+          if (eds.find((e) => e.id === edgeId)) return eds;
+          return [...eds, {
+            id: edgeId,
+            source: updatedNode.id,
+            target: modelNodeId,
+            sourceHandle: "model-out",
+            targetHandle: "model-in",
+            type: "smoothstep",
+            style: { stroke: "#52525b", strokeWidth: 2 },
+          }];
+        });
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Execute step handler ───────────────────────────────────────────────────
   const handleExecuteStep = useCallback(async (nodeId: string): Promise<Record<string, unknown>> => {
     await new Promise((r) => setTimeout(r, 700));
@@ -348,8 +412,20 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
           onExecuteStep={handleExecuteStep}
           onOpenChat={() => { setSelectedNode(null); setChatWindowOpen(true); }}
           onNodeChange={(updatedNode) => {
-            setNodes((nds) => nds.map((n) => (n.id === updatedNode.id ? updatedNode : n)));
+            handleNodeChange(updatedNode);
             setSelectedNode(updatedNode);
+          }}
+        />
+      )}
+
+      {/* Model selector popup — opened directly from canvas node sub-port */}
+      {modelPopupNode && (
+        <ModelSelectorPopup
+          node={modelPopupNode}
+          onClose={() => setModelPopupNode(null)}
+          onNodeChange={(updatedNode) => {
+            handleNodeChange(updatedNode);
+            setModelPopupNode(null);
           }}
         />
       )}
