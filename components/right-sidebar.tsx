@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, Globe, MessageSquare, Play, ScrollText, Search, Webhook, ChevronRight, PanelRight } from "lucide-react";
+import { Bot, Clock, Globe, MessageSquare, Play, ScrollText, Search, Webhook, ChevronRight, PanelRight } from "lucide-react";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,12 @@ const NODE_PALETTE = [
       { type: "scheduleTrigger", label: "Schedule Trigger", icon: Clock,         color: "text-orange-400" },
       { type: "chatTrigger",    label: "Chat Trigger",     icon: MessageSquare, color: "text-orange-400" },
       { type: "onHTTP",         label: "HTTP Trigger",     icon: Webhook,       color: "text-violet-400" },
+    ],
+  },
+  {
+    group: "AI",
+    nodes: [
+      { type: "aiAgent", label: "AI Agent", icon: Bot, color: "text-blue-400" },
     ],
   },
   {

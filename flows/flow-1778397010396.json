@@ -7,8 +7,8 @@
       "id": "node-1778649040920",
       "type": "chatTrigger",
       "position": {
-        "x": -212.89857816432337,
-        "y": -120.24607933818305
+        "x": -435.39857816432334,
+        "y": -182.74607933818305
       },
       "data": {
         "label": "Chat Trigger"
@@ -16,7 +16,29 @@
       "selected": false,
       "width": 108,
       "height": 108
+    },
+    {
+      "id": "node-1778650097267",
+      "type": "aiAgent",
+      "position": {
+        "x": -161.61756369608028,
+        "y": -175.62725964098388
+      },
+      "data": {
+        "label": "AI Agent"
+      },
+      "selected": true,
+      "width": 280,
+      "height": 169
     }
   ],
-  "edges": []
+  "edges": [
+    {
+      "id": "reactflow__edge-node-1778649040920-node-1778650097267",
+      "source": "node-1778649040920",
+      "target": "node-1778650097267",
+      "sourceHandle": null,
+      "targetHandle": null
+    }
+  ]
 }

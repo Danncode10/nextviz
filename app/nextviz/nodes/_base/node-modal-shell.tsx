@@ -44,6 +44,8 @@ export interface NodeModalShellProps {
   executeButtonLabel?: string;
   /** Optional button rendered in the tab bar, to the left of the Execute button. */
   actionButton?: ReactNode;
+  /** Optional fixed footer rendered below the scroll area on the left panel. */
+  footerContent?: ReactNode;
 }
 
 export function NodeModalShell({
@@ -57,6 +59,7 @@ export function NodeModalShell({
   parametersContent,
   executeButtonLabel = "Execute step",
   actionButton,
+  footerContent,
 }: NodeModalShellProps) {
   const [activeTab, setActiveTab]     = useState<Tab>("parameters");
   const [nodeLabel, setNodeLabel]     = useState<string>((node.data?.label as string) ?? "");
@@ -148,7 +151,7 @@ export function NodeModalShell({
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0">
               {activeTab === "parameters" && (
                 <div className="space-y-5">
                   {/* Universal node label — every node gets this */}
@@ -228,6 +231,13 @@ export function NodeModalShell({
                 </div>
               )}
             </div>
+
+            {/* Fixed footer — sub-component tabs etc. */}
+            {footerContent && (
+              <div className="shrink-0 border-t border-zinc-800">
+                {footerContent}
+              </div>
+            )}
           </div>
 
           {/* Right — Output */}
