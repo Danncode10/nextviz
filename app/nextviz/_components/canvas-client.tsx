@@ -205,11 +205,13 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   }, [rfInstance, edges, pushHistory]);
 
   // ── Node click → open properties panel ────────────────────────────────────
+  const NODES_WITH_PANEL = new Set(["manualTrigger", "scheduleTrigger"]);
+
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
-    if (node.type === "manualTrigger") {
+    if (NODES_WITH_PANEL.has(node.type ?? "")) {
       setSelectedNode(node);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPaneClick = useCallback(() => setSelectedNode(null), []);
 

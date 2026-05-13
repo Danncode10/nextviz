@@ -7,8 +7,8 @@
       "id": "node-1778397766275",
       "type": "manualTrigger",
       "position": {
-        "x": -49.879435968663216,
-        "y": -151.452876667121
+        "x": -133.92233845813828,
+        "y": -150.59529602947327
       },
       "data": {
         "label": "Manual Trigger"
@@ -18,11 +18,25 @@
       "height": 108
     },
     {
-      "id": "node-1778458146396",
+      "id": "node-1778647282575",
+      "type": "scheduleTrigger",
+      "position": {
+        "x": -136.24739532215355,
+        "y": 38.66618732785673
+      },
+      "data": {
+        "label": "Schedule Trigger"
+      },
+      "selected": false,
+      "width": 108,
+      "height": 108
+    },
+    {
+      "id": "node-1778647316686",
       "type": "httpAction",
       "position": {
-        "x": 187.96556111553826,
-        "y": -150.79843076812236
+        "x": 216.87163905092956,
+        "y": -46.391826633978944
       },
       "data": {
         "label": "HTTP Action"
@@ -34,9 +48,16 @@
   ],
   "edges": [
     {
-      "id": "reactflow__edge-node-1778397766275-node-1778458146396",
+      "id": "reactflow__edge-node-1778397766275-node-1778647316686",
       "source": "node-1778397766275",
-      "target": "node-1778458146396",
+      "target": "node-1778647316686",
+      "sourceHandle": null,
+      "targetHandle": null
+    },
+    {
+      "id": "reactflow__edge-node-1778647282575-node-1778647316686",
+      "source": "node-1778647282575",
+      "target": "node-1778647316686",
       "sourceHandle": null,
       "targetHandle": null
     }

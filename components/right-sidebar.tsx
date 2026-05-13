@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Globe, Play, ScrollText, Search, Webhook, ChevronRight, PanelRight } from "lucide-react";
+import { Clock, Globe, Play, ScrollText, Search, Webhook, ChevronRight, PanelRight } from "lucide-react";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
 
@@ -9,8 +9,9 @@ const NODE_PALETTE = [
   {
     group: "Triggers",
     nodes: [
-      { type: "manualTrigger", label: "Manual Trigger", icon: Play, color: "text-orange-400" },
-      { type: "onHTTP", label: "HTTP Trigger", icon: Webhook, color: "text-violet-400" },
+      { type: "manualTrigger",   label: "Manual Trigger",   icon: Play,  color: "text-orange-400" },
+      { type: "scheduleTrigger", label: "Schedule Trigger", icon: Clock, color: "text-orange-400" },
+      { type: "onHTTP",          label: "HTTP Trigger",     icon: Webhook, color: "text-violet-400" },
     ],
   },
   {
