@@ -1,10 +1,16 @@
 "use client";
 
 import { Node } from "reactflow";
-import { cn } from "@/lib/utils";
+import { listProviders, getProvider } from "@/lib/nextviz/credentials/providers";
+import { VizConnection } from "@/components/nextviz/viz-connection";
 
 interface ChatModelData {
-  type: string;
+  /** Provider id from PROVIDERS registry (e.g. "openai", "anthropic") */
+  provider?: string;
+  /** Model id within the provider (e.g. "gpt-4o", "claude-sonnet-4-6") */
+  type?: string;
+  /** Env variable name holding the API key (NOT the key itself). */
+  apiKeyRef?: string;
   temperature?: number;
   maxTokens?: number;
   topP?: number;
@@ -15,17 +21,11 @@ interface ChatModelConfigProps {
   onNodeChange?: (node: Node) => void;
 }
 
-const CHAT_MODELS = [
-  { value: "gpt-4o", label: "GPT-4o" },
-  { value: "gpt-4-turbo", label: "GPT-4 Turbo" },
-  { value: "claude-opus", label: "Claude Opus" },
-  { value: "claude-sonnet", label: "Claude Sonnet" },
-];
-
 export function ChatModelConfig({ node, onNodeChange }: ChatModelConfigProps) {
-  const model = (node.data?.chatModel as ChatModelData) ?? { type: "" };
+  const model = (node.data?.chatModel as ChatModelData) ?? {};
+  const provider = model.provider ? getProvider(model.provider) : undefined;
 
-  const updateModel = (updates: Partial<ChatModelData>) => {
+  const update = (updates: Partial<ChatModelData>) => {
     onNodeChange?.({
       ...node,
       data: { ...node.data, chatModel: { ...model, ...updates } },
@@ -33,27 +33,57 @@ export function ChatModelConfig({ node, onNodeChange }: ChatModelConfigProps) {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Model selector */}
+    <div className="space-y-5">
+      {/* Provider selection */}
       <div>
-        <label className="text-xs font-medium text-zinc-500 block mb-2">Chat Model *</label>
-        <select
-          value={model.type}
-          onChange={(e) => updateModel({ type: e.target.value })}
-          className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:border-zinc-700 appearance-none cursor-pointer"
-        >
-          <option value="">Select a model...</option>
-          {CHAT_MODELS.map((m) => (
-            <option key={m.value} value={m.value}>
-              {m.label}
-            </option>
+        <label className="text-xs font-medium text-zinc-500 block mb-2">Provider *</label>
+        <div className="grid grid-cols-3 gap-2">
+          {listProviders().map((p) => (
+            <button
+              key={p.id}
+              onClick={() => update({ provider: p.id, type: "", apiKeyRef: "" })}
+              className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-colors ${
+                model.provider === p.id
+                  ? "border-orange-500 bg-orange-500/5"
+                  : "border-zinc-800 bg-zinc-900/50 hover:border-zinc-700"
+              }`}
+            >
+              <div className={`w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold ${p.iconColor}`}>
+                {p.name[0]}
+              </div>
+              <span className="text-[11px] font-medium text-zinc-300">{p.name}</span>
+            </button>
           ))}
-        </select>
-        <p className="text-[11px] text-zinc-600 mt-1">Primary LLM for the agent.</p>
+        </div>
       </div>
 
-      {model.type && (
+      {provider && (
         <>
+          {/* Credential picker */}
+          <div>
+            <label className="text-xs font-medium text-zinc-500 block mb-2">Credential *</label>
+            <VizConnection
+              providerId={provider.id}
+              value={model.apiKeyRef}
+              onChange={(envKey) => update({ apiKeyRef: envKey })}
+            />
+          </div>
+
+          {/* Model selector */}
+          <div>
+            <label className="text-xs font-medium text-zinc-500 block mb-2">Model *</label>
+            <select
+              value={model.type ?? ""}
+              onChange={(e) => update({ type: e.target.value })}
+              className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:border-zinc-700 appearance-none cursor-pointer"
+            >
+              <option value="">Select a model…</option>
+              {provider.models.map((m) => (
+                <option key={m.value} value={m.value}>{m.label}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Temperature */}
           <div>
             <label className="text-xs font-medium text-zinc-500 block mb-2">
@@ -65,10 +95,10 @@ export function ChatModelConfig({ node, onNodeChange }: ChatModelConfigProps) {
               max="2"
               step="0.1"
               value={model.temperature ?? 0.7}
-              onChange={(e) => updateModel({ temperature: parseFloat(e.target.value) })}
-              className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+              onChange={(e) => update({ temperature: parseFloat(e.target.value) })}
+              className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-orange-500"
             />
-            <p className="text-[11px] text-zinc-600 mt-1">Controls randomness (0=deterministic, 2=creative).</p>
+            <p className="text-[11px] text-zinc-600 mt-1">0 = deterministic, 2 = creative.</p>
           </div>
 
           {/* Max Tokens */}
@@ -77,10 +107,9 @@ export function ChatModelConfig({ node, onNodeChange }: ChatModelConfigProps) {
             <input
               type="number"
               value={model.maxTokens ?? 2048}
-              onChange={(e) => updateModel({ maxTokens: parseInt(e.target.value) || 0 })}
+              onChange={(e) => update({ maxTokens: parseInt(e.target.value) || 0 })}
               className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-zinc-700"
             />
-            <p className="text-[11px] text-zinc-600 mt-1">Max output length.</p>
           </div>
 
           {/* Top P */}
@@ -94,10 +123,9 @@ export function ChatModelConfig({ node, onNodeChange }: ChatModelConfigProps) {
               max="1"
               step="0.05"
               value={model.topP ?? 0.9}
-              onChange={(e) => updateModel({ topP: parseFloat(e.target.value) })}
-              className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+              onChange={(e) => update({ topP: parseFloat(e.target.value) })}
+              className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-orange-500"
             />
-            <p className="text-[11px] text-zinc-600 mt-1">Nucleus sampling parameter.</p>
           </div>
         </>
       )}

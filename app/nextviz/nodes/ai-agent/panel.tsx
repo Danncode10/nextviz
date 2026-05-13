@@ -4,14 +4,14 @@ import { useState } from "react";
 import { Node } from "reactflow";
 import { Bot, Info, X, Plus, ChevronDown } from "lucide-react";
 import { NodeModalShell } from "../_base/node-modal-shell";
-import { ChatModelConfig } from "./_components/chat-model-config";
 import { MemoryConfig } from "./_components/memory-config";
 import { ToolConfig } from "./_components/tool-config";
+import { ModelSelectorPopup } from "./_components/model-selector-popup";
 import { cn } from "@/lib/utils";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-type SubView = "chatModel" | "memory" | "tool" | null;
+type SubView = "memory" | "tool" | null;
 
 export interface AIAgentPanelProps {
   node: Node;
@@ -194,31 +194,51 @@ function AIAgentParameters({ node, onNodeChange }: { node: Node; onNodeChange?: 
 function SubComponentFooter({
   activeView,
   onSelect,
+  onModelClick,
+  hasModel,
 }: {
   activeView: SubView;
   onSelect: (v: SubView) => void;
+  onModelClick: () => void;
+  hasModel: boolean;
 }) {
-  const tabs: { key: SubView; label: string; required?: boolean }[] = [
-    { key: "chatModel", label: "Chat Model", required: true },
-    { key: "memory",    label: "Memory" },
-    { key: "tool",      label: "Tool" },
-  ];
-
   return (
     <div className="flex items-center gap-0 px-6 py-3">
-      {tabs.map(({ key, label, required }) => (
+      {/* Model tab — opens popup */}
+      <button
+        onClick={onModelClick}
+        className={cn(
+          "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-colors",
+          hasModel
+            ? "bg-zinc-800 text-zinc-200 border border-zinc-700"
+            : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900"
+        )}
+      >
+        <span>Model</span>
+        <span className="text-red-400">*</span>
+        <div className={cn(
+          "w-5 h-5 rounded flex items-center justify-center border transition-colors",
+          hasModel
+            ? "bg-orange-600 border-orange-500 text-white"
+            : "bg-zinc-900 border-zinc-700 text-zinc-500 hover:border-zinc-500"
+        )}>
+          <Plus className="w-3 h-3" />
+        </div>
+      </button>
+
+      {/* Memory + Tool tabs — swap panel content */}
+      {(["memory", "tool"] as SubView[]).map((key) => (
         <button
           key={key}
           onClick={() => onSelect(activeView === key ? null : key)}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-colors",
+            "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-colors capitalize",
             activeView === key
               ? "bg-zinc-800 text-zinc-200 border border-zinc-700"
               : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900"
           )}
         >
-          <span>{label}</span>
-          {required && <span className="text-red-400">*</span>}
+          <span>{key}</span>
           <div className={cn(
             "w-5 h-5 rounded flex items-center justify-center border transition-colors",
             activeView === key
@@ -236,30 +256,48 @@ function SubComponentFooter({
 // ── Panel export ───────────────────────────────────────────────────────────────
 
 export function AIAgentPanel({ node, onClose, onExecuteStep, onNodeChange }: AIAgentPanelProps) {
-  const [subView, setSubView] = useState<SubView>(null);
+  const [subView, setSubView]           = useState<SubView>(null);
+  const [modelPopupOpen, setModelPopup] = useState(false);
 
-  // Swap parametersContent based on which sub-view is active
+  const hasModel = !!(node.data?.chatModel as Record<string, string> | undefined)?.type;
+
   const parametersContent = (() => {
-    if (subView === "chatModel") return <ChatModelConfig node={node} onNodeChange={onNodeChange} />;
-    if (subView === "memory")    return <MemoryConfig    node={node} onNodeChange={onNodeChange} />;
-    if (subView === "tool")      return <ToolConfig      node={node} onNodeChange={onNodeChange} />;
+    if (subView === "memory") return <MemoryConfig node={node} onNodeChange={onNodeChange} />;
+    if (subView === "tool")   return <ToolConfig   node={node} onNodeChange={onNodeChange} />;
     return <AIAgentParameters node={node} onNodeChange={onNodeChange} />;
   })();
 
   return (
-    <NodeModalShell
-      node={node}
-      icon={<Bot className="w-4 h-4 text-blue-400" strokeWidth={2} />}
-      title={(node.data?.label as string) || "AI Agent"}
-      version="3.1"
-      onClose={onClose}
-      onExecuteStep={onExecuteStep}
-      onNodeChange={onNodeChange}
-      executeButtonLabel="Execute step"
-      parametersContent={parametersContent}
-      footerContent={
-        <SubComponentFooter activeView={subView} onSelect={setSubView} />
-      }
-    />
+    <>
+      <NodeModalShell
+        node={node}
+        icon={<Bot className="w-4 h-4 text-blue-400" strokeWidth={2} />}
+        title={(node.data?.label as string) || "AI Agent"}
+        version="3.1"
+        onClose={onClose}
+        onExecuteStep={onExecuteStep}
+        onNodeChange={onNodeChange}
+        executeButtonLabel="Execute step"
+        parametersContent={parametersContent}
+        footerContent={
+          <SubComponentFooter
+            activeView={subView}
+            onSelect={setSubView}
+            onModelClick={() => setModelPopup(true)}
+            hasModel={hasModel}
+          />
+        }
+      />
+
+      {modelPopupOpen && (
+        <ModelSelectorPopup
+          node={node}
+          onClose={() => setModelPopup(false)}
+          onNodeChange={(updated) => {
+            onNodeChange?.(updated);
+          }}
+        />
+      )}
+    </>
   );
 }

@@ -7,8 +7,8 @@
       "id": "node-1778649040920",
       "type": "chatTrigger",
       "position": {
-        "x": -435.39857816432334,
-        "y": -182.74607933818305
+        "x": -447.60561285235315,
+        "y": -156.4086018082484
       },
       "data": {
         "label": "Chat Trigger"
@@ -21,15 +21,16 @@
       "id": "node-1778650097267",
       "type": "aiAgent",
       "position": {
-        "x": -161.61756369608028,
-        "y": -175.62725964098388
+        "x": -208.15973281807095,
+        "y": -140.27994865416073
       },
       "data": {
-        "label": "AI Agent"
+        "label": "AI Agent",
+        "agentOptions": []
       },
       "selected": true,
       "width": 280,
-      "height": 169
+      "height": 173
     }
   ],
   "edges": [

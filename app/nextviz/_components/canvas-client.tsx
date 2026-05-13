@@ -29,7 +29,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Undo2, Redo2 } from "lucide-react";
+import { Plus, Undo2, Redo2, KeyRound } from "lucide-react";
+import Link from "next/link";
 import { NodePropertiesPanel } from "./node-properties-panel";
 import { ChatWindow } from "./chat-window";
 
@@ -271,6 +272,13 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
               <Plus className="h-4 w-4" />
               Add Flow
             </Button>
+
+            <Link href="/nextviz/credentials">
+              <Button size="sm" variant="ghost" className="gap-2">
+                <KeyRound className="h-4 w-4" />
+                Credentials
+              </Button>
+            </Link>
 
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
               <DialogContent className="sm:max-w-[425px]">
