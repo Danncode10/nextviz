@@ -99,17 +99,30 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   }, [activeFlow]);
 
   // ── Chat message handler — runs flow with message payload ─────────────────
-  const handleChatMessage = useCallback(async (message: string, sessionId: string): Promise<string> => {
-    if (!activeFlow) return "No active flow.";
-    const result = await executeFlowAction(activeFlow.id, { chatMessage: message, sessionId });
-    if (!result.success) return `Error: ${result.error}`;
-    const outputs = result.result?.nodeOutputs ?? {};
-    for (const output of Object.values(outputs)) {
-      const out = output as Record<string, unknown>;
-      if (typeof out.response === "string" && out.response) return out.response;
-    }
-    return "No response returned from AI Agent.";
-  }, [activeFlow]);
+  const handleChatMessage = useCallback(
+    async (
+      message: string,
+      sessionId: string,
+      chatHistory: Array<{ role: "user" | "assistant"; content: string }>
+    ): Promise<string> => {
+      if (!activeFlow) return "No active flow.";
+      const result = await executeFlowAction(activeFlow.id, {
+        chatMessage: message,
+        sessionId,
+        chatHistory,
+      });
+      if (!result.success) return `Error: ${result.error}`;
+      const outputs = result.result?.nodeOutputs ?? {};
+      for (const output of Object.values(outputs)) {
+        const out = output as Record<string, unknown>;
+        if (out.response && typeof out.response === "string") {
+          return out.response;
+        }
+      }
+      return "No response returned from AI Agent.";
+    },
+    [activeFlow]
+  );
 
   // ── Undo / Redo history ────────────────────────────────────────────────────
   const history    = useRef<Array<{ nodes: Node[]; edges: Edge[] }>>([]);

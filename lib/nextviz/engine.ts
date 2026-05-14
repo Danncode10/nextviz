@@ -1,5 +1,6 @@
 import * as registry from "./registry";
 import { nodeExecutors } from "./node-executors";
+import { loadEnvNextviz } from "./load-env";
 import {
   ExecutionPlan,
   FlowExecutionResult,
@@ -8,6 +9,9 @@ import {
   NodeExecutionContext,
   WorkflowJSON,
 } from "./types";
+
+// Load .env.nextviz into process.env (server-side)
+loadEnvNextviz();
 
 // ─── Execution Plan Cache ──────────────────────────────────────────────────
 //

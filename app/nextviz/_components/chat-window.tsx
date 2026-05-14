@@ -15,7 +15,7 @@ interface ChatMessage {
 
 export interface ChatWindowProps {
   onClose: () => void;
-  onSendMessage: (message: string, sessionId: string) => Promise<string>;
+  onSendMessage: (message: string, sessionId: string, chatHistory: Array<{ role: "user" | "assistant"; content: string }>) => Promise<string>;
   executionResult?: any;
   isExecuting?: boolean;
 }
@@ -64,6 +64,8 @@ export function ChatWindow({ onClose, onSendMessage, executionResult, isExecutin
 
     msgHistory.current.unshift(trimmed);
     historyIdx.current = -1;
+
+    // Add user message to display
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsSending(true);
@@ -71,20 +73,48 @@ export function ChatWindow({ onClose, onSendMessage, executionResult, isExecutin
 
     const start = Date.now();
     try {
-      const response = await onSendMessage(trimmed, sessionId);
-      const elapsed = Date.now() - start;
+      // Build chat history from current messages (before adding assistant response)
+      setMessages((currentMessages) => {
+        const chatHistory = currentMessages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
 
-      const assistantMsg: ChatMessage = {
-        id: `msg-${Date.now()}-ai`,
-        role: "assistant",
-        content: response,
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, assistantMsg]);
-      setLogs((prev) => [
-        ...prev,
-        `✅ Response received in ${elapsed}ms`,
-      ]);
+        // Call API with chat history
+        onSendMessage(trimmed, sessionId, chatHistory)
+          .then((response) => {
+            const elapsed = Date.now() - start;
+            const assistantMsg: ChatMessage = {
+              id: `msg-${Date.now()}-ai`,
+              role: "assistant",
+              content: response,
+              timestamp: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, assistantMsg]);
+            setLogs((prev) => [
+              ...prev,
+              `✅ Response received in ${elapsed}ms`,
+            ]);
+          })
+          .catch((err) => {
+            const errText = err instanceof Error ? err.message : "Unknown error";
+            const errMsg: ChatMessage = {
+              id: `msg-${Date.now()}-err`,
+              role: "assistant",
+              content: `Error: ${errText}`,
+              timestamp: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, errMsg]);
+            setLogs((prev) => [...prev, `❌ Error: ${errText}`]);
+          })
+          .finally(() => {
+            setIsSending(false);
+            setTimeout(scrollToBottom, 50);
+            inputRef.current?.focus();
+          });
+
+        return currentMessages;
+      });
     } catch (err) {
       const errText = err instanceof Error ? err.message : "Unknown error";
       const errMsg: ChatMessage = {
@@ -95,10 +125,7 @@ export function ChatWindow({ onClose, onSendMessage, executionResult, isExecutin
       };
       setMessages((prev) => [...prev, errMsg]);
       setLogs((prev) => [...prev, `❌ Error: ${errText}`]);
-    } finally {
       setIsSending(false);
-      setTimeout(scrollToBottom, 50);
-      inputRef.current?.focus();
     }
   }, [input, isSending, onSendMessage, sessionId]);
 
