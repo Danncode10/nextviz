@@ -13,7 +13,7 @@
       "data": {
         "label": "Manual Trigger"
       },
-      "selected": true,
+      "selected": false,
       "width": 108,
       "height": 108
     },

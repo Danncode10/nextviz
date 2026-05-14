@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronDown, ChevronRight, X, Copy, Check, AlertCircle, Code, MessageSquare, Activity } from "lucide-react";
-import { useState } from "react";
+import { ChevronDown, ChevronRight, X, Copy, Check, AlertCircle, Code, MessageSquare, Activity, GripVertical } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 type TabType = "output" | "problems" | "chat" | "logs";
@@ -16,6 +16,37 @@ export function ExecutionOutput({ result, isExecuting, onClose }: ExecutionOutpu
   const [activeTab, setActiveTab] = useState<TabType>("output");
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [height, setHeight] = useState(320); // Default height
+  const resizeRef = useRef<HTMLDivElement>(null);
+  const startYRef = useRef(0);
+  const startHeightRef = useRef(0);
+
+  // Handle resize dragging
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      startYRef.current = e.clientY;
+      startHeightRef.current = height;
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const delta = startYRef.current - e.clientY; // Negative = drag up = increase height
+      const newHeight = Math.max(200, Math.min(800, startHeightRef.current + delta));
+      setHeight(newHeight);
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener("mousemove", handleMouseMove as EventListener);
+      document.removeEventListener("mouseup", handleMouseUp as EventListener);
+    };
+
+    const element = resizeRef.current?.querySelector("[data-resize-handle]") as HTMLElement | null;
+    if (element) {
+      element.addEventListener("mousedown", handleMouseDown as EventListener);
+      return () => element.removeEventListener("mousedown", handleMouseDown as EventListener);
+    }
+  }, [height]);
 
   const toggleNode = (nodeId: string) => {
     const next = new Set(expandedNodes);
@@ -56,7 +87,18 @@ export function ExecutionOutput({ result, isExecuting, onClose }: ExecutionOutpu
   ];
 
   return (
-    <div className="h-64 border-t border-border bg-zinc-950 flex flex-col shrink-0">
+    <div
+      ref={resizeRef}
+      style={{ height: `${height}px` }}
+      className="border-t border-border bg-zinc-950 flex flex-col shrink-0 relative"
+    >
+      {/* Resize handle */}
+      <div
+        data-resize-handle
+        className="absolute top-0 left-0 right-0 h-1 bg-orange-500/0 hover:bg-orange-500/50 cursor-ns-resize transition-colors group"
+        title="Drag to resize"
+      />
+
       {/* Header with tabs */}
       <div className="flex items-center border-b border-border shrink-0">
         <div className="flex items-center gap-0.5 px-0">
