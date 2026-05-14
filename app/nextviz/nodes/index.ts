@@ -1,6 +1,6 @@
 import ManualTriggerNode from "./manual-trigger";
 import OnHttpNode from "./on-http";
-import HttpActionNode from "./http-action";
+import HttpRequestNode from "./http-request/node";
 import LogDataNode from "./log-data";
 import ScheduleTriggerNode from "./schedule-trigger/node";
 import ChatTriggerNode from "./chat-trigger/node";
@@ -16,6 +16,6 @@ export const nodeTypes = {
   chatModelNode: ChatModelNode,
   memoryNode: MemoryNode,
   onHTTP: OnHttpNode,
-  httpAction: HttpActionNode,
+  httpRequest: HttpRequestNode,
   logData: LogDataNode,
 };

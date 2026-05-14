@@ -6,6 +6,7 @@ import { NodeModalShell } from "../nodes/_base/node-modal-shell";
 import { ScheduleTriggerPanel } from "../nodes/schedule-trigger/panel";
 import { ChatTriggerPanel } from "../nodes/chat-trigger/panel";
 import { AIAgentPanel } from "../nodes/ai-agent/panel";
+import { HttpRequestPanel } from "../nodes/http-request/panel";
 
 interface NodePropertiesPanelProps {
   node: Node;
@@ -70,6 +71,17 @@ export function NodePropertiesPanel({ node, onClose, onExecuteStep, onNodeChange
   if (node.type === "aiAgent") {
     return (
       <AIAgentPanel
+        node={node}
+        onClose={onClose}
+        onExecuteStep={onExecuteStep}
+        onNodeChange={onNodeChange}
+      />
+    );
+  }
+
+  if (node.type === "httpRequest") {
+    return (
+      <HttpRequestPanel
         node={node}
         onClose={onClose}
         onExecuteStep={onExecuteStep}

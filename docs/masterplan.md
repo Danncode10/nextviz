@@ -79,7 +79,7 @@ Migrated from monolithic `nextviz-flow.json` to individual flow files in `flows/
 | Logic     | Filter / If-Else     | The fork in the road. `if (user.paid) -> allow`.                            |
 | Logic     | Code (JS)            | The "Escaper." For when the UI isn't enough—write raw JS logic.             |
 | Data      | Supabase DB          | The "Memory." Create, Read, Update, or Delete rows.                         |
-| Data      | HTTP Request         | The "Universal Connector." Connects to any API that doesn't have a node.   |
+| Data      | HTTP Request         | ✅ Done — Method selector, URL, headers builder, body, auth (Bearer/API Key/Basic). |
 | Messaging | Discord / Slack      | The "Voice." Sends notifications to a channel.                              |
 | Messaging | Gmail / Resend       | The "Letters." Sends emails to users or yourself.                           |
 
@@ -99,7 +99,7 @@ Migrated from monolithic `nextviz-flow.json` to individual flow files in `flows/
 
 #### Tier 4: Data & Persistence
 - [ ] **Supabase DB (CRUD)** — UI: table/RPC selector + query builder. Ops: SELECT, INSERT, UPDATE, DELETE, RPC. Output: `{ data: [], rowCount: number }`
-- [ ] **HTTP Request** — UI: method selector + URL + headers + body. Auth: Basic, Bearer, API key. Output: `{ status: number, body: any, headers: {} }`
+- [x] **HTTP Request** — UI: method selector + URL + headers + body. Auth: Basic, Bearer, API key. Output: `{ status: number, body: any, headers: {} }`
 
 #### Tier 5: Messaging & Notifications
 - [ ] **Discord / Slack** — UI: channel selector + message formatter. Ops: send to channel, thread, DM. Output: `{ messageId: string, timestamp: number }`

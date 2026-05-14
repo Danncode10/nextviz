@@ -7,8 +7,8 @@
       "id": "node-1778649040920",
       "type": "chatTrigger",
       "position": {
-        "x": -596.1113476026723,
-        "y": -336.5411832127804
+        "x": -558.0502946769326,
+        "y": -271.33373073361514
       },
       "data": {
         "label": "Chat Trigger"
@@ -21,8 +21,8 @@
       "id": "node-1778650097267",
       "type": "aiAgent",
       "position": {
-        "x": -350.78821825925814,
-        "y": -321.770910966084
+        "x": -304.3620243236621,
+        "y": -255.44777677237542
       },
       "data": {
         "label": "AI Agent",
@@ -33,7 +33,7 @@
           "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
         },
         "memory": {
-          "type": "none",
+          "type": "simple",
           "supabase": {
             "urlRef": "NEXTVIZ_SUPABASE_URL",
             "keyRef": "NEXTVIZ_SUPABASE_SERVICE_ROLE_KEY",
@@ -46,7 +46,7 @@
         },
         "systemPrompt": "\"You are a JSON API. Always respond with valid JSON.\"\n\"Respond in bullet points, be professional.\"\n\"You are a programming expert. Explain concepts simply.\""
       },
-      "selected": true,
+      "selected": false,
       "width": 280,
       "height": 173
     },
@@ -54,8 +54,8 @@
       "id": "node-1778650097267-model",
       "type": "chatModelNode",
       "position": {
-        "x": -533.2208080346461,
-        "y": -57.42984214809253
+        "x": -528.9242597893399,
+        "y": -55.71122284997006
       },
       "data": {
         "chatModel": {
@@ -67,6 +67,45 @@
       "selected": false,
       "width": 160,
       "height": 56
+    },
+    {
+      "id": "node-1778650097267-memory",
+      "type": "memoryNode",
+      "position": {
+        "x": -389.42531466056334,
+        "y": 35.56320831097254
+      },
+      "data": {
+        "memory": {
+          "type": "simple",
+          "supabase": {
+            "urlRef": "NEXTVIZ_SUPABASE_URL",
+            "keyRef": "NEXTVIZ_SUPABASE_SERVICE_ROLE_KEY",
+            "table": "case_summaries",
+            "columns": [
+              "summary_text"
+            ],
+            "rowFilter": "Lesterdannlopez7@gmail.com"
+          }
+        }
+      },
+      "selected": false,
+      "width": 160,
+      "height": 56
+    },
+    {
+      "id": "node-1778737875442",
+      "type": "httpAction",
+      "position": {
+        "x": -19.497542900799694,
+        "y": -48.00591218038804
+      },
+      "data": {
+        "label": "HTTP Action"
+      },
+      "selected": true,
+      "width": 150,
+      "height": 40
     }
   ],
   "edges": [
@@ -83,6 +122,14 @@
       "target": "node-1778650097267-model",
       "sourceHandle": "model-out",
       "targetHandle": "model-in",
+      "type": "smoothstep"
+    },
+    {
+      "id": "node-1778650097267-to-memory",
+      "source": "node-1778650097267",
+      "target": "node-1778650097267-memory",
+      "sourceHandle": "memory-out",
+      "targetHandle": "memory-in",
       "type": "smoothstep"
     }
   ]

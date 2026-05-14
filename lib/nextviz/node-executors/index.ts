@@ -1,7 +1,7 @@
 import { NodeExecutorFn } from "../types";
 import { manualTrigger } from "./manual-trigger";
 import { onHTTP } from "./on-http";
-import { httpAction } from "./http-action";
+import { httpRequest } from "./http-request";
 import { logData } from "./log-data";
 import { chatTrigger } from "./chat-trigger";
 import { aiAgent } from "./ai-agent";
@@ -13,7 +13,7 @@ import { aiAgent } from "./ai-agent";
 export const nodeExecutors: Record<string, NodeExecutorFn> = {
   manualTrigger,
   onHTTP,
-  httpAction,
+  httpRequest,
   logData,
   chatTrigger,
   aiAgent,

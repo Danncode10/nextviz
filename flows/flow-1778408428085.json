@@ -19,13 +19,13 @@
     },
     {
       "id": "node-1778410386409",
-      "type": "httpAction",
+      "type": "httpRequest",
       "position": {
         "x": 467.2530656291591,
         "y": 5.113297565409695
       },
       "data": {
-        "label": "HTTP Action"
+        "label": "HTTP Request"
       },
       "selected": false,
       "width": 256,
