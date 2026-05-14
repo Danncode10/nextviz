@@ -74,7 +74,7 @@ Migrated from monolithic `nextviz-flow.json` to individual flow files in `flows/
 |-----------|----------------------|-----------------------------------------------------------------------------|
 | Triggers  | Webhook (onHTTP)     | ✅ Done — Starts a flow when an external service sends a POST/GET request.  |
 | Triggers  | Schedule (Cron)      | Runs a flow every hour, day, or specific minute.                            |
-| AI        | OpenAI / Anthropic   | The "Brain." Sends prompts and gets structured responses.                   |
+| AI        | OpenAI / Anthropic   | ✅ Done — Covered by the AI Agent node (model selector, memory, tools).     |
 | AI        | Vector Store         | Connects to Supabase `pgvector` for RAG (retrieval augmented generation).  |
 | Logic     | Filter / If-Else     | The fork in the road. `if (user.paid) -> allow`.                            |
 | Logic     | Code (JS)            | The "Escaper." For when the UI isn't enough—write raw JS logic.             |
@@ -90,7 +90,7 @@ Migrated from monolithic `nextviz-flow.json` to individual flow files in `flows/
 - [x] **Schedule (Cron)** — UI: time picker + cron expression editor. Executor: `node-schedule`. Output: `{ executedAt: string }`
 
 #### Tier 2: AI & Intelligence
-- [ ] **OpenAI / Anthropic** — UI: prompt editor, model selector (gpt-4o, claude-opus). Config: temperature, max_tokens, system_role. Output: `{ response: string, usage: { tokens_used, cost } }`
+- [x] **OpenAI / Anthropic** — Superseded by the **AI Agent** node (`ai-agent/`), which provides model selection, memory, tools, system message config, and chat trigger integration. No standalone LLM call node needed.
 - [ ] **Vector Store (pgvector)** — UI: action selector (embed/query/upsert). Supabase RAG integration. Output: `{ results: [], similarity_scores: [] }`
 
 #### Tier 3: Logic & Control Flow
