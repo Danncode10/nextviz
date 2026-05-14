@@ -1,0 +1,102 @@
+{
+  "id": "flow-1778728492372",
+  "name": "chat example 2",
+  "description": "",
+  "nodes": [
+    {
+      "id": "node-1778728496023",
+      "type": "chatTrigger",
+      "position": {
+        "x": 313.9596678223992,
+        "y": 239.312041668314
+      },
+      "data": {
+        "label": "Chat Trigger"
+      },
+      "selected": false,
+      "width": 108,
+      "height": 108
+    },
+    {
+      "id": "node-1778728499290",
+      "type": "aiAgent",
+      "position": {
+        "x": 496.3023930057749,
+        "y": 253.364724093534
+      },
+      "data": {
+        "label": "AI Agent",
+        "chatModel": {
+          "provider": "openai",
+          "type": "gpt-4o-mini",
+          "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
+        },
+        "memory": {
+          "type": "simple"
+        }
+      },
+      "selected": true,
+      "width": 280,
+      "height": 173
+    },
+    {
+      "id": "node-1778728499290-model",
+      "type": "chatModelNode",
+      "position": {
+        "x": 407.13025896582394,
+        "y": 481.0084909847581
+      },
+      "data": {
+        "chatModel": {
+          "provider": "openai",
+          "type": "gpt-4o-mini",
+          "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
+        }
+      },
+      "selected": false,
+      "width": 160,
+      "height": 56
+    },
+    {
+      "id": "node-1778728499290-memory",
+      "type": "memoryNode",
+      "position": {
+        "x": 552.1887646979064,
+        "y": 547.7684290667428
+      },
+      "data": {
+        "memory": {
+          "type": "simple"
+        }
+      },
+      "selected": false,
+      "width": 160,
+      "height": 56
+    }
+  ],
+  "edges": [
+    {
+      "id": "reactflow__edge-node-1778728496023-node-1778728499290",
+      "source": "node-1778728496023",
+      "target": "node-1778728499290",
+      "sourceHandle": null,
+      "targetHandle": null
+    },
+    {
+      "id": "node-1778728499290-to-model",
+      "source": "node-1778728499290",
+      "target": "node-1778728499290-model",
+      "sourceHandle": "model-out",
+      "targetHandle": "model-in",
+      "type": "smoothstep"
+    },
+    {
+      "id": "node-1778728499290-to-memory",
+      "source": "node-1778728499290",
+      "target": "node-1778728499290-memory",
+      "sourceHandle": "memory-out",
+      "targetHandle": "memory-in",
+      "type": "smoothstep"
+    }
+  ]
+}
