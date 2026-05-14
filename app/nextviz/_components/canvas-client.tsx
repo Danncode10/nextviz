@@ -32,8 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Undo2, Redo2, KeyRound } from "lucide-react";
 import Link from "next/link";
 import { NodePropertiesPanel } from "./node-properties-panel";
-import { ChatWindow } from "./chat-window";
-import { ExecutionOutput } from "./execution-output";
+import { Console } from "./console";
 import { ModelSelectorPopup } from "../nodes/ai-agent/_components/model-selector-popup";
 import { MemoryPopup } from "../nodes/ai-agent/_components/memory-popup";
 import { ToolPopup } from "../nodes/ai-agent/_components/tool-popup";
@@ -108,6 +107,13 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
       document.removeEventListener("nextviz:open-tool-popup",   onTool);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Console toggle listener (sidebar button) ─────────────────────────────
+  useEffect(() => {
+    const handleToggle = () => setShowExecutionOutput((prev) => !prev);
+    document.addEventListener("nextviz:toggle-console", handleToggle);
+    return () => document.removeEventListener("nextviz:toggle-console", handleToggle);
+  }, []);
 
   // ── Flow execution listener (play button on canvas) ──────────────────────
   useEffect(() => {
@@ -554,7 +560,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
 
         {/* Execution output — shows results from flow execution */}
         {showExecutionOutput && (
-          <ExecutionOutput
+          <Console
             key={executionOutputTab}
             result={executionResult}
             isExecuting={isExecuting}

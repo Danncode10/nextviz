@@ -1,9 +1,16 @@
-import React, { Suspense } from 'react'
+"use client";
+
+import React from 'react'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from "./ui/sidebar"
 import AppSideBarLinks from "./app-sidebar-links"
 import { ModeToggle } from './mode-toggle'
+import { TerminalSquare } from 'lucide-react'
 
 const AppSideBar = () => {
+  const toggleConsole = () => {
+    document.dispatchEvent(new CustomEvent("nextviz:toggle-console"));
+  };
+
   return (
     <Sidebar collapsible='icon'>
         <SidebarRail/>
@@ -18,8 +25,16 @@ const AppSideBar = () => {
            <ModeToggle/>
         </SidebarContent>
         <SidebarFooter>
-            <div className="p-4 group-data-[collapsible=icon]:hidden text-xs text-muted-foreground text-center">
-              Local Bridge v1.0
+            <div className="flex items-center justify-between px-4 py-3 group-data-[collapsible=icon]:justify-center">
+              <span className="text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">Local Bridge v1.0</span>
+              <button
+                onClick={toggleConsole}
+                title="Toggle Console"
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <TerminalSquare className="w-4 h-4" />
+                <span className="group-data-[collapsible=icon]:hidden">Console</span>
+              </button>
             </div>
         </SidebarFooter>
     </Sidebar>

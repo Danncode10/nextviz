@@ -15,7 +15,7 @@ interface ExecutionOutputProps {
   onSendChatMessage?: (message: string) => Promise<string>;
 }
 
-export function ExecutionOutput({
+export function Console({
   result,
   isExecuting,
   onClose,
@@ -81,7 +81,7 @@ export function ExecutionOutput({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  if (!result && !isExecuting) return null;
+
 
   const nodeOutputs = (result as Record<string, Record<string, unknown>>) || {};
   const nodeIds = Object.keys(nodeOutputs).filter((id) => !id.match(/-model$|-memory$/));
