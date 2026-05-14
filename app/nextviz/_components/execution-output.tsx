@@ -34,6 +34,7 @@ export function ExecutionOutput({
   const resizeRef = useRef<HTMLDivElement>(null);
   const startYRef = useRef(0);
   const startHeightRef = useRef(0);
+  const hasAutoSwitchedRef = useRef(false);
 
   // Update local chat messages when prop changes
   useEffect(() => {
@@ -44,6 +45,17 @@ export function ExecutionOutput({
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [localChatMessages]);
+
+  // Auto-switch to Chat tab only on first open
+  useEffect(() => {
+    if (showChatTab && !hasAutoSwitchedRef.current) {
+      setActiveTab("chat");
+      hasAutoSwitchedRef.current = true;
+    }
+    if (!showChatTab) {
+      hasAutoSwitchedRef.current = false;
+    }
+  }, [showChatTab]);
 
   // Handle resize dragging
   useEffect(() => {
