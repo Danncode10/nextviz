@@ -94,18 +94,18 @@
       "height": 56
     },
     {
-      "id": "node-1778737875442",
-      "type": "httpAction",
+      "id": "node-1778738257396",
+      "type": "httpRequest",
       "position": {
-        "x": -19.497542900799694,
-        "y": -48.00591218038804
+        "x": 104.95919699150619,
+        "y": -271.1819523930269
       },
       "data": {
-        "label": "HTTP Action"
+        "label": "HTTP Request"
       },
-      "selected": true,
-      "width": 150,
-      "height": 40
+      "selected": false,
+      "width": 108,
+      "height": 108
     }
   ],
   "edges": [
@@ -131,6 +131,13 @@
       "sourceHandle": "memory-out",
       "targetHandle": "memory-in",
       "type": "smoothstep"
+    },
+    {
+      "id": "reactflow__edge-node-1778650097267-node-1778738257396",
+      "source": "node-1778650097267",
+      "target": "node-1778738257396",
+      "sourceHandle": null,
+      "targetHandle": null
     }
   ]
 }

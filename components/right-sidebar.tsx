@@ -24,7 +24,7 @@ const NODE_PALETTE = [
   {
     group: "Actions",
     nodes: [
-      { type: "httpAction", label: "HTTP Action", icon: Globe, color: "text-emerald-400" },
+      { type: "httpRequest", label: "HTTP Request", icon: Globe, color: "text-emerald-400" },
       { type: "logData", label: "Log Data", icon: ScrollText, color: "text-blue-400" },
     ],
   },
