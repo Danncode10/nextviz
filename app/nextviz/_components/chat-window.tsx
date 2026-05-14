@@ -71,11 +71,9 @@ export function ChatWindow({ onClose, onSendMessage, executionResult, isExecutin
     setIsSending(true);
     setTimeout(scrollToBottom, 50);
 
-    // Build chat history including the message we just added
-    const chatHistoryWithUserMsg: Array<{ role: "user" | "assistant"; content: string }> = [
-      ...messages.map((m) => ({ role: m.role, content: m.content })),
-      { role: "user", content: trimmed },
-    ];
+    // Pass only PREVIOUS messages — executor appends the current user message itself
+    const chatHistoryWithUserMsg: Array<{ role: "user" | "assistant"; content: string }> =
+      messages.map((m) => ({ role: m.role, content: m.content }));
 
     const start = Date.now();
     try {

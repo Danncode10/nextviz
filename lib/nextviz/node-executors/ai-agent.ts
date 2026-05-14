@@ -38,9 +38,12 @@ export const aiAgent: NodeExecutorFn = async (nodeData, inputs) => {
     "";
 
   const memory = nodeData?.memory as MemoryConfig | undefined;
+  const memoryType = memory?.type ?? "none";
   const maxMessages = memory?.maxMessages ?? 20;
   const rawHistory = (inputs?.chatHistory as Array<{ role: string; content: string }>) ?? [];
-  const chatHistory = rawHistory.slice(-maxMessages);
+  const chatHistory = memoryType === "none" ? [] : rawHistory.slice(-maxMessages);
+
+  console.log("[AI Agent] memoryType:", memoryType, "| rawHistory length:", rawHistory.length, "| chatHistory:", JSON.stringify(chatHistory));
 
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     ...chatHistory.map((h) => ({

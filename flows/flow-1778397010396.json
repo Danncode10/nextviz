@@ -7,8 +7,8 @@
       "id": "node-1778649040920",
       "type": "chatTrigger",
       "position": {
-        "x": -594.2111991040975,
-        "y": -324.042370484329
+        "x": -574.7111991040975,
+        "y": -359.542370484329
       },
       "data": {
         "label": "Chat Trigger"
@@ -21,8 +21,8 @@
       "id": "node-1778650097267",
       "type": "aiAgent",
       "position": {
-        "x": -350.78821825925814,
-        "y": -321.770910966084
+        "x": -332.08438123189524,
+        "y": -354.8027712752522
       },
       "data": {
         "label": "AI Agent",
@@ -33,14 +33,12 @@
           "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
         },
         "memory": {
-          "type": "simple",
+          "type": "none",
           "supabase": {
             "urlRef": "NEXTVIZ_SUPABASE_URL",
             "keyRef": "NEXTVIZ_SUPABASE_SERVICE_ROLE_KEY",
-            "table": "case_summaries",
-            "columns": [
-              "summary_text"
-            ],
+            "table": "",
+            "columns": [],
             "rowFilter": "Lesterdannlopez7@gmail.com"
           }
         }
@@ -53,8 +51,8 @@
       "id": "node-1778650097267-model",
       "type": "chatModelNode",
       "position": {
-        "x": -533.2208080346461,
-        "y": -57.42984214809253
+        "x": -480.2184567371585,
+        "y": -122.77158598462364
       },
       "data": {
         "chatModel": {
@@ -63,31 +61,7 @@
           "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
         }
       },
-      "selected": false,
-      "width": 160,
-      "height": 56
-    },
-    {
-      "id": "node-1778650097267-memory",
-      "type": "memoryNode",
-      "position": {
-        "x": -240.78821825925814,
-        "y": -91.77091096608399
-      },
-      "data": {
-        "memory": {
-          "type": "simple",
-          "supabase": {
-            "urlRef": "NEXTVIZ_SUPABASE_URL",
-            "keyRef": "NEXTVIZ_SUPABASE_SERVICE_ROLE_KEY",
-            "table": "case_summaries",
-            "columns": [
-              "summary_text"
-            ],
-            "rowFilter": "Lesterdannlopez7@gmail.com"
-          }
-        }
-      },
+      "selected": true,
       "width": 160,
       "height": 56
     }
@@ -106,14 +80,6 @@
       "target": "node-1778650097267-model",
       "sourceHandle": "model-out",
       "targetHandle": "model-in",
-      "type": "smoothstep"
-    },
-    {
-      "id": "node-1778650097267-to-memory",
-      "source": "node-1778650097267",
-      "target": "node-1778650097267-memory",
-      "sourceHandle": "memory-out",
-      "targetHandle": "memory-in",
       "type": "smoothstep"
     }
   ]
