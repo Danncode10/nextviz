@@ -45,7 +45,7 @@
           }
         }
       },
-      "selected": true,
+      "selected": false,
       "width": 280,
       "height": 173
     },
@@ -71,8 +71,8 @@
       "id": "node-1778650097267-memory",
       "type": "memoryNode",
       "position": {
-        "x": -266.69965051376664,
-        "y": -49.88514923405092
+        "x": -240.78821825925814,
+        "y": -91.77091096608399
       },
       "data": {
         "memory": {
@@ -88,7 +88,6 @@
           }
         }
       },
-      "selected": false,
       "width": 160,
       "height": 56
     }

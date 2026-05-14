@@ -65,56 +65,34 @@ export function ChatWindow({ onClose, onSendMessage, executionResult, isExecutin
     msgHistory.current.unshift(trimmed);
     historyIdx.current = -1;
 
-    // Add user message to display
+    // Update UI: add user message, clear input, show loading
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsSending(true);
     setTimeout(scrollToBottom, 50);
 
+    // Build chat history including the message we just added
+    const chatHistoryWithUserMsg: Array<{ role: "user" | "assistant"; content: string }> = [
+      ...messages.map((m) => ({ role: m.role, content: m.content })),
+      { role: "user", content: trimmed },
+    ];
+
     const start = Date.now();
     try {
-      // Build chat history from current messages (before adding assistant response)
-      setMessages((currentMessages) => {
-        const chatHistory = currentMessages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        }));
+      const response = await onSendMessage(trimmed, sessionId, chatHistoryWithUserMsg);
+      const elapsed = Date.now() - start;
 
-        // Call API with chat history
-        onSendMessage(trimmed, sessionId, chatHistory)
-          .then((response) => {
-            const elapsed = Date.now() - start;
-            const assistantMsg: ChatMessage = {
-              id: `msg-${Date.now()}-ai`,
-              role: "assistant",
-              content: response,
-              timestamp: new Date().toISOString(),
-            };
-            setMessages((prev) => [...prev, assistantMsg]);
-            setLogs((prev) => [
-              ...prev,
-              `✅ Response received in ${elapsed}ms`,
-            ]);
-          })
-          .catch((err) => {
-            const errText = err instanceof Error ? err.message : "Unknown error";
-            const errMsg: ChatMessage = {
-              id: `msg-${Date.now()}-err`,
-              role: "assistant",
-              content: `Error: ${errText}`,
-              timestamp: new Date().toISOString(),
-            };
-            setMessages((prev) => [...prev, errMsg]);
-            setLogs((prev) => [...prev, `❌ Error: ${errText}`]);
-          })
-          .finally(() => {
-            setIsSending(false);
-            setTimeout(scrollToBottom, 50);
-            inputRef.current?.focus();
-          });
-
-        return currentMessages;
-      });
+      const assistantMsg: ChatMessage = {
+        id: `msg-${Date.now()}-ai`,
+        role: "assistant",
+        content: response,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, assistantMsg]);
+      setLogs((prev) => [
+        ...prev,
+        `✅ Response received in ${elapsed}ms`,
+      ]);
     } catch (err) {
       const errText = err instanceof Error ? err.message : "Unknown error";
       const errMsg: ChatMessage = {
@@ -125,9 +103,12 @@ export function ChatWindow({ onClose, onSendMessage, executionResult, isExecutin
       };
       setMessages((prev) => [...prev, errMsg]);
       setLogs((prev) => [...prev, `❌ Error: ${errText}`]);
+    } finally {
       setIsSending(false);
+      setTimeout(scrollToBottom, 50);
+      inputRef.current?.focus();
     }
-  }, [input, isSending, onSendMessage, sessionId]);
+  }, [input, isSending, messages, onSendMessage, sessionId]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
