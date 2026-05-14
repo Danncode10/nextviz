@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { MessageSquare, RotateCcw, ChevronDown, MoreHorizontal, Send } from "lucide-react";
+import { MessageSquare, RotateCcw, ChevronDown, MoreHorizontal, Send, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -15,6 +15,7 @@ interface ChatMessage {
 
 export interface ChatWindowProps {
   onClose: () => void;
+  onSendMessage: (message: string, sessionId: string) => Promise<string>;
   executionResult?: any;
   isExecuting?: boolean;
 }
@@ -27,24 +28,17 @@ function generateSessionId() {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export function ChatWindow({ onClose, executionResult, isExecuting }: ChatWindowProps) {
+export function ChatWindow({ onClose, onSendMessage, executionResult, isExecuting }: ChatWindowProps) {
   const [messages, setMessages]   = useState<ChatMessage[]>([]);
   const [input, setInput]         = useState("");
   const [sessionId, setSessionId] = useState(generateSessionId);
+  const [isSending, setIsSending] = useState(false);
+  const [logs, setLogs]           = useState<string[]>([]);
 
-  const logs = executionResult
-    ? [
-        executionResult.success
-          ? `✅ Execution succeeded in ${executionResult.result?.completedAt ? new Date(executionResult.result.completedAt).getTime() - new Date(executionResult.result.startedAt).getTime() : '?'}ms`
-          : `❌ Error: ${executionResult.error}`,
-        ...(executionResult.result?.nodeOutputs ? [`Total nodes executed: ${Object.keys(executionResult.result.nodeOutputs).length}`] : []),
-      ]
-    : [];
-
-  const inputRef      = useRef<HTMLTextAreaElement>(null);
-  const messagesEnd   = useRef<HTMLDivElement>(null);
-  const msgHistory    = useRef<string[]>([]);
-  const historyIdx    = useRef(-1);
+  const inputRef    = useRef<HTMLTextAreaElement>(null);
+  const messagesEnd = useRef<HTMLDivElement>(null);
+  const msgHistory  = useRef<string[]>([]);
+  const historyIdx  = useRef(-1);
 
   const scrollToBottom = () =>
     messagesEnd.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,15 +46,16 @@ export function ChatWindow({ onClose, executionResult, isExecuting }: ChatWindow
   const resetSession = () => {
     setMessages([]);
     setSessionId(generateSessionId());
+    setLogs([]);
     msgHistory.current = [];
     historyIdx.current = -1;
   };
 
-  const sendMessage = useCallback(() => {
+  const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
-    if (!trimmed) return;
+    if (!trimmed || isSending) return;
 
-    const msg: ChatMessage = {
+    const userMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
       role: "user",
       content: trimmed,
@@ -69,11 +64,43 @@ export function ChatWindow({ onClose, executionResult, isExecuting }: ChatWindow
 
     msgHistory.current.unshift(trimmed);
     historyIdx.current = -1;
-    setMessages((prev) => [...prev, msg]);
+    setMessages((prev) => [...prev, userMsg]);
     setInput("");
+    setIsSending(true);
     setTimeout(scrollToBottom, 50);
-    inputRef.current?.focus();
-  }, [input]);
+
+    const start = Date.now();
+    try {
+      const response = await onSendMessage(trimmed, sessionId);
+      const elapsed = Date.now() - start;
+
+      const assistantMsg: ChatMessage = {
+        id: `msg-${Date.now()}-ai`,
+        role: "assistant",
+        content: response,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, assistantMsg]);
+      setLogs((prev) => [
+        ...prev,
+        `✅ Response received in ${elapsed}ms`,
+      ]);
+    } catch (err) {
+      const errText = err instanceof Error ? err.message : "Unknown error";
+      const errMsg: ChatMessage = {
+        id: `msg-${Date.now()}-err`,
+        role: "assistant",
+        content: `Error: ${errText}`,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, errMsg]);
+      setLogs((prev) => [...prev, `❌ Error: ${errText}`]);
+    } finally {
+      setIsSending(false);
+      setTimeout(scrollToBottom, 50);
+      inputRef.current?.focus();
+    }
+  }, [input, isSending, onSendMessage, sessionId]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -138,7 +165,7 @@ export function ChatWindow({ onClose, executionResult, isExecuting }: ChatWindow
               >
                 <div
                   className={cn(
-                    "max-w-[80%] rounded-xl px-3 py-2 text-sm leading-relaxed",
+                    "max-w-[80%] rounded-xl px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap",
                     msg.role === "user"
                       ? "bg-orange-600 text-white"
                       : "bg-zinc-800 text-zinc-200"
@@ -148,6 +175,13 @@ export function ChatWindow({ onClose, executionResult, isExecuting }: ChatWindow
                 </div>
               </div>
             ))
+          )}
+          {isSending && (
+            <div className="flex justify-start">
+              <div className="bg-zinc-800 rounded-xl px-3 py-2">
+                <Loader2 className="w-4 h-4 text-zinc-400 animate-spin" />
+              </div>
+            </div>
           )}
           <div ref={messagesEnd} />
         </div>
@@ -161,16 +195,17 @@ export function ChatWindow({ onClose, executionResult, isExecuting }: ChatWindow
             onKeyDown={handleKeyDown}
             placeholder="Type message, or press 'up' for previous one"
             rows={1}
-            className="flex-1 bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2 resize-none focus:outline-none focus:border-zinc-700 placeholder:text-zinc-600 transition-colors"
+            disabled={isSending}
+            className="flex-1 bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2 resize-none focus:outline-none focus:border-zinc-700 placeholder:text-zinc-600 transition-colors disabled:opacity-50"
             style={{ minHeight: 38, maxHeight: 80 }}
           />
           <button
             onClick={sendMessage}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isSending}
             title="Send message"
             className="p-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg transition-colors shrink-0"
           >
-            <Send className="w-4 h-4" />
+            {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </button>
         </div>
       </div>
@@ -194,10 +229,10 @@ export function ChatWindow({ onClose, executionResult, isExecuting }: ChatWindow
         </div>
 
         {/* Logs content */}
-        <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
+        <div className="flex-1 p-4 overflow-y-auto">
           {logs.length === 0 ? (
-            <p className="text-xs text-zinc-600 text-center leading-relaxed">
-              Nothing to display yet. Execute the workflow to see execution logs.
+            <p className="text-xs text-zinc-600 text-center leading-relaxed mt-4">
+              Nothing to display yet. Send a message to see execution logs.
             </p>
           ) : (
             <div className="w-full space-y-1">

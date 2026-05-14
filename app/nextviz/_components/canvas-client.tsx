@@ -84,9 +84,9 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Flow execution listener ────────────────────────────────────────────────
+  // ── Flow execution listener (manual trigger button) ───────────────────────
   useEffect(() => {
-    const handleExecuteFlow = async (e: Event) => {
+    const handleExecuteFlow = async () => {
       if (!activeFlow) return;
       setIsExecuting(true);
       const result = await executeFlowAction(activeFlow.id);
@@ -96,6 +96,19 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
     };
     document.addEventListener("nextviz:execute-flow", handleExecuteFlow);
     return () => document.removeEventListener("nextviz:execute-flow", handleExecuteFlow);
+  }, [activeFlow]);
+
+  // ── Chat message handler — runs flow with message payload ─────────────────
+  const handleChatMessage = useCallback(async (message: string, sessionId: string): Promise<string> => {
+    if (!activeFlow) return "No active flow.";
+    const result = await executeFlowAction(activeFlow.id, { chatMessage: message, sessionId });
+    if (!result.success) return `Error: ${result.error}`;
+    const outputs = result.result?.nodeOutputs ?? {};
+    for (const output of Object.values(outputs)) {
+      const out = output as Record<string, unknown>;
+      if (typeof out.response === "string" && out.response) return out.response;
+    }
+    return "No response returned from AI Agent.";
   }, [activeFlow]);
 
   // ── Undo / Redo history ────────────────────────────────────────────────────
@@ -477,7 +490,14 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
       </div>
 
       {/* Chat window — slides up from bottom when a chatTrigger is open */}
-      {chatWindowOpen && <ChatWindow onClose={() => setChatWindowOpen(false)} executionResult={executionResult} isExecuting={isExecuting} />}
+      {chatWindowOpen && (
+        <ChatWindow
+          onClose={() => setChatWindowOpen(false)}
+          onSendMessage={handleChatMessage}
+          executionResult={executionResult}
+          isExecuting={isExecuting}
+        />
+      )}
       </div>
 
       {/* Properties modal — portal to body, not affected by canvas transforms */}
