@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { MessageSquare, RotateCcw, ChevronDown, MoreHorizontal, Send, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { buildChatHistory, Entity } from "@/lib/nextviz/memory-handlers";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -15,7 +16,7 @@ interface ChatMessage {
 
 export interface ChatWindowProps {
   onClose: () => void;
-  onSendMessage: (message: string, sessionId: string, chatHistory: Array<{ role: "user" | "assistant"; content: string }>) => Promise<string>;
+  onSendMessage: (message: string, sessionId: string, chatHistory: Array<{ role: "user" | "assistant" | "system"; content: string }>) => Promise<string>;
   memoryType?: string;
   executionResult?: any;
   isExecuting?: boolean;
@@ -36,6 +37,9 @@ export function ChatWindow({ onClose, onSendMessage, memoryType = "none", execut
   const [isSending, setIsSending] = useState(false);
   const [logs, setLogs]           = useState<string[]>([]);
 
+  // Entity mode: track extracted entities separately per mode
+  const entities = useRef<Entity[]>([]);
+
   // Reset session whenever memory mode changes to avoid cross-mode history bleed
   const prevMemoryType = useRef(memoryType);
   useEffect(() => {
@@ -46,6 +50,7 @@ export function ChatWindow({ onClose, onSendMessage, memoryType = "none", execut
       setLogs([`🔄 Memory mode changed to "${memoryType}" — session reset.`]);
       msgHistory.current = [];
       historyIdx.current = -1;
+      entities.current = []; // Clear entities when switching modes
     }
   }, [memoryType]);
 
@@ -85,11 +90,27 @@ export function ChatWindow({ onClose, onSendMessage, memoryType = "none", execut
     setIsSending(true);
     setTimeout(scrollToBottom, 50);
 
-    // Simple memory: pass previous messages. None (and others): send empty history.
-    const chatHistoryWithUserMsg: Array<{ role: "user" | "assistant"; content: string }> =
-      memoryType === "simple"
-        ? messages.map((m) => ({ role: m.role, content: m.content }))
-        : [];
+    // Build chat history based on memory mode using separate functions
+    const messagesForHistory = messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+    const { history, entityContext, entities: newEntities } = buildChatHistory(
+      memoryType,
+      messagesForHistory,
+      entities.current
+    );
+
+    // Update entities for next iteration (entity mode only)
+    if (memoryType === "entity" && newEntities) {
+      entities.current = newEntities;
+    }
+
+    // For entity mode, prepend the fact context as a system message
+    let chatHistoryWithUserMsg: Array<{ role: "user" | "assistant" | "system"; content: string }> = history;
+    if (memoryType === "entity" && entityContext) {
+      chatHistoryWithUserMsg = [
+        { role: "system", content: entityContext },
+        ...history,
+      ];
+    }
 
     const start = Date.now();
     try {

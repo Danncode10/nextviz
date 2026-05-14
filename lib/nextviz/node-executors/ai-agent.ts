@@ -14,6 +14,14 @@ type MemoryConfig = {
   maxMessages?: number;
 };
 
+/**
+ * AI Agent Node Executor
+ *
+ * Memory Modes:
+ * - "none": Stateless. No history passed. Each message is independent.
+ * - "simple": Last N messages. Full conversation history maintained.
+ * - "entity": Key facts only. Extracts entities (names, dates, etc.) from conversation.
+ */
 export const aiAgent: NodeExecutorFn = async (nodeData, inputs) => {
   const chatModel = nodeData?.chatModel as ChatModelConfig | undefined;
   const model = chatModel?.type;
@@ -39,11 +47,31 @@ export const aiAgent: NodeExecutorFn = async (nodeData, inputs) => {
 
   const memory = nodeData?.memory as MemoryConfig | undefined;
   const memoryType = memory?.type ?? "none";
-  const maxMessages = memory?.maxMessages ?? 20;
   const rawHistory = (inputs?.chatHistory as Array<{ role: string; content: string }>) ?? [];
-  const chatHistory = memoryType === "none" ? [] : rawHistory.slice(-maxMessages);
 
-  console.log("[AI Agent] memoryType:", memoryType, "| rawHistory length:", rawHistory.length, "| chatHistory:", JSON.stringify(chatHistory));
+  // Process history based on memory mode
+  let chatHistory: Array<{ role: string; content: string }> = [];
+
+  switch (memoryType) {
+    case "none":
+      // No history for stateless mode
+      chatHistory = [];
+      break;
+    case "simple":
+      // Last N messages for simple mode
+      const maxMessages = memory?.maxMessages ?? 20;
+      chatHistory = rawHistory.slice(-maxMessages);
+      break;
+    case "entity":
+      // Entity mode: keep system messages (entity facts), drop old conversation history
+      // System messages are prepended by chat-window and contain the entity context
+      chatHistory = rawHistory.filter((h) => h.role === "system");
+      break;
+    default:
+      chatHistory = [];
+  }
+
+  console.log(`[AI Agent] mode: ${memoryType} | rawHistory: ${rawHistory.length} | processed: ${chatHistory.length} | userMsg: "${userMessage.substring(0, 50)}..."`);
 
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     ...chatHistory.map((h) => ({

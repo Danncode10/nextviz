@@ -109,7 +109,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
     async (
       message: string,
       sessionId: string,
-      chatHistory: Array<{ role: "user" | "assistant"; content: string }>
+      chatHistory: Array<{ role: "user" | "assistant" | "system"; content: string }>
     ): Promise<string> => {
       if (!activeFlow) return "No active flow.";
       const result = await executeFlowAction(activeFlow.id, {
