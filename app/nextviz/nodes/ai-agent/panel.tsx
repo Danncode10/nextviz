@@ -115,6 +115,7 @@ function AIAgentParameters({ node, onNodeChange }: { node: Node; onNodeChange?: 
   const [showTip, setShowTip]         = useState(true);
   const [promptSource, setPromptSource] = useState<string>(node.data?.promptSource ?? "chatTrigger");
   const [promptTemplate, setTemplate] = useState<string>(node.data?.promptTemplate ?? "{{ $json.chatInput }}");
+  const [systemPrompt, setSystemPrompt] = useState<string>(node.data?.systemPrompt ?? "");
   const [requireFormat, setFormat]    = useState<boolean>(node.data?.requireOutputFormat ?? false);
   const [enableFallback, setFallback] = useState<boolean>(node.data?.enableFallback ?? false);
 
@@ -167,6 +168,21 @@ function AIAgentParameters({ node, onNodeChange }: { node: Node; onNodeChange?: 
           />
         </div>
         <p className="text-[11px] text-zinc-600 mt-1">Use {"{{ $json.fieldName }}"} to reference upstream data.</p>
+      </div>
+
+      {/* System Message */}
+      <div>
+        <label className="text-xs font-medium text-zinc-500 block mb-1.5">
+          System Message
+        </label>
+        <textarea
+          value={systemPrompt}
+          onChange={(e) => { setSystemPrompt(e.target.value); sync({ systemPrompt: e.target.value }); }}
+          placeholder="e.g., You are a helpful assistant"
+          rows={3}
+          className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:border-zinc-700 placeholder:text-zinc-600 resize-none"
+        />
+        <p className="text-[11px] text-zinc-600 mt-1">Instructions for AI behavior. Included in every request for consistency.</p>
       </div>
 
       {/* Toggles */}
