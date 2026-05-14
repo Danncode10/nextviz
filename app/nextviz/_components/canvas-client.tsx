@@ -53,6 +53,21 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   const [edges, setEdges] = useState<Edge[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // ── Read-only mode detection ───────────────────────────────────────────────
+  const [isProduction, setIsProduction] = useState(false);
+  const [showReadOnlyModal, setShowReadOnlyModal] = useState(false);
+
+  useEffect(() => {
+    const isLocal = typeof window !== "undefined" &&
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+    setIsProduction(!isLocal);
+
+    // Show modal once on load if in production
+    if (!isLocal) {
+      setShowReadOnlyModal(true);
+    }
+  }, []);
+
   // ── Properties panel ───────────────────────────────────────────────────────
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
@@ -555,6 +570,55 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
           onClose={() => setToolPopupNode(null)}
           onNodeChange={(updatedNode) => { handleNodeChange(updatedNode); setToolPopupNode(null); }}
         />
+      )}
+
+      {/* Read-Only Mode Modal */}
+      {!isDevelopment && (
+        <Dialog open={showReadOnlyModal} onOpenChange={setShowReadOnlyModal}>
+          <DialogContent className="sm:max-w-[500px] border-yellow-500/30 bg-zinc-950">
+            <DialogHeader>
+              <DialogTitle className="text-yellow-500 flex items-center gap-2">
+                <span className="text-xl">🔒</span> Read-Only Mode
+              </DialogTitle>
+              <DialogDescription className="text-zinc-400">
+                This is the production version. To edit flows, you must run NextViz locally.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="bg-zinc-900/50 border border-yellow-500/20 rounded-lg p-4 space-y-2">
+                <p className="text-sm font-medium text-zinc-200">
+                  ⚠️ You are viewing this flow in read-only mode.
+                </p>
+                <p className="text-sm text-zinc-400">
+                  All editing features (drag, connect, create, delete) are disabled to prevent accidental changes.
+                </p>
+              </div>
+
+              <div className="bg-zinc-900/50 border border-blue-500/20 rounded-lg p-4 space-y-2">
+                <p className="text-sm font-medium text-blue-400">
+                  How to edit:
+                </p>
+                <ol className="text-sm text-zinc-400 space-y-1 list-decimal list-inside">
+                  <li>Clone or download this project locally</li>
+                  <li>Run <code className="bg-zinc-800 px-2 py-1 rounded text-zinc-200">npm install && npm run dev</code></li>
+                  <li>Open <code className="bg-zinc-800 px-2 py-1 rounded text-zinc-200">localhost:3000/nextviz</code></li>
+                  <li>Edit flows and they'll sync to your git repository</li>
+                </ol>
+              </div>
+
+              <div className="bg-green-500/5 border border-green-500/20 rounded-lg p-4">
+                <p className="text-sm text-green-400">
+                  ✓ You can still test flows by opening the chat window (testing works in production).
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setShowReadOnlyModal(false)} className="gap-2">
+                Got it, I'll edit locally
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
