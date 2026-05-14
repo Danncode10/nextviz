@@ -7,8 +7,8 @@
       "id": "node-1778649040920",
       "type": "chatTrigger",
       "position": {
-        "x": -574.7111991040975,
-        "y": -359.542370484329
+        "x": -594.2111991040975,
+        "y": -324.042370484329
       },
       "data": {
         "label": "Chat Trigger"
@@ -21,8 +21,8 @@
       "id": "node-1778650097267",
       "type": "aiAgent",
       "position": {
-        "x": -331.3732995689936,
-        "y": -354.0916896123506
+        "x": -350.78821825925814,
+        "y": -321.770910966084
       },
       "data": {
         "label": "AI Agent",
@@ -37,11 +37,14 @@
           "supabase": {
             "urlRef": "NEXTVIZ_SUPABASE_URL",
             "keyRef": "NEXTVIZ_SUPABASE_SERVICE_ROLE_KEY",
-            "table": "",
-            "columns": [],
+            "table": "case_summaries",
+            "columns": [
+              "summary_text"
+            ],
             "rowFilter": "Lesterdannlopez7@gmail.com"
           }
-        }
+        },
+        "systemPrompt": "\"You are a JSON API. Always respond with valid JSON.\"\n\"Respond in bullet points, be professional.\"\n\"You are a programming expert. Explain concepts simply.\""
       },
       "selected": true,
       "width": 280,
@@ -51,8 +54,8 @@
       "id": "node-1778650097267-model",
       "type": "chatModelNode",
       "position": {
-        "x": -480.2184567371585,
-        "y": -122.77158598462364
+        "x": -533.2208080346461,
+        "y": -57.42984214809253
       },
       "data": {
         "chatModel": {
@@ -69,8 +72,8 @@
       "id": "node-1778650097267-memory",
       "type": "memoryNode",
       "position": {
-        "x": -222.08438123189524,
-        "y": -124.80277127525221
+        "x": -266.69965051376664,
+        "y": -49.88514923405092
       },
       "data": {
         "memory": {
@@ -78,12 +81,15 @@
           "supabase": {
             "urlRef": "NEXTVIZ_SUPABASE_URL",
             "keyRef": "NEXTVIZ_SUPABASE_SERVICE_ROLE_KEY",
-            "table": "",
-            "columns": [],
+            "table": "case_summaries",
+            "columns": [
+              "summary_text"
+            ],
             "rowFilter": "Lesterdannlopez7@gmail.com"
           }
         }
       },
+      "selected": false,
       "width": 160,
       "height": 56
     }
