@@ -1,0 +1,53 @@
+{
+  "id": "flow-test-execution",
+  "name": "Test Execution Output",
+  "description": "Test flow to verify ExecutionOutput integration",
+  "nodes": [
+    {
+      "id": "node-manual-trigger",
+      "type": "manualTrigger",
+      "position": {
+        "x": 100,
+        "y": 100
+      },
+      "data": {
+        "label": "Manual Start"
+      },
+      "selected": false,
+      "width": 108,
+      "height": 108
+    },
+    {
+      "id": "node-http-request",
+      "type": "httpRequest",
+      "position": {
+        "x": 350,
+        "y": 100
+      },
+      "data": {
+        "label": "Get JSON Data",
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "authType": "none",
+        "sendQueryParams": false,
+        "queryParams": [],
+        "sendHeaders": false,
+        "headers": [],
+        "sendBody": false,
+        "body": ""
+      },
+      "selected": false,
+      "width": 108,
+      "height": 108
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-manual-to-http",
+      "source": "node-manual-trigger",
+      "target": "node-http-request",
+      "sourceHandle": null,
+      "targetHandle": null
+    }
+  ]
+}

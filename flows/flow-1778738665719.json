@@ -1,0 +1,59 @@
+{
+  "id": "flow-1778738665719",
+  "name": "HTTP request Example",
+  "description": "",
+  "nodes": [
+    {
+      "id": "node-1778738668143",
+      "type": "manualTrigger",
+      "position": {
+        "x": 18.32423532234037,
+        "y": 95.81375548349709
+      },
+      "data": {
+        "label": "Manual Trigger"
+      },
+      "selected": false,
+      "width": 108,
+      "height": 108
+    },
+    {
+      "id": "node-1778738671841",
+      "type": "httpRequest",
+      "position": {
+        "x": 402.15725874127156,
+        "y": 131.6817367751759
+      },
+      "data": {
+        "label": "HTTP Request",
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "authType": "apiKey",
+        "authToken": "",
+        "authApiKeyHeader": "X-API-Key",
+        "authApiKeyValue": "",
+        "authUsername": "",
+        "authPassword": "",
+        "sendQueryParams": false,
+        "sendHeaders": false,
+        "sendBody": false,
+        "queryParams": [],
+        "headers": [],
+        "bodyType": "json",
+        "body": ""
+      },
+      "selected": true,
+      "width": 108,
+      "height": 108
+    }
+  ],
+  "edges": [
+    {
+      "id": "reactflow__edge-node-1778738668143-node-1778738671841",
+      "source": "node-1778738668143",
+      "target": "node-1778738671841",
+      "sourceHandle": null,
+      "targetHandle": null
+    }
+  ]
+}

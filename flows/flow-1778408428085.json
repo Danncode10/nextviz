@@ -4,41 +4,99 @@
   "description": "Default example for NextViz",
   "nodes": [
     {
-      "id": "node-1778410383727",
-      "type": "manualTrigger",
+      "id": "node-1778738569629",
+      "type": "chatTrigger",
       "position": {
-        "x": 205.3965657814258,
-        "y": -4.056774413693816
+        "x": 188.3248157052925,
+        "y": -78.97173842414207
       },
       "data": {
-        "label": "Manual Trigger"
+        "label": "Chat Trigger"
       },
       "selected": false,
       "width": 108,
       "height": 108
     },
     {
-      "id": "node-1778410386409",
-      "type": "httpRequest",
+      "id": "node-1778738573211",
+      "type": "aiAgent",
       "position": {
-        "x": 467.2530656291591,
-        "y": 5.113297565409695
+        "x": 425.4847120486275,
+        "y": -66.90217514587629
       },
       "data": {
-        "label": "HTTP Request"
+        "label": "AI Agent",
+        "chatModel": {
+          "provider": "openai",
+          "type": "gpt-4o-mini",
+          "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
+        },
+        "memory": {
+          "type": "simple"
+        }
       },
       "selected": false,
-      "width": 256,
-      "height": 88
+      "width": 280,
+      "height": 173
+    },
+    {
+      "id": "node-1778738573211-model",
+      "type": "chatModelNode",
+      "position": {
+        "x": 293.42286150502565,
+        "y": 163.0978248541237
+      },
+      "data": {
+        "chatModel": {
+          "provider": "openai",
+          "type": "gpt-4o-mini",
+          "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
+        }
+      },
+      "selected": false,
+      "width": 160,
+      "height": 56
+    },
+    {
+      "id": "node-1778738573211-memory",
+      "type": "memoryNode",
+      "position": {
+        "x": 460.9301154228808,
+        "y": 200.00604100548338
+      },
+      "data": {
+        "memory": {
+          "type": "simple"
+        }
+      },
+      "selected": false,
+      "width": 160,
+      "height": 56
     }
   ],
   "edges": [
     {
-      "id": "reactflow__edge-node-1778410383727-node-1778410386409",
-      "source": "node-1778410383727",
-      "target": "node-1778410386409",
+      "id": "reactflow__edge-node-1778738569629-node-1778738573211",
+      "source": "node-1778738569629",
+      "target": "node-1778738573211",
       "sourceHandle": null,
       "targetHandle": null
+    },
+    {
+      "id": "node-1778738573211-to-model",
+      "source": "node-1778738573211",
+      "target": "node-1778738573211-model",
+      "sourceHandle": "model-out",
+      "targetHandle": "model-in",
+      "type": "smoothstep"
+    },
+    {
+      "id": "node-1778738573211-to-memory",
+      "source": "node-1778738573211",
+      "target": "node-1778738573211-memory",
+      "sourceHandle": "memory-out",
+      "targetHandle": "memory-in",
+      "type": "smoothstep"
     }
   ]
 }

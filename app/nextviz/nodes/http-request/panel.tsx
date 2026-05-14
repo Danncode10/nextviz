@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Node } from "reactflow";
-import { Globe, Plus, Trash2, AlertTriangle } from "lucide-react";
+import { Globe, Plus, Trash2, AlertTriangle, Zap, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NodeModalShell } from "../_base/node-modal-shell";
 
@@ -30,6 +30,13 @@ interface HttpRequestConfig {
   headers: KVRow[];
   bodyType: BodyType;
   body: string;
+}
+
+interface HttpResponse {
+  status: number;
+  ok: boolean;
+  data: unknown;
+  duration?: number;
 }
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
@@ -164,9 +171,11 @@ function KVEditor({ rows, onChange, keyPlaceholder = "Name", valuePlaceholder = 
 
 const METHODS: HttpMethod[] = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"];
 
-function ParametersContent({ config, patch }: {
+function ParametersContent({ config, patch, onSendRequest, isLoading }: {
   config: HttpRequestConfig;
   patch: (p: Partial<HttpRequestConfig>) => void;
+  onSendRequest: () => void;
+  isLoading: boolean;
 }) {
   const noBody = config.method === "GET" || config.method === "HEAD" || config.method === "OPTIONS";
 
@@ -186,6 +195,20 @@ function ParametersContent({ config, patch }: {
           <Label>URL</Label>
           <Input value={config.url} onChange={(v) => patch({ url: v })} placeholder="https://api.example.com/endpoint" mono warning />
         </div>
+
+        <button
+          onClick={onSendRequest}
+          disabled={isLoading || !config.url}
+          className={cn(
+            "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium transition-all",
+            isLoading || !config.url
+              ? "bg-zinc-800 text-zinc-600 cursor-not-allowed opacity-60"
+              : "bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-orange-900/20 active:scale-[0.98]"
+          )}
+        >
+          <Zap className={cn("w-4 h-4", isLoading && "animate-pulse")} />
+          {isLoading ? "Sending…" : "Send request"}
+        </button>
       </div>
 
       {/* Authentication */}
@@ -250,6 +273,78 @@ function ParametersContent({ config, patch }: {
   );
 }
 
+// ── Response display ──────────────────────────────────────────────────────────
+
+function ResponseDisplay({ response, error, isLoading }: {
+  response: HttpResponse | null;
+  error: string | null;
+  isLoading: boolean;
+}) {
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 gap-3">
+        <div className="w-10 h-10 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center animate-pulse">
+          <Zap className="w-5 h-5 text-orange-400" />
+        </div>
+        <p className="text-sm text-zinc-400">Sending request…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-4 space-y-2">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-red-500" />
+          <p className="text-sm font-medium text-red-400">Request failed</p>
+        </div>
+        <pre className="text-xs text-red-300 bg-red-950/30 rounded px-3 py-2 overflow-auto max-h-40">
+          {error}
+        </pre>
+      </div>
+    );
+  }
+
+  if (response) {
+    const isJson = typeof response.data === "object";
+    const statusColor = response.ok ? "text-green-400" : "text-amber-400";
+    const statusBg = response.ok ? "bg-green-500/10 border-green-500/30" : "bg-amber-500/10 border-amber-500/30";
+
+    return (
+      <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {response.ok ? (
+              <CheckCircle2 className="w-4 h-4 text-green-400" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-amber-400" />
+            )}
+            <span className={cn("text-sm font-mono font-bold", statusColor)}>
+              {response.status}
+            </span>
+          </div>
+          {response.duration && (
+            <p className="text-xs text-zinc-500">{response.duration}ms</p>
+          )}
+        </div>
+
+        <div className="bg-zinc-950/50 rounded border border-zinc-800/30 p-3">
+          <p className="text-xs text-zinc-600 mb-2 uppercase tracking-wider">Response</p>
+          <pre className="text-xs text-zinc-300 font-mono overflow-auto max-h-64 whitespace-pre-wrap break-words">
+            {isJson ? JSON.stringify(response.data, null, 2) : String(response.data)}
+          </pre>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center py-8 gap-2">
+      <p className="text-sm text-zinc-500">Click "Send request" to test</p>
+    </div>
+  );
+}
+
 // ── Panel export ──────────────────────────────────────────────────────────────
 
 interface HttpRequestPanelProps {
@@ -261,6 +356,9 @@ interface HttpRequestPanelProps {
 
 export function HttpRequestPanel({ node, onClose, onExecuteStep, onNodeChange }: HttpRequestPanelProps) {
   const [config, setConfig] = useState<HttpRequestConfig>(() => defaultConfig(node.data ?? {}));
+  const [response, setResponse] = useState<HttpResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const patch = useCallback(
     (partial: Partial<HttpRequestConfig>) => {
@@ -273,6 +371,77 @@ export function HttpRequestPanel({ node, onClose, onExecuteStep, onNodeChange }:
     [node, onNodeChange]
   );
 
+  const handleSendRequest = useCallback(async () => {
+    if (!config.url) {
+      setError("URL is required");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setResponse(null);
+
+    try {
+      const startTime = performance.now();
+
+      let url = config.url;
+      const headers: Record<string, string> = {};
+
+      // Auth
+      const authType = config.authType || "none";
+      if (authType === "bearer" && config.authToken) {
+        headers["Authorization"] = `Bearer ${config.authToken}`;
+      } else if (authType === "apiKey" && config.authApiKeyHeader && config.authApiKeyValue) {
+        headers[config.authApiKeyHeader] = config.authApiKeyValue;
+      } else if (authType === "basic" && config.authUsername && config.authPassword) {
+        const encoded = Buffer.from(`${config.authUsername}:${config.authPassword}`).toString("base64");
+        headers["Authorization"] = `Basic ${encoded}`;
+      }
+
+      // Query params
+      if (config.sendQueryParams && config.queryParams.length > 0) {
+        const params = config.queryParams
+          .filter((p) => p.key)
+          .reduce<Record<string, string>>((acc, p) => { acc[p.key] = p.value; return acc; }, {});
+        const qs = new URLSearchParams(params).toString();
+        if (qs) url = `${url}${url.includes("?") ? "&" : "?"}${qs}`;
+      }
+
+      // Headers
+      if (config.sendHeaders && config.headers.length > 0) {
+        config.headers.filter((h) => h.key).forEach((h) => { headers[h.key] = h.value; });
+      }
+
+      // Body
+      let body: string | undefined;
+      const noBody = config.method === "GET" || config.method === "HEAD" || config.method === "OPTIONS";
+      if (!noBody && config.sendBody && config.body) {
+        const bodyType = config.bodyType || "json";
+        if (bodyType === "json") {
+          headers["Content-Type"] = "application/json";
+        } else if (bodyType === "form") {
+          headers["Content-Type"] = "application/x-www-form-urlencoded";
+        } else {
+          headers["Content-Type"] = "text/plain";
+        }
+        body = config.body;
+      }
+
+      const res = await fetch(url, { method: config.method, headers, body });
+      const contentType = res.headers.get("content-type") ?? "";
+      const data = contentType.includes("application/json")
+        ? await res.json()
+        : await res.text();
+
+      const duration = Math.round(performance.now() - startTime);
+      setResponse({ status: res.status, ok: res.ok, data, duration });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [config]);
+
   return (
     <NodeModalShell
       node={node}
@@ -283,7 +452,15 @@ export function HttpRequestPanel({ node, onClose, onExecuteStep, onNodeChange }:
       onExecuteStep={onExecuteStep}
       onNodeChange={onNodeChange}
       executeButtonLabel="Send request"
-      parametersContent={<ParametersContent config={config} patch={patch} />}
+      parametersContent={
+        <div className="space-y-6">
+          <ParametersContent config={config} patch={patch} onSendRequest={handleSendRequest} isLoading={isLoading} />
+          <div className="border-t border-zinc-800/30 pt-4">
+            <p className="text-xs font-medium text-zinc-600 mb-3">RESPONSE</p>
+            <ResponseDisplay response={response} error={error} isLoading={isLoading} />
+          </div>
+        </div>
+      }
     />
   );
 }

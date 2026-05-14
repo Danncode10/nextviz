@@ -33,6 +33,7 @@ import { Plus, Undo2, Redo2, KeyRound } from "lucide-react";
 import Link from "next/link";
 import { NodePropertiesPanel } from "./node-properties-panel";
 import { ChatWindow } from "./chat-window";
+import { ExecutionOutput } from "./execution-output";
 import { ModelSelectorPopup } from "../nodes/ai-agent/_components/model-selector-popup";
 import { MemoryPopup } from "../nodes/ai-agent/_components/memory-popup";
 import { ToolPopup } from "../nodes/ai-agent/_components/tool-popup";
@@ -75,6 +76,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   const [chatWindowOpen, setChatWindowOpen] = useState(false);
   const [executionResult, setExecutionResult] = useState<any>(null);
   const [isExecuting, setIsExecuting] = useState(false);
+  const [showExecutionOutput, setShowExecutionOutput] = useState(false);
 
   // Derive memory type from the active AI Agent node so ChatWindow can react to changes
   const activeMemoryType = (() => {
@@ -112,6 +114,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
       setIsExecuting(true);
       const result = await executeFlowAction(activeFlow.id);
       setExecutionResult(result);
+      setShowExecutionOutput(true);
       setChatWindowOpen(true);
       setIsExecuting(false);
     };
@@ -409,9 +412,34 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
 
   // ── Execute step handler ───────────────────────────────────────────────────
   const handleExecuteStep = useCallback(async (nodeId: string): Promise<Record<string, unknown>> => {
+    if (!activeFlow) return { error: "No active flow" };
+
+    // Check if the node is a manual trigger
+    const node = nodes.find((n) => n.id === nodeId);
+    if (node?.type === "manualTrigger") {
+      // Execute the full flow from this manual trigger
+      setIsExecuting(true);
+      setShowExecutionOutput(true);
+      try {
+        const result = await executeFlowAction(activeFlow.id, { triggeredBy: nodeId });
+        if (!result.success) {
+          setExecutionResult({ error: result.error });
+        } else {
+          setExecutionResult(result.result?.nodeOutputs ?? {});
+        }
+        return result.result?.nodeOutputs ?? {};
+      } catch (error) {
+        setExecutionResult({ error: String(error) });
+        return { error: String(error) };
+      } finally {
+        setIsExecuting(false);
+      }
+    }
+
+    // Default mock response for other node types
     await new Promise((r) => setTimeout(r, 700));
     return { executedAt: new Date().toISOString(), nodeId, flowId: activeFlow?.id ?? "unknown", payload: {} };
-  }, [activeFlow]);
+  }, [activeFlow, nodes]);
 
   // ── Create flow ────────────────────────────────────────────────────────────
   const handleCreateFlow = async () => {
@@ -492,9 +520,9 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
         )}
       </div>
 
-      {/* Canvas + Chat Window */}
+      {/* Canvas + Chat Window + Execution Output */}
       <div className="flex flex-col flex-1 min-h-0">
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-col flex-1 min-h-0">
         <div ref={reactFlowWrapper} className="flex-1 relative">
           <ReactFlow
             nodes={nodes}
@@ -521,6 +549,15 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
             <MiniMap className="bg-card border-border" maskColor="rgba(0,0,0,0.2)" nodeColor="#52525b" />
           </ReactFlow>
         </div>
+
+        {/* Execution output — shows results from flow execution */}
+        {showExecutionOutput && (
+          <ExecutionOutput
+            result={executionResult}
+            isExecuting={isExecuting}
+            onClose={() => setShowExecutionOutput(false)}
+          />
+        )}
       </div>
 
       {/* Chat window — slides up from bottom when a chatTrigger is open */}
