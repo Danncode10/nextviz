@@ -300,7 +300,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   }, [rfInstance, edges, pushHistory]);
 
   // ── Node click → open properties panel ────────────────────────────────────
-  const NODES_WITH_PANEL = new Set(["manualTrigger", "scheduleTrigger", "chatTrigger", "aiAgent"]);
+  const NODES_WITH_PANEL = new Set(["manualTrigger", "scheduleTrigger", "chatTrigger", "aiAgent", "httpRequest"]);
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     if (NODES_WITH_PANEL.has(node.type ?? "")) {

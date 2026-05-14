@@ -97,13 +97,28 @@
       "id": "node-1778738257396",
       "type": "httpRequest",
       "position": {
-        "x": 104.95919699150619,
-        "y": -271.1819523930269
+        "x": 104.25243829081012,
+        "y": -274.71574589650726
       },
       "data": {
-        "label": "HTTP Request"
+        "label": "HTTP Request",
+        "method": "GET",
+        "url": "",
+        "authType": "none",
+        "authToken": "",
+        "authApiKeyHeader": "X-API-Key",
+        "authApiKeyValue": "",
+        "authUsername": "",
+        "authPassword": "",
+        "sendQueryParams": false,
+        "sendHeaders": false,
+        "sendBody": false,
+        "queryParams": [],
+        "headers": [],
+        "bodyType": "json",
+        "body": ""
       },
-      "selected": false,
+      "selected": true,
       "width": 108,
       "height": 108
     }
