@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronRight, X, Copy, Check, AlertCircle, Code, MessageSquare, Activity, GripVertical } from "lucide-react";
+import { ChevronDown, ChevronRight, X, Copy, Check, AlertCircle, Code, MessageSquare, Activity, Send } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
@@ -10,16 +10,40 @@ interface ExecutionOutputProps {
   result: Record<string, unknown> | null;
   isExecuting: boolean;
   onClose: () => void;
+  chatMessages?: Array<{ role: "user" | "assistant"; content: string }>;
+  onSendChatMessage?: (message: string) => Promise<string>;
+  showChatTab?: boolean;
 }
 
-export function ExecutionOutput({ result, isExecuting, onClose }: ExecutionOutputProps) {
+export function ExecutionOutput({
+  result,
+  isExecuting,
+  onClose,
+  chatMessages = [],
+  onSendChatMessage,
+  showChatTab = false,
+}: ExecutionOutputProps) {
   const [activeTab, setActiveTab] = useState<TabType>("output");
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [height, setHeight] = useState(320); // Default height
+  const [chatInput, setChatInput] = useState("");
+  const [localChatMessages, setLocalChatMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>(chatMessages);
+  const [isSending, setIsSending] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
   const resizeRef = useRef<HTMLDivElement>(null);
   const startYRef = useRef(0);
   const startHeightRef = useRef(0);
+
+  // Update local chat messages when prop changes
+  useEffect(() => {
+    setLocalChatMessages(chatMessages);
+  }, [chatMessages]);
+
+  // Auto-scroll to bottom of chat
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [localChatMessages]);
 
   // Handle resize dragging
   useEffect(() => {
@@ -79,10 +103,31 @@ export function ExecutionOutput({ result, isExecuting, onClose }: ExecutionOutpu
       severity: "error" as const,
     }));
 
+  const handleSendMessage = async () => {
+    if (!chatInput.trim() || !onSendChatMessage) return;
+
+    const userMessage = chatInput;
+    setChatInput("");
+    setLocalChatMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+    setIsSending(true);
+
+    try {
+      const response = await onSendChatMessage(userMessage);
+      setLocalChatMessages((prev) => [...prev, { role: "assistant", content: response }]);
+    } catch (error) {
+      setLocalChatMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: `Error: ${error instanceof Error ? error.message : "Unknown error"}` },
+      ]);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const tabConfigs: Array<{ id: TabType; label: string; icon: React.ReactNode; badge?: number }> = [
     { id: "output", label: "Output", icon: <Code className="w-4 h-4" />, badge: nodeIds.length },
     { id: "problems", label: "Problems", icon: <AlertCircle className="w-4 h-4" />, badge: problems.length > 0 ? problems.length : undefined },
-    { id: "chat", label: "Chat", icon: <MessageSquare className="w-4 h-4" /> },
+    ...(showChatTab ? [{ id: "chat" as TabType, label: "Chat", icon: <MessageSquare className="w-4 h-4" /> }] : []),
     { id: "logs", label: "Logs", icon: <Activity className="w-4 h-4" /> },
   ];
 
@@ -240,12 +285,65 @@ export function ExecutionOutput({ result, isExecuting, onClose }: ExecutionOutpu
         )}
 
         {/* Chat Tab */}
-        {activeTab === "chat" && !isExecuting && (
-          <div className="flex items-center justify-center py-12 text-center">
-            <div className="space-y-2">
-              <MessageSquare className="w-8 h-8 text-zinc-700 mx-auto" />
-              <p className="text-sm text-zinc-600">No chat messages</p>
-              <p className="text-xs text-zinc-700">Use Chat Trigger to enable chat mode</p>
+        {activeTab === "chat" && (
+          <div className="flex flex-col h-full">
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto space-y-3 p-3">
+              {localChatMessages.length === 0 ? (
+                <div className="flex items-center justify-center py-12 text-center">
+                  <div className="space-y-2">
+                    <MessageSquare className="w-8 h-8 text-zinc-700 mx-auto" />
+                    <p className="text-sm text-zinc-600">No messages yet</p>
+                    <p className="text-xs text-zinc-700">Send a message to start chatting</p>
+                  </div>
+                </div>
+              ) : (
+                localChatMessages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}
+                  >
+                    <div
+                      className={cn(
+                        "max-w-xs px-3 py-2 rounded-lg text-sm",
+                        msg.role === "user"
+                          ? "bg-orange-600 text-white"
+                          : "bg-zinc-800 text-zinc-200"
+                      )}
+                    >
+                      {msg.content}
+                    </div>
+                  </div>
+                ))
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Input */}
+            <div className="border-t border-zinc-800 p-3 bg-zinc-900/50 shrink-0">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  placeholder="Type a message..."
+                  disabled={isSending || !onSendChatMessage}
+                  className="flex-1 bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded px-3 py-2 focus:outline-none focus:border-orange-500 disabled:opacity-50 placeholder:text-zinc-600"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={isSending || !chatInput.trim() || !onSendChatMessage}
+                  className="bg-orange-600 hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-2 rounded transition-colors flex items-center gap-1"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         )}

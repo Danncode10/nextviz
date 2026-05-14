@@ -7,8 +7,8 @@
       "id": "node-1778738668143",
       "type": "manualTrigger",
       "position": {
-        "x": 9.786922277234567,
-        "y": -18.017085117913737
+        "x": -3.2130777227654335,
+        "y": -75.01708511791374
       },
       "data": {
         "label": "Manual Trigger"
@@ -21,8 +21,8 @@
       "id": "node-1778738671841",
       "type": "httpRequest",
       "position": {
-        "x": 370.85377757588356,
-        "y": 7.890697621141626
+        "x": 321.35377757588356,
+        "y": -76.10930237885837
       },
       "data": {
         "label": "HTTP Request",
@@ -42,7 +42,7 @@
         "bodyType": "json",
         "body": ""
       },
-      "selected": false,
+      "selected": true,
       "width": 108,
       "height": 108
     }

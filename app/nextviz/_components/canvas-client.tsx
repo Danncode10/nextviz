@@ -77,6 +77,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   const [executionResult, setExecutionResult] = useState<any>(null);
   const [isExecuting, setIsExecuting] = useState(false);
   const [showExecutionOutput, setShowExecutionOutput] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
 
   // Derive memory type from the active AI Agent node so ChatWindow can react to changes
   const activeMemoryType = (() => {
@@ -124,16 +125,11 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
 
   // ── Chat message handler — runs flow with message payload ─────────────────
   const handleChatMessage = useCallback(
-    async (
-      message: string,
-      sessionId: string,
-      chatHistory: Array<{ role: "user" | "assistant" | "system"; content: string }>
-    ): Promise<string> => {
+    async (message: string): Promise<string> => {
       if (!activeFlow) return "No active flow.";
       const result = await executeFlowAction(activeFlow.id, {
         chatMessage: message,
-        sessionId,
-        chatHistory,
+        chatHistory: chatMessages,
       });
       if (!result.success) return `Error: ${result.error}`;
       const outputs = result.result?.nodeOutputs ?? {};
@@ -145,7 +141,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
       }
       return "No response returned from AI Agent.";
     },
-    [activeFlow]
+    [activeFlow, chatMessages]
   );
 
   // ── Undo / Redo history ────────────────────────────────────────────────────
@@ -555,21 +551,18 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
           <ExecutionOutput
             result={executionResult}
             isExecuting={isExecuting}
-            onClose={() => setShowExecutionOutput(false)}
+            onClose={() => {
+              setShowExecutionOutput(false);
+              setChatWindowOpen(false);
+              setChatMessages([]);
+            }}
+            showChatTab={chatWindowOpen}
+            onSendChatMessage={chatWindowOpen ? handleChatMessage : undefined}
+            chatMessages={chatMessages}
           />
         )}
       </div>
 
-      {/* Chat window — slides up from bottom when a chatTrigger is open */}
-      {chatWindowOpen && (
-        <ChatWindow
-          onClose={() => setChatWindowOpen(false)}
-          onSendMessage={handleChatMessage}
-          memoryType={activeMemoryType}
-          executionResult={executionResult}
-          isExecuting={isExecuting}
-        />
-      )}
       </div>
 
       {/* Properties modal — portal to body, not affected by canvas transforms */}
@@ -578,7 +571,12 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
           node={selectedNode}
           onClose={() => setSelectedNode(null)}
           onExecuteStep={handleExecuteStep}
-          onOpenChat={() => { setSelectedNode(null); setChatWindowOpen(true); }}
+          onOpenChat={() => {
+            setSelectedNode(null);
+            setChatWindowOpen(true);
+            setShowExecutionOutput(true);
+            setChatMessages([]);
+          }}
           onNodeChange={(updatedNode) => {
             handleNodeChange(updatedNode);
             setSelectedNode(updatedNode);
