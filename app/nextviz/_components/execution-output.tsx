@@ -10,23 +10,23 @@ interface ExecutionOutputProps {
   result: Record<string, unknown> | null;
   isExecuting: boolean;
   onClose: () => void;
+  initialTab?: TabType;
   chatMessages?: Array<{ role: "user" | "assistant"; content: string }>;
   onSendChatMessage?: (message: string) => Promise<string>;
-  showChatTab?: boolean;
 }
 
 export function ExecutionOutput({
   result,
   isExecuting,
   onClose,
+  initialTab = "output",
   chatMessages = [],
   onSendChatMessage,
-  showChatTab = false,
 }: ExecutionOutputProps) {
-  const [activeTab, setActiveTab] = useState<TabType>("output");
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [height, setHeight] = useState(320); // Default height
+  const [height, setHeight] = useState(320);
   const [chatInput, setChatInput] = useState("");
   const [localChatMessages, setLocalChatMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>(chatMessages);
   const [isSending, setIsSending] = useState(false);
@@ -34,28 +34,11 @@ export function ExecutionOutput({
   const resizeRef = useRef<HTMLDivElement>(null);
   const startYRef = useRef(0);
   const startHeightRef = useRef(0);
-  const hasAutoSwitchedRef = useRef(false);
-
-  // Update local chat messages when prop changes
-  useEffect(() => {
-    setLocalChatMessages(chatMessages);
-  }, [chatMessages]);
 
   // Auto-scroll to bottom of chat
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [localChatMessages]);
-
-  // Auto-switch to Chat tab only on first open
-  useEffect(() => {
-    if (showChatTab && !hasAutoSwitchedRef.current) {
-      setActiveTab("chat");
-      hasAutoSwitchedRef.current = true;
-    }
-    if (!showChatTab) {
-      hasAutoSwitchedRef.current = false;
-    }
-  }, [showChatTab]);
 
   // Handle resize dragging
   useEffect(() => {
@@ -139,7 +122,7 @@ export function ExecutionOutput({
   const tabConfigs: Array<{ id: TabType; label: string; icon: React.ReactNode; badge?: number }> = [
     { id: "output", label: "Output", icon: <Code className="w-4 h-4" />, badge: nodeIds.length },
     { id: "problems", label: "Problems", icon: <AlertCircle className="w-4 h-4" />, badge: problems.length > 0 ? problems.length : undefined },
-    ...(showChatTab ? [{ id: "chat" as TabType, label: "Chat", icon: <MessageSquare className="w-4 h-4" /> }] : []),
+    ...(initialTab === "chat" || onSendChatMessage ? [{ id: "chat" as TabType, label: "Chat", icon: <MessageSquare className="w-4 h-4" /> }] : []),
     { id: "logs", label: "Logs", icon: <Activity className="w-4 h-4" /> },
   ];
 

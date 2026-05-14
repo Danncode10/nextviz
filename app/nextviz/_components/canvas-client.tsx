@@ -77,6 +77,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   const [executionResult, setExecutionResult] = useState<any>(null);
   const [isExecuting, setIsExecuting] = useState(false);
   const [showExecutionOutput, setShowExecutionOutput] = useState(false);
+  const [executionOutputTab, setExecutionOutputTab] = useState<"output" | "chat">("output");
   const [chatMessages, setChatMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
 
   // Derive memory type from the active AI Agent node so ChatWindow can react to changes
@@ -108,20 +109,24 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Flow execution listener (manual trigger button) ───────────────────────
+  // ── Flow execution listener (play button on canvas) ──────────────────────
   useEffect(() => {
     const handleExecuteFlow = async () => {
       if (!activeFlow) return;
+      const hasChatTrigger = nodes.some((n) => n.type === "chatTrigger");
+      setExecutionOutputTab(hasChatTrigger ? "chat" : "output");
+      setChatWindowOpen(hasChatTrigger);
       setIsExecuting(true);
-      const result = await executeFlowAction(activeFlow.id);
-      setExecutionResult(result);
       setShowExecutionOutput(true);
-      setChatWindowOpen(true);
-      setIsExecuting(false);
+      if (!hasChatTrigger) {
+        const result = await executeFlowAction(activeFlow.id);
+        setExecutionResult(result);
+        setIsExecuting(false);
+      }
     };
     document.addEventListener("nextviz:execute-flow", handleExecuteFlow);
     return () => document.removeEventListener("nextviz:execute-flow", handleExecuteFlow);
-  }, [activeFlow]);
+  }, [activeFlow, nodes]);
 
   // ── Chat message handler — runs flow with message payload ─────────────────
   const handleChatMessage = useCallback(
@@ -415,6 +420,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
     if (node?.type === "manualTrigger") {
       // Execute the full flow from this manual trigger
       setIsExecuting(true);
+      setExecutionOutputTab("output");
       setShowExecutionOutput(true);
       try {
         const result = await executeFlowAction(activeFlow.id, { triggeredBy: nodeId });
@@ -549,14 +555,15 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
         {/* Execution output — shows results from flow execution */}
         {showExecutionOutput && (
           <ExecutionOutput
+            key={executionOutputTab}
             result={executionResult}
             isExecuting={isExecuting}
+            initialTab={executionOutputTab}
             onClose={() => {
               setShowExecutionOutput(false);
               setChatWindowOpen(false);
               setChatMessages([]);
             }}
-            showChatTab={chatWindowOpen}
             onSendChatMessage={chatWindowOpen ? handleChatMessage : undefined}
             chatMessages={chatMessages}
           />
@@ -574,6 +581,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
           onOpenChat={() => {
             setSelectedNode(null);
             setChatWindowOpen(true);
+            setExecutionOutputTab("chat");
             setShowExecutionOutput(true);
             setChatMessages([]);
           }}
