@@ -6,12 +6,15 @@ export const chatTrigger: NodeExecutorFn = async (nodeData, inputs) => {
     (nodeData?.testMessage as string) ??
     "";
 
+  const chatHistory = (inputs?.chatHistory as unknown[]) ?? [];
+  console.log(`[Chat Trigger] Received chatHistory length: ${Array.isArray(chatHistory) ? chatHistory.length : 'invalid'}`);
+
   return {
     message,
     sessionId:
       (inputs?.sessionId as string) ?? `session-${Date.now()}`,
     timestamp: new Date().toISOString(),
-    chatHistory: (inputs?.chatHistory as unknown[]) ?? [],
+    chatHistory,
     isPublic: nodeData?.chatPublic ?? false,
   };
 };
