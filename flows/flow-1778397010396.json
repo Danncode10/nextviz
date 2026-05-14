@@ -21,8 +21,8 @@
       "id": "node-1778650097267",
       "type": "aiAgent",
       "position": {
-        "x": -332.08438123189524,
-        "y": -354.8027712752522
+        "x": -331.3732995689936,
+        "y": -354.0916896123506
       },
       "data": {
         "label": "AI Agent",
@@ -33,7 +33,7 @@
           "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
         },
         "memory": {
-          "type": "none",
+          "type": "simple",
           "supabase": {
             "urlRef": "NEXTVIZ_SUPABASE_URL",
             "keyRef": "NEXTVIZ_SUPABASE_SERVICE_ROLE_KEY",
@@ -43,7 +43,7 @@
           }
         }
       },
-      "selected": false,
+      "selected": true,
       "width": 280,
       "height": 173
     },
@@ -61,7 +61,29 @@
           "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
         }
       },
-      "selected": true,
+      "selected": false,
+      "width": 160,
+      "height": 56
+    },
+    {
+      "id": "node-1778650097267-memory",
+      "type": "memoryNode",
+      "position": {
+        "x": -222.08438123189524,
+        "y": -124.80277127525221
+      },
+      "data": {
+        "memory": {
+          "type": "simple",
+          "supabase": {
+            "urlRef": "NEXTVIZ_SUPABASE_URL",
+            "keyRef": "NEXTVIZ_SUPABASE_SERVICE_ROLE_KEY",
+            "table": "",
+            "columns": [],
+            "rowFilter": "Lesterdannlopez7@gmail.com"
+          }
+        }
+      },
       "width": 160,
       "height": 56
     }
@@ -80,6 +102,14 @@
       "target": "node-1778650097267-model",
       "sourceHandle": "model-out",
       "targetHandle": "model-in",
+      "type": "smoothstep"
+    },
+    {
+      "id": "node-1778650097267-to-memory",
+      "source": "node-1778650097267",
+      "target": "node-1778650097267-memory",
+      "sourceHandle": "memory-out",
+      "targetHandle": "memory-in",
       "type": "smoothstep"
     }
   ]

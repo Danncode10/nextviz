@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { MessageSquare, RotateCcw, ChevronDown, MoreHorizontal, Send, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ interface ChatMessage {
 export interface ChatWindowProps {
   onClose: () => void;
   onSendMessage: (message: string, sessionId: string, chatHistory: Array<{ role: "user" | "assistant"; content: string }>) => Promise<string>;
+  memoryType?: string;
   executionResult?: any;
   isExecuting?: boolean;
 }
@@ -28,12 +29,25 @@ function generateSessionId() {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export function ChatWindow({ onClose, onSendMessage, executionResult, isExecuting }: ChatWindowProps) {
+export function ChatWindow({ onClose, onSendMessage, memoryType = "none", executionResult, isExecuting }: ChatWindowProps) {
   const [messages, setMessages]   = useState<ChatMessage[]>([]);
   const [input, setInput]         = useState("");
   const [sessionId, setSessionId] = useState(generateSessionId);
   const [isSending, setIsSending] = useState(false);
   const [logs, setLogs]           = useState<string[]>([]);
+
+  // Reset session whenever memory mode changes to avoid cross-mode history bleed
+  const prevMemoryType = useRef(memoryType);
+  useEffect(() => {
+    if (prevMemoryType.current !== memoryType) {
+      prevMemoryType.current = memoryType;
+      setMessages([]);
+      setSessionId(generateSessionId());
+      setLogs([`🔄 Memory mode changed to "${memoryType}" — session reset.`]);
+      msgHistory.current = [];
+      historyIdx.current = -1;
+    }
+  }, [memoryType]);
 
   const inputRef    = useRef<HTMLTextAreaElement>(null);
   const messagesEnd = useRef<HTMLDivElement>(null);
@@ -71,9 +85,11 @@ export function ChatWindow({ onClose, onSendMessage, executionResult, isExecutin
     setIsSending(true);
     setTimeout(scrollToBottom, 50);
 
-    // Pass only PREVIOUS messages — executor appends the current user message itself
+    // Simple memory: pass previous messages. None (and others): send empty history.
     const chatHistoryWithUserMsg: Array<{ role: "user" | "assistant"; content: string }> =
-      messages.map((m) => ({ role: m.role, content: m.content }));
+      memoryType === "simple"
+        ? messages.map((m) => ({ role: m.role, content: m.content }))
+        : [];
 
     const start = Date.now();
     try {
@@ -106,7 +122,7 @@ export function ChatWindow({ onClose, onSendMessage, executionResult, isExecutin
       setTimeout(scrollToBottom, 50);
       inputRef.current?.focus();
     }
-  }, [input, isSending, messages, onSendMessage, sessionId]);
+  }, [input, isSending, memoryType, messages, onSendMessage, sessionId]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {

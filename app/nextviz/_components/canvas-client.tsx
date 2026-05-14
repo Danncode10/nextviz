@@ -61,6 +61,12 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   const [executionResult, setExecutionResult] = useState<any>(null);
   const [isExecuting, setIsExecuting] = useState(false);
 
+  // Derive memory type from the active AI Agent node so ChatWindow can react to changes
+  const activeMemoryType = (() => {
+    const aiNode = nodes.find((n) => n.type === "aiAgent");
+    return (aiNode?.data?.memory as { type?: string } | undefined)?.type ?? "none";
+  })();
+
   // ── Sub-component popups (opened from canvas node sub-ports) ─────────────
   const [modelPopupNode,  setModelPopupNode]  = useState<Node | null>(null);
   const [memoryPopupNode, setMemoryPopupNode] = useState<Node | null>(null);
@@ -507,6 +513,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
         <ChatWindow
           onClose={() => setChatWindowOpen(false)}
           onSendMessage={handleChatMessage}
+          memoryType={activeMemoryType}
           executionResult={executionResult}
           isExecuting={isExecuting}
         />
