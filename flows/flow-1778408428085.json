@@ -7,8 +7,8 @@
       "id": "node-1778738569629",
       "type": "chatTrigger",
       "position": {
-        "x": 191.18126157623004,
-        "y": -93.25396777882992
+        "x": 174.1878507972944,
+        "y": -114.10951737116002
       },
       "data": {
         "label": "Chat Trigger"
@@ -21,8 +21,8 @@
       "id": "node-1778738573211",
       "type": "aiAgent",
       "position": {
-        "x": 420.4847120486275,
-        "y": -75.90217514587627
+        "x": 441.34026164095764,
+        "y": -105.2544301276742
       },
       "data": {
         "label": "AI Agent",
@@ -35,7 +35,7 @@
           "type": "simple"
         }
       },
-      "selected": false,
+      "selected": true,
       "width": 280,
       "height": 173
     },
@@ -69,7 +69,7 @@
           "type": "simple"
         }
       },
-      "selected": true,
+      "selected": false,
       "width": 160,
       "height": 56
     }

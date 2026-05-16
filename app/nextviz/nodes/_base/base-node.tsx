@@ -24,13 +24,16 @@
 
 import { useRef, useState, ReactNode } from "react";
 import { Handle, Position } from "reactflow";
-import { Zap } from "lucide-react";
+import { Zap, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NodeHoverMenu } from "../../_components/node-hover-menu";
+
+export type ExecutionState = "running" | "success" | "error";
 
 export interface BaseNodeData {
   label?: string;
   disabled?: boolean;
+  executionState?: ExecutionState;
   [key: string]: unknown;
 }
 
@@ -40,6 +43,8 @@ export interface BaseNodeProps {
   selected: boolean;
   children: ReactNode;
   defaultLabel: string;
+  /** Optional colored subtitle rendered below the main label (e.g. "GET: api.example.com"). */
+  subtitle?: ReactNode;
   /** Show the ⚡ badge on the left (triggers only). Default false. */
   showBadge?: boolean;
   /** Show the source handle on the right. Default true. */
@@ -54,6 +59,7 @@ export function BaseNode({
   selected,
   children,
   defaultLabel,
+  subtitle,
   showBadge = false,
   showSourceHandle = true,
   showTargetHandle = false,
@@ -71,6 +77,7 @@ export function BaseNode({
   };
 
   const label = (data?.label as string | undefined) || defaultLabel;
+  const execState = data?.executionState as ExecutionState | undefined;
 
   return (
     <div
@@ -83,14 +90,27 @@ export function BaseNode({
       <div
         className={cn(
           "absolute inset-0 rounded-[22px] bg-zinc-800 border-2 flex items-center justify-center transition-all duration-150",
-          selected
-            ? "border-orange-500 shadow-[0_0_0_3px_rgba(249,115,22,0.18)]"
-            : "border-zinc-700 hover:border-zinc-500",
+          execState === "running" && "border-primary animate-pulse shadow-[0_0_0_3px_rgba(var(--primary)/0.2)]",
+          execState === "success" && "border-green-500 shadow-[0_0_0_3px_rgba(34,197,94,0.18)]",
+          execState === "error" && "border-destructive shadow-[0_0_0_3px_rgba(var(--destructive)/0.2)]",
+          !execState && selected && "border-orange-500 shadow-[0_0_0_3px_rgba(249,115,22,0.18)]",
+          !execState && !selected && "border-zinc-700 hover:border-zinc-500",
           data.disabled && "border-zinc-800 bg-zinc-900"
         )}
       >
         {children}
       </div>
+
+      {/* Execution state badge */}
+      {execState === "running" && (
+        <Loader2 className="absolute -top-2 -right-2 w-5 h-5 text-primary animate-spin pointer-events-none" />
+      )}
+      {execState === "success" && (
+        <CheckCircle2 className="absolute -top-2 -right-2 w-5 h-5 text-green-500 pointer-events-none" />
+      )}
+      {execState === "error" && (
+        <XCircle className="absolute -top-2 -right-2 w-5 h-5 text-destructive pointer-events-none" />
+      )}
 
       {/* Trigger badge */}
       {showBadge && (
@@ -103,6 +123,7 @@ export function BaseNode({
         style={{ top: 116, width: 180 }}
       >
         <p className="text-[11px] font-medium text-zinc-300 leading-snug">{label}</p>
+        {subtitle && <div className="mt-0.5">{subtitle}</div>}
       </div>
 
       {/* Handles */}

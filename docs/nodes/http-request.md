@@ -46,13 +46,13 @@ Key fields extracted from `HttpRequestV3.node.ts`:
 
 ## Gap Analysis (NextViz vs n8n)
 
-### 🟥 Tier 1 — Architectural fixes (do first)
+### 🟥 Tier 1 — Architectural fixes ✅ COMPLETE
 
-- [ ] **Two-file pattern violated** — Executor is at `lib/nextviz/node-executors/http-request.ts`, not `app/nextviz/nodes/http-request/logic.ts`. Move it; have node-executors/index.ts re-export.
-- [ ] **`node.tsx` reinvents BaseNode** — Duplicates ~50 lines of hover/handle/label logic. Refactor to use `_base/base-node.tsx`.
-- [ ] **No execution visual feedback** — `node.tsx` doesn't apply `running → border-primary + pulse`, `success → border-green-500`, `error → border-destructive`. Add execution state reading to `BaseNode` (benefits all nodes).
-- [ ] **viz-\* primitives missing** — `panel.tsx` uses local `Input`/`Select`/`Toggle`/`KVEditor`. Only `viz-connection.tsx` exists. Build `viz-input`, `viz-select`, `viz-toggle`, `viz-kv-editor` first, then refactor the panel.
-- [ ] **`Buffer.from` in browser** — `panel.tsx:397` uses Node.js `Buffer` for Basic auth encoding in the test-send. Replace with `btoa(\`${user}:${pass}\`)`.
+- [x] **Two-file pattern violated** — Created `app/nextviz/nodes/http-request/logic.ts`; `lib/nextviz/node-executors/http-request.ts` now re-exports from there.
+- [x] **`node.tsx` reinvents BaseNode** — Refactored to use `BaseNode`. Added `subtitle` prop to `BaseNode` for the method/host line.
+- [x] **No execution visual feedback** — Added `ExecutionState` type + `executionState` field to `BaseNodeData`. `BaseNode` now applies `border-primary + animate-pulse` (running), `border-green-500` (success), `border-destructive` (error), plus badge icons.
+- [x] **viz-\* primitives missing** — Created `viz-input.tsx`, `viz-select.tsx`, `viz-toggle.tsx`, `viz-kv-editor.tsx`. Panel refactored to use all four.
+- [x] **`Buffer.from` in browser** — Replaced with `btoa(\`${user}:${pass}\`)` in `panel.tsx`.
 
 ### 🟧 Tier 2 — Feature parity gaps
 
@@ -90,33 +90,60 @@ Key fields extracted from `HttpRequestV3.node.ts`:
 
 Steps are ordered: complete each before moving to the next.
 
-### Step 1 — Build missing viz-\* primitives
-- [ ] `components/nextviz/viz-input.tsx` — text / number / URL / password input
-- [ ] `components/nextviz/viz-select.tsx` — static option dropdown
-- [ ] `components/nextviz/viz-toggle.tsx` — boolean toggle with label + description
-- [ ] `components/nextviz/viz-kv-editor.tsx` — key-value row editor with add/remove
+### Step 1 — Build missing viz-\* primitives ✅
+- [x] `components/nextviz/viz-input.tsx` — text / number / URL / password input
+- [x] `components/nextviz/viz-select.tsx` — static option dropdown
+- [x] `components/nextviz/viz-toggle.tsx` — boolean toggle with label + description
+- [x] `components/nextviz/viz-kv-editor.tsx` — key-value row editor with add/remove
 
-### Step 2 — Fix `node.tsx` (use BaseNode + execution feedback)
-- [ ] Refactor `node.tsx` to extend `BaseNode` instead of duplicating it
-- [ ] Read `data.executionState` (`running` / `success` / `error`) and apply border classes
-- [ ] Show method + hostname subtitle below node label (keep current display logic)
+### Step 2 — Fix `node.tsx` (use BaseNode + execution feedback) ✅
+- [x] Refactor `node.tsx` to extend `BaseNode` instead of duplicating it
+- [x] Read `data.executionState` (`running` / `success` / `error`) and apply border classes
+- [x] Show method + hostname subtitle below node label via new `subtitle` prop on BaseNode
 
-### Step 3 — Add execution state to BaseNode
-- [ ] Add `executionState?: 'running' | 'success' | 'error'` to `BaseNodeData`
-- [ ] Apply conditional border classes in `BaseNode` (all nodes inherit this for free)
+### Step 3 — Add execution state to BaseNode ✅
+- [x] Added `ExecutionState` type + `executionState?: ExecutionState` to `BaseNodeData`
+- [x] Applied conditional border classes in `BaseNode` (all nodes inherit this for free)
+- [x] Added badge icons: `Loader2` (running), `CheckCircle2` (success), `XCircle` (error)
 
-### Step 4 — Move executor to two-file pattern
-- [ ] Create `app/nextviz/nodes/http-request/logic.ts` with the `NodeExecutorFn`
-- [ ] Update `lib/nextviz/node-executors/http-request.ts` to re-export from the new location (keeps index.ts wiring intact)
+### Step 4 — Move executor to two-file pattern ✅
+- [x] Created `app/nextviz/nodes/http-request/logic.ts` with the `NodeExecutorFn`
+- [x] Updated `lib/nextviz/node-executors/http-request.ts` to re-export from new location
 
-### Step 5 — Fix `Buffer.from` browser bug
-- [ ] Replace `Buffer.from(\`${user}:${pass}\`).toString('base64')` with `btoa(\`${user}:${pass}\`)` in `panel.tsx`
+### Step 5 — Fix `Buffer.from` browser bug ✅
+- [x] Replaced with `btoa(\`${user}:${pass}\`)` in `panel.tsx`
 
-### Step 6 — Refactor `panel.tsx` to use viz-\* primitives
-- [ ] Replace local `Input` → `viz-input`
-- [ ] Replace local `Select` → `viz-select`
-- [ ] Replace local `Toggle` → `viz-toggle`
-- [ ] Replace local `KVEditor` → `viz-kv-editor`
+### Step 6 — Refactor `panel.tsx` to use viz-\* primitives ✅
+- [x] Replaced local `Input` → `VizInput`
+- [x] Replaced local `Select` → `VizSelect`
+- [x] Replaced local `Toggle` → `VizToggle`
+- [x] Replaced local `KVEditor` → `VizKvEditor`
+
+## Test Results
+
+### ✅ Test 1: Canvas node renders correctly
+- [x] Open the canvas, add an HTTP Request node
+- [x] Should show Globe icon + "HTTP Request" label + method subtitle below (e.g. `GET`)
+- [x] Should show no TypeScript errors in terminal
+
+### ✅ Test 2: Execution state feedback
+- [x] Manually set `data.executionState = "running"` on a node in the flow JSON, reload — border pulses with primary color + spinner badge
+- [x] Set `"success"` → green border + ✅ icon
+- [x] Set `"error"` → red border + ❌ icon
+
+### ⏳ Test 3: Panel opens and uses viz-* components
+- [ ] Click the HTTP Request node → panel opens
+- [ ] Method dropdown, URL input, auth section, toggles all render with the new unified dark style
+
+### ⏳ Test 4: Basic auth test-send (the Buffer.from fix)
+- [ ] In the panel, set Auth = Basic Auth, enter any username/password
+- [ ] Click "Send request" — should NOT throw `Buffer is not defined`
+
+### ⏳ Test 5: URL validation
+- [ ] Enter `example.com` (no `https://`) → should show error: `URL must start with "http://" or "https://"`
+
+### ⏳ Test 6: Logic.ts re-export still works
+- [ ] Run a flow that includes an HTTP Request node — it should still execute (the re-export chain: `index.ts` → `node-executors/http-request.ts` → `nodes/http-request/logic.ts`)
 
 ### Step 7 — Add Tier 2 features to panel + executor
 - [ ] URL validation (http/https prefix check)
