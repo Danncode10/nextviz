@@ -4,58 +4,19 @@
   "description": "",
   "nodes": [
     {
-      "id": "node-1778738668143",
+      "id": "node-1778930561864",
       "type": "manualTrigger",
       "position": {
-        "x": -115.56790247256151,
-        "y": -468.4184342234769
+        "x": 36.18230930005785,
+        "y": -568.9227489065297
       },
       "data": {
-        "label": "Manual Trigger",
-        "executionState": "success"
-      },
-      "selected": false,
-      "width": 108,
-      "height": 108
-    },
-    {
-      "id": "node-1778738671841",
-      "type": "httpRequest",
-      "position": {
-        "x": 136.85377757588356,
-        "y": -462.6093023788584
-      },
-      "data": {
-        "label": "HTTP Request",
-        "method": "GET",
-        "url": "http://example.com",
-        "authType": "basic",
-        "authToken": "",
-        "authApiKeyHeader": "X-API-Key",
-        "authApiKeyValue": "",
-        "authUsername": "admin@dann.com",
-        "authPassword": "syhxaj-3resKa-nogcot",
-        "sendQueryParams": false,
-        "sendHeaders": false,
-        "sendBody": false,
-        "queryParams": [],
-        "headers": [],
-        "bodyType": "json",
-        "body": "",
-        "executionState": "error"
+        "label": "Manual Trigger"
       },
       "selected": true,
       "width": 108,
       "height": 108
     }
   ],
-  "edges": [
-    {
-      "id": "reactflow__edge-node-1778738668143-node-1778738671841",
-      "source": "node-1778738668143",
-      "target": "node-1778738671841",
-      "sourceHandle": null,
-      "targetHandle": null
-    }
-  ]
+  "edges": []
 }

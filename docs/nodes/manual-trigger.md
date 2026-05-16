@@ -92,28 +92,28 @@ NextViz currently outputs: `{ triggered: true, triggeredAt: ISO string, payload:
 ### Tier 1
 
 **File structure**
-- [ ] `app/nextviz/nodes/manual-trigger/node.tsx` exists
-- [ ] `app/nextviz/nodes/manual-trigger/logic.ts` exists
-- [ ] Old flat file `app/nextviz/nodes/manual-trigger.tsx` is gone
+- [x] `app/nextviz/nodes/manual-trigger/node.tsx` exists
+- [x] `app/nextviz/nodes/manual-trigger/logic.ts` exists
+- [x] Old flat file `app/nextviz/nodes/manual-trigger.tsx` is gone
 
 **Import chain**
-- [ ] `app/nextviz/nodes/index.ts` imports from `"./manual-trigger/node"` (not `"./manual-trigger"`)
-- [ ] `lib/nextviz/node-executors/manual-trigger.ts` contains only a re-export — no logic
+- [x] `app/nextviz/nodes/index.ts` imports from `"./manual-trigger/node"` (not `"./manual-trigger"`)
+- [x] `lib/nextviz/node-executors/manual-trigger.ts` contains only a re-export — no logic
 
 **Canvas renders correctly**
-- [ ] Open the canvas — the Manual Trigger node renders with the `MousePointer2` icon
-- [ ] Node label shows `"When clicking 'Execute workflow'"`
-- [ ] Node has no input handle and one output handle
+- [x] Open the canvas — the Manual Trigger node renders with the `MousePointer2` icon
+- [x] Node label shows `"When clicking 'Execute workflow'"`
+- [x] Node has no input handle and one output handle
 
 **Executor still works**
-- [ ] Run a flow that starts with Manual Trigger — it executes without error
-- [ ] Downstream nodes receive `{ triggered: true, triggeredAt: <ISO string>, payload: ... }` in their inputs
-- [ ] `triggeredAt` value is a valid ISO 8601 date string
+- [x] Run a flow that starts with Manual Trigger — it executes without error
+- [x] Downstream nodes receive `{ triggered: true, triggeredAt: <ISO string>, payload: ... }` in their inputs
+- [x] `triggeredAt` value is a valid ISO 8601 date string
 
 **Execution state visual feedback**
-- [ ] While flow runs: Manual Trigger node shows `running` state (pulsing border)
-- [ ] After success: node shows `success` state (green border / ✅ badge)
-- [ ] After error in a downstream node: Manual Trigger node does not incorrectly show error state
+- [x] While flow runs: Manual Trigger node shows `running` state (pulsing border)
+- [x] After success: node shows `success` state (green border / ✅ badge)
+- [x] After error in a downstream node: Manual Trigger node does not incorrectly show error state
 
 ### Tier 2
 
