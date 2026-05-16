@@ -8,7 +8,7 @@ Copy the block below, fill in the blanks, and paste it into the chat.
 ```
 Build the **[NODE NAME]** node for NextViz.
 
-## Step 0 — Read before coding
+## Step 0 — Read before coding, use Github MCP
 1. Search `n8n-io/n8n` for `[n8n class name, e.g. HttpRequestV3]` and read the node descriptor + executor.
 2. Read `docs/nodes/README.md` for the documentation format.
 3. Create (or update) `docs/nodes/[node-name].md` following the format in docs/nodes/README.md — fill in the n8n Source Notes table and Masterplan before writing any code.
@@ -28,7 +28,6 @@ Build the **[NODE NAME]** node for NextViz.
 - No `any` types
 - Execution state visual feedback (running / success / error) via BaseNode
 - Update `docs/nodes/[node-name].md` as steps complete — mark [x] in Build Plan
-- **Do NOT populate Test Results** — leave all tier test sections empty. Tests are generated separately after each tier is complete.
 
 ## Do not commit — summarize changes and ask first
 ```
