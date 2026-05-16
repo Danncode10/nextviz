@@ -7,13 +7,14 @@
       "id": "node-1778738668143",
       "type": "manualTrigger",
       "position": {
-        "x": -116.49553935044423,
+        "x": -115.56790247256151,
         "y": -468.4184342234769
       },
       "data": {
-        "label": "Manual Trigger"
+        "label": "Manual Trigger",
+        "executionState": "success"
       },
-      "selected": true,
+      "selected": false,
       "width": 108,
       "height": 108
     },
@@ -27,7 +28,7 @@
       "data": {
         "label": "HTTP Request",
         "method": "GET",
-        "url": "example.com",
+        "url": "http://example.com",
         "authType": "basic",
         "authToken": "",
         "authApiKeyHeader": "X-API-Key",
@@ -40,9 +41,10 @@
         "queryParams": [],
         "headers": [],
         "bodyType": "json",
-        "body": ""
+        "body": "",
+        "executionState": "error"
       },
-      "selected": false,
+      "selected": true,
       "width": 108,
       "height": 108
     }
