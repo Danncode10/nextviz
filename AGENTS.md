@@ -112,6 +112,17 @@ When building a node's Properties Sidebar, use **only** the shared primitives fr
 - `viz-code-editor` — Monaco / CodeMirror pane for JS snippets
 - `viz-connection` — API key picker that auto-reads `.env.nextviz` key names
 
+### n8n Source Reference Rule
+Before building or modifying **any** node, use `github-mcp-server` to read the equivalent implementation from the `n8n-io/n8n` public repo. Follow this sequence:
+
+1. **Search** for the node in `n8n-io/n8n` using `search_code` (e.g. `HttpRequest`, `ScheduleTrigger`).
+2. **Read** the node's descriptor file (usually `*.node.ts`) to extract: input/output field names, default values, and option sets.
+3. **Read** the executor logic to understand how n8n processes the node at runtime.
+4. **Adapt** — do not copy Vue/n8n-specific code. Port the data shape and logic into NextViz's two-file pattern (`node.tsx` + `logic.ts`).
+5. **Note any gaps** — if n8n has behavior NextViz can't support yet, call it out before coding.
+
+> n8n's frontend is Vue 3. Only the **data schemas, field names, execution logic, and option sets** are portable to NextViz.
+
 ### Execution Visual Feedback Rule
 The canvas must reflect live execution state. Apply these styles when execution events are received:
 - `running` → `border-primary` + pulse animation

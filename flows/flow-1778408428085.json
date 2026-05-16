@@ -43,8 +43,8 @@
       "id": "node-1778738573211-model",
       "type": "chatModelNode",
       "position": {
-        "x": 259.41882455957506,
-        "y": 142.69540268685336
+        "x": 207.6661644600892,
+        "y": 79.35632614718415
       },
       "data": {
         "chatModel": {
@@ -61,15 +61,15 @@
       "id": "node-1778738573211-memory",
       "type": "memoryNode",
       "position": {
-        "x": 446.09199021032055,
-        "y": 214.8441662180436
+        "x": 204.3221004918271,
+        "y": 197.85075543910796
       },
       "data": {
         "memory": {
           "type": "simple"
         }
       },
-      "selected": false,
+      "selected": true,
       "width": 160,
       "height": 56
     }

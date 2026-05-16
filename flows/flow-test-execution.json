@@ -7,8 +7,8 @@
       "id": "node-manual-trigger",
       "type": "manualTrigger",
       "position": {
-        "x": 100,
-        "y": 100
+        "x": 34.85390831431789,
+        "y": -32.16520567991111
       },
       "data": {
         "label": "Manual Start"
@@ -21,16 +21,21 @@
       "id": "node-http-request",
       "type": "httpRequest",
       "position": {
-        "x": 350,
-        "y": 100
+        "x": 314.61066450432827,
+        "y": 8.339493710987995
       },
       "data": {
-        "label": "Get JSON Data",
+        "label": "Get Limited Posts",
         "method": "GET",
-        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "url": "https://jsonplaceholder.typicode.com/posts",
         "authType": "none",
-        "sendQueryParams": false,
-        "queryParams": [],
+        "sendQueryParams": true,
+        "queryParams": [
+          {
+            "key": "_limit",
+            "value": "5"
+          }
+        ],
         "sendHeaders": false,
         "headers": [],
         "sendBody": false,
