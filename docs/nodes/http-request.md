@@ -131,19 +131,20 @@ Steps are ordered: complete each before moving to the next.
 - [x] Set `"success"` → green border + ✅ icon
 - [x] Set `"error"` → red border + ❌ icon
 
-### ⏳ Test 3: Panel opens and uses viz-* components
-- [ ] Click the HTTP Request node → panel opens
-- [ ] Method dropdown, URL input, auth section, toggles all render with the new unified dark style
+### ✅ Test 3: Panel opens and uses viz-* components
+- [x] Click the HTTP Request node → panel opens
+- [x] Method dropdown, URL input, auth section, toggles all render with the new unified dark style
 
-### ⏳ Test 4: Basic auth test-send (the Buffer.from fix)
-- [ ] In the panel, set Auth = Basic Auth, enter any username/password
-- [ ] Click "Send request" — should NOT throw `Buffer is not defined`
+### ✅ Test 4: Basic auth test-send (the Buffer.from fix)
+- [x] In the panel, set Auth = Basic Auth, enter any username/password
+- [x] Click "Send request" — returned 200 with JSON data, no `Buffer is not defined` error
 
-### ⏳ Test 5: URL validation
-- [ ] Enter `example.com` (no `https://`) → should show error: `URL must start with "http://" or "https://"`
+### ✅ Test 5: URL validation
+- [x] Enter `example.com` (no `https://`) → showed error: `URL must start with "http://" or "https://"`
 
-### ⏳ Test 6: Logic.ts re-export still works
-- [ ] Run a flow that includes an HTTP Request node — it should still execute (the re-export chain: `index.ts` → `node-executors/http-request.ts` → `nodes/http-request/logic.ts`)
+### ✅ Test 6: Logic.ts re-export still works
+- [x] Ran the "HTTP request Example" flow — Manual Trigger + HTTP Request both executed successfully
+- [x] nodeOutputs returned status 200 with JSON data from jsonplaceholder API
 
 ### Step 7 — Add Tier 2 features to panel + executor
 - [ ] URL validation (http/https prefix check)

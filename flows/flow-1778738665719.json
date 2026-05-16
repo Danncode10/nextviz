@@ -7,8 +7,8 @@
       "id": "node-1778738668143",
       "type": "manualTrigger",
       "position": {
-        "x": -76.99553935044423,
-        "y": -377.4184342234769
+        "x": -116.49553935044423,
+        "y": -468.4184342234769
       },
       "data": {
         "label": "Manual Trigger"
@@ -21,19 +21,19 @@
       "id": "node-1778738671841",
       "type": "httpRequest",
       "position": {
-        "x": 225.85377757588356,
-        "y": -389.1093023788584
+        "x": 136.85377757588356,
+        "y": -462.6093023788584
       },
       "data": {
         "label": "HTTP Request",
         "method": "GET",
-        "url": "https://jsonplaceholder.typicode.com/posts/1",
-        "authType": "apiKey",
+        "url": "example.com",
+        "authType": "basic",
         "authToken": "",
         "authApiKeyHeader": "X-API-Key",
         "authApiKeyValue": "",
-        "authUsername": "",
-        "authPassword": "",
+        "authUsername": "admin@dann.com",
+        "authPassword": "syhxaj-3resKa-nogcot",
         "sendQueryParams": false,
         "sendHeaders": false,
         "sendBody": false,
