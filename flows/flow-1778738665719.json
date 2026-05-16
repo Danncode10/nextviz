@@ -7,13 +7,13 @@
       "id": "node-1778738668143",
       "type": "manualTrigger",
       "position": {
-        "x": -39.49553935044423,
-        "y": -289.4184342234769
+        "x": -76.99553935044423,
+        "y": -377.4184342234769
       },
       "data": {
         "label": "Manual Trigger"
       },
-      "selected": false,
+      "selected": true,
       "width": 108,
       "height": 108
     },
@@ -42,7 +42,7 @@
         "bodyType": "json",
         "body": ""
       },
-      "selected": true,
+      "selected": false,
       "width": 108,
       "height": 108
     }
