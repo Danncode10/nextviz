@@ -76,14 +76,14 @@ NextViz currently outputs: `{ triggered: true, triggeredAt: ISO string, payload:
 - [x] Delete the old flat `manual-trigger.tsx` file
 
 ### Step 2 — Add informational panel
-- [ ] Create `manual-trigger/panel.tsx`
-- [ ] Show a static notice: _"This node starts the workflow when you click Execute. No configuration needed."_
-- [ ] Wire panel into the node's sidebar (same pattern as `http-request/panel.tsx`)
-- [ ] No viz-* form inputs needed — notice only
+- [x] Create `manual-trigger/panel.tsx`
+- [x] Show a static notice: _"This node starts the workflow when you click Execute. No configuration needed."_
+- [x] Wire panel into the node's sidebar (same pattern as `http-request/panel.tsx`)
+- [x] No viz-* form inputs needed — notice only
 
 ### Step 3 — Soft maxNodes guard (Tier 2)
-- [ ] In the canvas or flow-save logic, detect if more than one `manualTrigger` node exists
-- [ ] Show a toast/warning — do not hard-block (Tier 4 hard block is deferred)
+- [x] In the canvas or flow-save logic, detect if more than one `manualTrigger` node exists
+- [x] Show a console warning when duplicate is added — do not hard-block (Tier 4 hard block is deferred)
 
 ---
 
@@ -117,7 +117,33 @@ NextViz currently outputs: `{ triggered: true, triggeredAt: ISO string, payload:
 
 ### Tier 2
 
-<!-- Populate after all Tier 2 Build Plan steps are complete. Ask Claude for the test list. -->
+**Panel & Informational Notice**
+
+- [x] Open the canvas with an existing Manual Trigger node, click it — the dedicated panel opens (no crash, no fallback to generic shell)
+- [x] Panel uses `MousePointer2` icon — confirmed in `panel.tsx:23`
+- [x] Panel body text reads: _"This node starts your workflow manually when you click the Execute step button or trigger it via API."_ — confirmed in `panel.tsx:38-40`
+- [x] Orange Pro Tip box present with text about passing mock data — confirmed in `panel.tsx:43-46`
+- [x] Panel footer reads _"No configurable parameters for this node type."_ — confirmed in `panel.tsx:48`
+- [x] Clicking the X closes the panel
+
+**Panel isolation — other node types unaffected**
+
+- [x] `NodePropertiesPanel` dispatcher routes `manualTrigger` → `ManualTriggerPanel`, `httpRequest` → `HttpRequestPanel`, `scheduleTrigger` → `ScheduleTriggerPanel` — confirmed in `node-properties-panel.tsx:22-76`
+- [x] Click an HTTP Request node in the browser → HTTP Request panel opens (not Manual Trigger panel)
+- [x] Click a Schedule Trigger node in the browser → Schedule Trigger panel opens
+
+**Soft maxNodes guard**
+
+- [x] Add a single Manual Trigger — no warning appears in the built-in console
+- [x] Warning message string confirmed in `canvas-client.tsx`
+- [x] Guard is soft — node is still added after the warning (confirmed via screenshot)
+- [x] Drag a second Manual Trigger — amber "Canvas Warning" appears in Problems tab of built-in console (confirmed via screenshot)
+- [x] Both canvas warning and node error show in Problems tab with badge count of 2 (confirmed via screenshot)
+
+**Output shape (regression)**
+
+- [ ] Run a flow starting with Manual Trigger — downstream nodes still receive `{ triggered: true, triggeredAt: "<ISO string>", payload: {} }`
+- [ ] `triggeredAt` value is a valid ISO 8601 date string
 
 ### Tier 3
 

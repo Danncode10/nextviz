@@ -36,6 +36,39 @@ Before modifying the codebase, verify the following environment state:
 
 4. **Read-Only Mode**: If `isLocalhost` is false, the UI must show a fixed header banner: *"Read-Only Mode: Edit in Localhost to sync with Git."*
 
+## 🖥 Built-in Console (`app/nextviz/_components/console.tsx`)
+
+NextViz has a built-in console panel at the bottom of the canvas. **Never tell the user to check browser DevTools for NextViz-related output — use this console instead.**
+
+### Tabs
+| Tab | What goes here |
+|---|---|
+| **Output** | Node execution results (auto-populated from `result.nodeOutputs`) |
+| **Problems** | Node errors + canvas-level warnings (`canvasWarnings` prop) |
+| **Logs** | Execution timeline (node order, start/success events) |
+| **Chat** | Chat interface — only shown for `chatTrigger` flows |
+
+### Canvas Warnings API
+To surface a warning or error in the Problems tab from anywhere in `canvas-client.tsx`:
+
+```ts
+setCanvasWarnings((prev) => [
+  ...prev,
+  { message: "Your warning message here", severity: "warning" }, // or "error"
+]);
+setShowExecutionOutput(true); // open the console automatically
+```
+
+- `severity: "warning"` → amber styling, labelled "Canvas Warning"
+- `severity: "error"` → red styling, labelled with the node ID
+- `CanvasWarning` type is exported from `console.tsx`
+- Warnings are cleared when the user closes the console panel
+
+### When to use
+- Any canvas-level validation (e.g., duplicate trigger guard, missing required config) → `canvasWarnings`
+- Node execution errors → automatically appear via `result.nodeOutputs` (no extra code needed)
+- **Do not use `console.warn` or `console.error` for user-visible NextViz messages** — put them in the built-in console
+
 ## 🔄 Vibe Workflow & Git Integration
 
 1. **Commit Checkpoints**: When requested to "checkpoint," use the Terminal/GitHub MCP to:
