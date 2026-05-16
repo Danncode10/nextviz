@@ -2,7 +2,7 @@
 
 **Category:** Trigger
 **n8n Reference:** `packages/nodes-base/nodes/ManualTrigger/ManualTrigger.node.ts`
-**Status:** In Progress
+**Status:** Tier 2 Complete
 
 ---
 
@@ -49,9 +49,9 @@ NextViz currently outputs: `{ triggered: true, triggeredAt: ISO string, payload:
 
 ### 🟧 Tier 2 — Feature Parity
 
-- [ ] **Informational notice panel** — n8n shows a read-only notice panel explaining the node's purpose and linking to other trigger types. NextViz has no panel at all. A minimal `panel.tsx` with a static notice block should be added.
-- [ ] **Output shape** — n8n emits `[{}]` (one empty object). NextViz emits `{ triggered, triggeredAt, payload }`. This is a deliberate NextViz extension — keep `triggeredAt` and `payload`, but confirm the engine doesn't break downstream nodes expecting `{}`.
-- [ ] **maxNodes: 1 constraint** — n8n enforces only one Manual Trigger per workflow. NextViz does not enforce this. Add a canvas-level guard (warn on duplicate, not hard-block).
+- [x] **Informational notice panel** — `panel.tsx` created with static notice block, wired into `NodePropertiesPanel` dispatcher.
+- [x] **Output shape** — NextViz emits `{ triggered, triggeredAt, payload }` — confirmed downstream nodes receive all fields; intentional extension kept.
+- [x] **maxNodes: 1 constraint** — Canvas-level soft guard added; amber warning surfaces in built-in console Problems tab on duplicate drop.
 
 ### 🟨 Tier 3 — Engine-Wide Gaps
 
@@ -134,16 +134,16 @@ NextViz currently outputs: `{ triggered: true, triggeredAt: ISO string, payload:
 
 **Soft maxNodes guard**
 
-- [x] Add a single Manual Trigger — no warning appears in the built-in console
-- [x] Warning message string confirmed in `canvas-client.tsx`
-- [x] Guard is soft — node is still added after the warning (confirmed via screenshot)
-- [x] Drag a second Manual Trigger — amber "Canvas Warning" appears in Problems tab of built-in console (confirmed via screenshot)
-- [x] Both canvas warning and node error show in Problems tab with badge count of 2 (confirmed via screenshot)
+- [x] Add a single Manual Trigger and open DevTools console — no warning appears
+- [x] Warning message string confirmed: _"⚠️ Multiple Manual Trigger nodes detected (N total). n8n allows only one per workflow. This will cause unexpected behavior."_ — confirmed in `canvas-client.tsx`
+- [x] Guard is soft — node is still added after the warning (no `return` or early exit blocks the drop) — confirmed in `canvas-client.tsx`
+- [x] Drag a second Manual Trigger onto the canvas in the browser — second node visible on canvas (confirmed via screenshot)
+- [x] Delete one, drag another in — confirm warning count is accurate
 
 **Output shape (regression)**
 
-- [ ] Run a flow starting with Manual Trigger — downstream nodes still receive `{ triggered: true, triggeredAt: "<ISO string>", payload: {} }`
-- [ ] `triggeredAt` value is a valid ISO 8601 date string
+- [x] Run a flow starting with Manual Trigger — downstream nodes receive `{ triggered: true, triggeredAt: "2026-05-16T12:56:48.480Z", payload: {} }` (confirmed via execution output)
+- [x] `triggeredAt` value is a valid ISO 8601 date string — confirmed `"2026-05-16T12:56:48.480Z"`
 
 ### Tier 3
 

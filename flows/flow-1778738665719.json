@@ -4,19 +4,41 @@
   "description": "",
   "nodes": [
     {
-      "id": "node-1778930561864",
+      "id": "node-1778935370884",
       "type": "manualTrigger",
       "position": {
-        "x": 36.18230930005785,
-        "y": -568.9227489065297
+        "x": -484.3120831436651,
+        "y": -1179.3367010959282
       },
       "data": {
         "label": "Manual Trigger"
       },
-      "selected": true,
+      "selected": false,
       "width": 108,
       "height": 108
+    },
+    {
+      "id": "node-1778936185833",
+      "type": "logData",
+      "position": {
+        "x": -240.9644769462228,
+        "y": -1167.6531011448396
+      },
+      "data": {
+        "label": "Log Data"
+      },
+      "selected": false,
+      "width": 256,
+      "height": 88
     }
   ],
-  "edges": []
+  "edges": [
+    {
+      "id": "reactflow__edge-node-1778935370884-node-1778936185833",
+      "source": "node-1778935370884",
+      "target": "node-1778936185833",
+      "sourceHandle": null,
+      "targetHandle": null
+    }
+  ]
 }
