@@ -6,6 +6,11 @@ import { cn } from "@/lib/utils";
 
 type TabType = "output" | "problems" | "chat" | "logs";
 
+export interface CanvasWarning {
+  message: string;
+  severity: "warning" | "error";
+}
+
 interface ExecutionOutputProps {
   result: Record<string, unknown> | null;
   isExecuting: boolean;
@@ -13,6 +18,7 @@ interface ExecutionOutputProps {
   initialTab?: TabType;
   chatMessages?: Array<{ role: "user" | "assistant"; content: string }>;
   onSendChatMessage?: (message: string) => Promise<string>;
+  canvasWarnings?: CanvasWarning[];
 }
 
 export function Console({
@@ -22,6 +28,7 @@ export function Console({
   initialTab = "output",
   chatMessages = [],
   onSendChatMessage,
+  canvasWarnings = [],
 }: ExecutionOutputProps) {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
@@ -87,7 +94,7 @@ export function Console({
   const nodeIds = Object.keys(nodeOutputs).filter((id) => !id.match(/-model$|-memory$/));
 
   // Extract problems (errors) from node outputs
-  const problems = nodeIds
+  const nodeProblems = nodeIds
     .filter((nodeId) => {
       const data = nodeOutputs[nodeId];
       return data && (data.error || (data.status && typeof data.status === "number" && data.status >= 400));
@@ -97,6 +104,11 @@ export function Console({
       message: (nodeOutputs[nodeId] as any)?.error || `HTTP ${(nodeOutputs[nodeId] as any)?.status}`,
       severity: "error" as const,
     }));
+
+  const problems = [
+    ...canvasWarnings.map((w, i) => ({ nodeId: `canvas-${i}`, message: w.message, severity: w.severity })),
+    ...nodeProblems,
+  ];
 
   const handleSendMessage = async () => {
     if (!chatInput.trim() || !onSendChatMessage) return;
@@ -263,18 +275,28 @@ export function Console({
                 <p className="text-sm text-zinc-500">No problems detected</p>
               </div>
             ) : (
-              problems.map((problem, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-start gap-3 p-3 rounded-lg border border-red-500/20 bg-red-500/5"
-                >
-                  <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-red-500">{problem.nodeId}</p>
-                    <p className="text-xs text-red-400/80 mt-1">{problem.message}</p>
+              problems.map((problem, idx) => {
+                const isWarning = problem.severity === "warning";
+                return (
+                  <div
+                    key={idx}
+                    className={cn(
+                      "flex items-start gap-3 p-3 rounded-lg border",
+                      isWarning
+                        ? "border-amber-500/20 bg-amber-500/5"
+                        : "border-red-500/20 bg-red-500/5"
+                    )}
+                  >
+                    <AlertCircle className={cn("w-4 h-4 flex-shrink-0 mt-0.5", isWarning ? "text-amber-400" : "text-red-500")} />
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-xs font-semibold", isWarning ? "text-amber-400" : "text-red-500")}>
+                        {isWarning ? "Canvas Warning" : problem.nodeId}
+                      </p>
+                      <p className={cn("text-xs mt-1", isWarning ? "text-amber-400/80" : "text-red-400/80")}>{problem.message}</p>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         )}

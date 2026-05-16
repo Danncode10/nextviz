@@ -32,7 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Undo2, Redo2, KeyRound } from "lucide-react";
 import Link from "next/link";
 import { NodePropertiesPanel } from "./node-properties-panel";
-import { Console } from "./console";
+import { Console, CanvasWarning } from "./console";
 import { ModelSelectorPopup } from "../nodes/ai-agent/_components/model-selector-popup";
 import { MemoryPopup } from "../nodes/ai-agent/_components/memory-popup";
 import { ToolPopup } from "../nodes/ai-agent/_components/tool-popup";
@@ -76,6 +76,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   const [executionResult, setExecutionResult] = useState<any>(null);
   const [isExecuting, setIsExecuting] = useState(false);
   const [showExecutionOutput, setShowExecutionOutput] = useState(false);
+  const [canvasWarnings, setCanvasWarnings] = useState<CanvasWarning[]>([]);
   const [executionOutputTab, setExecutionOutputTab] = useState<"output" | "chat">("output");
   const [chatMessages, setChatMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
 
@@ -340,13 +341,28 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
     const bounds   = reactFlowWrapper.current.getBoundingClientRect();
     const position = rfInstance.project({ x: event.clientX - bounds.left, y: event.clientY - bounds.top });
 
+    // Warn if adding a second Manual Trigger (Tier 2 soft guard)
+    if (nodeType === "manualTrigger") {
+      const existingManualTriggers = nodes.filter((n) => n.type === "manualTrigger");
+      if (existingManualTriggers.length > 0) {
+        setCanvasWarnings((prev) => [
+          ...prev,
+          {
+            message: `Multiple Manual Trigger nodes detected (${existingManualTriggers.length + 1} total). Only one is allowed per workflow — duplicate triggers will cause the flow to run multiple times.`,
+            severity: "warning",
+          },
+        ]);
+        setShowExecutionOutput(true);
+      }
+    }
+
     const newNode: Node = { id: `node-${Date.now()}`, type: nodeType, position, data: { label } };
     setNodes((nds) => {
       const next = [...nds, newNode];
       pushHistory(next, edges);
       return next;
     });
-  }, [rfInstance, edges, pushHistory]);
+  }, [rfInstance, edges, pushHistory, nodes]);
 
   // ── Node click → open properties panel ────────────────────────────────────
   const NODES_WITH_PANEL = new Set(["manualTrigger", "scheduleTrigger", "chatTrigger", "aiAgent", "httpRequest"]);
@@ -608,14 +624,16 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
             key={executionOutputTab}
             result={executionResult}
             isExecuting={isExecuting}
-            initialTab={executionOutputTab}
+            initialTab={canvasWarnings.length > 0 ? "problems" : executionOutputTab}
             onClose={() => {
               setShowExecutionOutput(false);
               setChatWindowOpen(false);
               setChatMessages([]);
+              setCanvasWarnings([]);
             }}
             onSendChatMessage={chatWindowOpen ? handleChatMessage : undefined}
             chatMessages={chatMessages}
+            canvasWarnings={canvasWarnings}
           />
         )}
       </div>
