@@ -2,6 +2,7 @@ import * as registry from "./registry";
 import { nodeExecutors } from "./node-executors";
 import { loadEnvNextviz } from "./load-env";
 import {
+  ExecutionEvent,
   ExecutionPlan,
   FlowExecutionResult,
   NextVizEdge,
@@ -124,6 +125,8 @@ export async function executeFlow(
 
   // 3. Execute nodes in sorted order
   const nodeOutputs = new Map<string, Record<string, unknown>>();
+  const executionEvents: ExecutionEvent[] = [];
+  const startTime = performance.now();
   const context: NodeExecutionContext = { flowId, executionId, payload, nodeOutputs };
 
   for (const nodeId of plan.sortedNodeIds) {
@@ -150,18 +153,41 @@ export async function executeFlow(
             {}
           );
 
+    // Emit node-start event
+    executionEvents.push({
+      type: "node-start",
+      nodeId,
+      timestamp: Math.round(performance.now() - startTime),
+    });
+
     try {
       const output = await executor(node.data, inputs, context);
       nodeOutputs.set(nodeId, output);
+
+      // Emit node-success event
+      executionEvents.push({
+        type: "node-success",
+        nodeId,
+        timestamp: Math.round(performance.now() - startTime),
+      });
     } catch (err: unknown) {
+      const errorMsg = String(err);
+      executionEvents.push({
+        type: "node-error",
+        nodeId,
+        timestamp: Math.round(performance.now() - startTime),
+        error: errorMsg,
+      });
+
       return {
         ...failure(
           flowId,
           executionId,
           startedAt,
-          `Node "${nodeId}" (${node.type}) threw: ${String(err)}`
+          `Node "${nodeId}" (${node.type}) threw: ${errorMsg}`
         ),
         nodeOutputs: Object.fromEntries(nodeOutputs),
+        executionEvents,
       };
     }
   }
@@ -173,6 +199,7 @@ export async function executeFlow(
     startedAt,
     completedAt: new Date().toISOString(),
     nodeOutputs: Object.fromEntries(nodeOutputs),
+    executionEvents,
   };
 }
 

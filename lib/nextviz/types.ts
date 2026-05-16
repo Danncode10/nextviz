@@ -73,6 +73,15 @@ export interface ExecutionPlan {
   incomingEdges: Map<string, string[]>;
 }
 
+export type ExecutionEventType = "node-start" | "node-success" | "node-error";
+
+export interface ExecutionEvent {
+  type: ExecutionEventType;
+  nodeId: string;
+  timestamp: number; // ms since execution start
+  error?: string;
+}
+
 /** Result returned by `executeFlow`. */
 export interface FlowExecutionResult {
   success: boolean;
@@ -82,5 +91,7 @@ export interface FlowExecutionResult {
   completedAt: string;
   /** Each node's output, keyed by node ID. */
   nodeOutputs: Record<string, Record<string, unknown>>;
+  /** Execution events for replay animation on the canvas. */
+  executionEvents?: ExecutionEvent[];
   error?: string;
 }

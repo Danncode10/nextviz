@@ -115,6 +115,40 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
     return () => document.removeEventListener("nextviz:toggle-console", handleToggle);
   }, []);
 
+  // ── Replay execution events on canvas nodes ────────────────────────────────
+  const replayExecutionEvents = useCallback((events: Array<{ type: string; nodeId: string; error?: string }>) => {
+    const updateNodeState = (nodeId: string, state: "running" | "success" | "error") => {
+      setNodes((nds) =>
+        nds.map((n) =>
+          n.id === nodeId
+            ? { ...n, data: { ...n.data, executionState: state } }
+            : n
+        )
+      );
+    };
+
+    let delay = 0;
+    for (const event of events) {
+      if (event.type === "node-start") {
+        setTimeout(() => updateNodeState(event.nodeId, "running"), delay);
+        delay += 400; // 400ms for each node to show running state
+      } else if (event.type === "node-success") {
+        setTimeout(() => updateNodeState(event.nodeId, "success"), delay);
+        delay += 300; // Brief success state
+      } else if (event.type === "node-error") {
+        setTimeout(() => updateNodeState(event.nodeId, "error"), delay);
+        delay += 300; // Brief error state
+      }
+    }
+
+    // Clear all execution states after the sequence completes
+    setTimeout(() => {
+      setNodes((nds) =>
+        nds.map((n) => ({ ...n, data: { ...n.data, executionState: undefined } }))
+      );
+    }, delay + 500);
+  }, []);
+
   // ── Flow execution listener (play button on canvas) ──────────────────────
   useEffect(() => {
     const handleExecuteFlow = async () => {
@@ -127,6 +161,10 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
       if (!hasChatTrigger) {
         const result = await executeFlowAction(activeFlow.id);
         setExecutionResult(result);
+        // Replay execution events on the canvas
+        if (result.result?.executionEvents) {
+          replayExecutionEvents(result.result.executionEvents);
+        }
         setIsExecuting(false);
       }
     };
@@ -434,6 +472,10 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
           setExecutionResult({ error: result.error });
         } else {
           setExecutionResult(result.result?.nodeOutputs ?? {});
+          // Replay execution events on the canvas
+          if (result.result?.executionEvents) {
+            replayExecutionEvents(result.result.executionEvents);
+          }
         }
         return result.result?.nodeOutputs ?? {};
       } catch (error) {
@@ -447,7 +489,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
     // Default mock response for other node types
     await new Promise((r) => setTimeout(r, 700));
     return { executedAt: new Date().toISOString(), nodeId, flowId: activeFlow?.id ?? "unknown", payload: {} };
-  }, [activeFlow, nodes]);
+  }, [activeFlow, nodes, replayExecutionEvents]);
 
   // ── Create flow ────────────────────────────────────────────────────────────
   const handleCreateFlow = async () => {
