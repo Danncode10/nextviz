@@ -116,6 +116,12 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
   }, []);
 
   // ── Replay execution events on canvas nodes ────────────────────────────────
+  const clearExecutionStates = useCallback(() => {
+    setNodes((nds) =>
+      nds.map((n) => ({ ...n, data: { ...n.data, executionState: undefined } }))
+    );
+  }, []);
+
   const replayExecutionEvents = useCallback((events: Array<{ type: string; nodeId: string; error?: string }>) => {
     const updateNodeState = (nodeId: string, state: "running" | "success" | "error") => {
       setNodes((nds) =>
@@ -131,28 +137,23 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
     for (const event of events) {
       if (event.type === "node-start") {
         setTimeout(() => updateNodeState(event.nodeId, "running"), delay);
-        delay += 400; // 400ms for each node to show running state
+        delay += 400;
       } else if (event.type === "node-success") {
         setTimeout(() => updateNodeState(event.nodeId, "success"), delay);
-        delay += 300; // Brief success state
+        // No delay increment — success state persists as the final state
       } else if (event.type === "node-error") {
         setTimeout(() => updateNodeState(event.nodeId, "error"), delay);
-        delay += 300; // Brief error state
+        // No delay increment — error state persists as the final state
       }
     }
-
-    // Clear all execution states after the sequence completes
-    setTimeout(() => {
-      setNodes((nds) =>
-        nds.map((n) => ({ ...n, data: { ...n.data, executionState: undefined } }))
-      );
-    }, delay + 500);
+    // States are NOT cleared after replay — they stay until the next execution
   }, []);
 
   // ── Flow execution listener (play button on canvas) ──────────────────────
   useEffect(() => {
     const handleExecuteFlow = async () => {
       if (!activeFlow) return;
+      clearExecutionStates(); // Reset all node states before new run
       const hasChatTrigger = nodes.some((n) => n.type === "chatTrigger");
       setExecutionOutputTab(hasChatTrigger ? "chat" : "output");
       setChatWindowOpen(hasChatTrigger);
@@ -170,7 +171,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
     };
     document.addEventListener("nextviz:execute-flow", handleExecuteFlow);
     return () => document.removeEventListener("nextviz:execute-flow", handleExecuteFlow);
-  }, [activeFlow, nodes]);
+  }, [activeFlow, nodes, clearExecutionStates, replayExecutionEvents]);
 
   // ── Chat message handler — runs flow with message payload ─────────────────
   const handleChatMessage = useCallback(
@@ -463,6 +464,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
     const node = nodes.find((n) => n.id === nodeId);
     if (node?.type === "manualTrigger") {
       // Execute the full flow from this manual trigger
+      clearExecutionStates(); // Reset all node states before new run
       setIsExecuting(true);
       setExecutionOutputTab("output");
       setShowExecutionOutput(true);
@@ -489,7 +491,7 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
     // Default mock response for other node types
     await new Promise((r) => setTimeout(r, 700));
     return { executedAt: new Date().toISOString(), nodeId, flowId: activeFlow?.id ?? "unknown", payload: {} };
-  }, [activeFlow, nodes, replayExecutionEvents]);
+  }, [activeFlow, nodes, replayExecutionEvents, clearExecutionStates]);
 
   // ── Create flow ────────────────────────────────────────────────────────────
   const handleCreateFlow = async () => {
