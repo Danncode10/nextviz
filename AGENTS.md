@@ -141,6 +141,30 @@ The canvas must reflect live execution state. Apply these styles when execution 
 * **Backend**: Next.js Server Actions (The "Local Bridge")
 * **Deployment**: Vercel (Running in Read-Only Mode)
 
+## 📚 Documentation Structure
+
+The `docs/` folder is the living record of all planning and implementation work. **Always read and update the relevant doc before and after building a component.**
+
+```
+docs/
+├── masterplan.md          ← High-level phase roadmap (what to build, priority order)
+├── engine-architecture.md ← How the execution engine works
+├── FOLDER_STRUCTURE.md    ← Directory layout reference
+└── nodes/
+    └── {node-name}.md     ← Per-node: n8n reference, gap analysis, step-by-step build plan
+```
+
+### Per-Node Doc Rule
+Every Phase 4+ node **MUST** have a `docs/nodes/{node-name}.md` file. This file contains:
+1. **n8n Source Notes** — key fields and their types extracted from the n8n source
+2. **Gap Analysis** — what NextViz has vs what n8n has, tiered by priority
+3. **Build Plan** — ordered checklist of steps (`[ ]` → `[x]` as work completes)
+4. **What Was Adapted** — how the n8n logic was ported to React/TypeScript
+5. **What Was Skipped** — deferred features and the reason why
+
+Before starting any node: create or read `docs/nodes/{node-name}.md`.
+After completing a step: check it off in the build plan.
+
 **Always be concise. If a change breaks the "Local Bridge" logic, stop and warn the user.**
 
 ---

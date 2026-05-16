@@ -69,6 +69,15 @@ This document defines the core actionable "skills" or procedures the AI agent mu
 5. Add any required npm packages to `package.json` and install them.
 6. Use `viz-*` sidebar primitives (never build custom inputs per node). Add the `viz-connection` component for any API key field.
 
+## Skill 11: Maintain Node Documentation
+**When to use:** Before building a new node OR after completing any build plan step on an existing node.
+**Action:**
+1. **Before building:** Check if `docs/nodes/{node-name}.md` exists. If not, create it using the standard template (n8n source notes → gap analysis → build plan → adapted/skipped sections).
+2. **During build:** After completing each step in the build plan, mark it `[x]` in the doc.
+3. **After building:** Fill in the "What Was Adapted" and "What Was Skipped" sections so the next session has full context.
+4. **n8n reference lookup:** Use `github-mcp-server` to search `n8n-io/n8n` for the equivalent node before writing the gap analysis. Don't guess — read the source.
+5. **Never leave a node undocumented.** If a node folder exists in `app/nextviz/nodes/` without a matching `docs/nodes/` file, create the doc before touching the code.
+
 ## Skill 10: Implement the Properties Sidebar
 **When to use:** When building or updating the node configuration panel that slides out on node click.
 **Action:**
