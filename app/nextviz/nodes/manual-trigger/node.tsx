@@ -2,7 +2,7 @@
 
 import { NodeProps } from "reactflow";
 import { MousePointer2 } from "lucide-react";
-import { BaseNode } from "./_base/base-node";
+import { BaseNode } from "../_base/base-node";
 
 export default function ManualTriggerNode({ id, data, selected }: NodeProps) {
   return (

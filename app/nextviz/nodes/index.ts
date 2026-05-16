@@ -1,4 +1,4 @@
-import ManualTriggerNode from "./manual-trigger";
+import ManualTriggerNode from "./manual-trigger/node";
 import OnHttpNode from "./on-http";
 import HttpRequestNode from "./http-request/node";
 import LogDataNode from "./log-data";

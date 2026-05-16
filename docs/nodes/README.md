@@ -10,6 +10,7 @@ Copy the template below when starting a new node. Fill in every section — neve
 | Node | Status | Doc |
 |---|---|---|
 | HTTP Request | 🔶 Tier 1 Complete | [http-request.md](./http-request.md) |
+| Manual Trigger | 🔶 Tier 1 Complete | [manual-trigger.md](./manual-trigger.md) |
 
 ---
 
