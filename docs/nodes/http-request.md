@@ -146,13 +146,15 @@ Steps are ordered: complete each before moving to the next.
 - [x] Ran the "HTTP request Example" flow — Manual Trigger + HTTP Request both executed successfully
 - [x] nodeOutputs returned status 200 with JSON data from jsonplaceholder API
 
-### ✅ Test 7: Result Replay — execution animation on canvas
+### ✅ Test 7: Result Replay — execution animation on canvas [IMPLEMENTATION READY]
 - [ ] Click Manual Trigger and watch the canvas
 - [ ] Manual Trigger node should show running state (border-primary + pulse + spinner badge) for ~400ms
 - [ ] HTTP Request node should show running state during request execution (~400ms)
 - [ ] HTTP Request node should show success state (border-green-500 + ✅ icon) for ~300ms
 - [ ] All node execution states should clear after sequence completes
 - [ ] Console panel should show full execution result with response data
+
+**Test Guide:** See `docs/TESTING-RESULT-REPLAY.md` for step-by-step testing instructions
 
 ### Step 7 — Add Tier 2 features to panel + executor
 - [ ] URL validation (http/https prefix check)
