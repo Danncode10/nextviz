@@ -1,6 +1,7 @@
 import * as registry from "./registry";
 import { nodeExecutors } from "./node-executors";
 import { loadEnvNextviz } from "./load-env";
+import { resolveTemplates } from "./template";
 import {
   ExecutionEvent,
   ExecutionPlan,
@@ -160,8 +161,11 @@ export async function executeFlow(
       timestamp: Math.round(performance.now() - startTime),
     });
 
+    // Resolve {{ template }} expressions in nodeData before calling the executor.
+    const resolvedData = resolveTemplates(node.data, inputs, context);
+
     try {
-      const output = await executor(node.data, inputs, context);
+      const output = await executor(resolvedData, inputs, context);
       nodeOutputs.set(nodeId, output);
 
       // Emit node-success event
@@ -178,6 +182,12 @@ export async function executeFlow(
         timestamp: Math.round(performance.now() - startTime),
         error: errorMsg,
       });
+
+      // continueOnFail: store error as node output and keep running downstream nodes.
+      if (node.data.continueOnFail === true) {
+        nodeOutputs.set(nodeId, { error: errorMsg, continueOnFail: true });
+        continue;
+      }
 
       return {
         ...failure(

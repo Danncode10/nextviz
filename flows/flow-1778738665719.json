@@ -7,36 +7,37 @@
       "id": "node-1778935370884",
       "type": "manualTrigger",
       "position": {
-        "x": -484.3120831436651,
-        "y": -1179.3367010959282
+        "x": -756.2903625744016,
+        "y": -1279.393575374659
       },
       "data": {
-        "label": "Manual Trigger"
+        "label": "Manual Trigger",
+        "executionState": "success"
       },
       "selected": false,
       "width": 108,
       "height": 108
     },
     {
-      "id": "node-1778936185833",
-      "type": "logData",
+      "id": "node-1778937778447",
+      "type": "httpRequest",
       "position": {
-        "x": -240.9644769462228,
-        "y": -1167.6531011448396
+        "x": -422.37290296995513,
+        "y": -1285.8495629967765
       },
       "data": {
-        "label": "Log Data"
+        "label": "HTTP Request"
       },
       "selected": false,
-      "width": 256,
-      "height": 88
+      "width": 108,
+      "height": 108
     }
   ],
   "edges": [
     {
-      "id": "reactflow__edge-node-1778935370884-node-1778936185833",
+      "id": "reactflow__edge-node-1778935370884-node-1778937778447",
       "source": "node-1778935370884",
-      "target": "node-1778936185833",
+      "target": "node-1778937778447",
       "sourceHandle": null,
       "targetHandle": null
     }

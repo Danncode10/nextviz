@@ -71,9 +71,9 @@ Key fields extracted from `HttpRequestV3.node.ts`:
 
 ### 🟨 Tier 3 — Engine-wide gaps (not HTTP-specific)
 
-- [ ] **Template resolution** — `{{ user_email }}` / `{{ $node["X"].data.y }}` strings in `nodeData` fields are never replaced with upstream values. This is a global engine gap affecting every node.
+- [x] **Template resolution** — `{{ key }}` / `{{ $json.key }}` / dot-notation strings in `nodeData` are resolved against upstream inputs before the executor runs. Implemented in `lib/nextviz/template.ts`, called from `engine.ts`.
 - [ ] **Per-item iteration** — n8n loops the executor over each item in the input array. NextViz runs the executor once.
-- [ ] **`continueOnFail`** — If HTTP request fails, entire flow halts. Need opt-in error passthrough.
+- [x] **`continueOnFail`** — Set `node.data.continueOnFail = true` to opt-in to error passthrough. On error, stores `{ error, continueOnFail: true }` in nodeOutputs and continues instead of halting the flow.
 
 ### 🟦 Tier 4 — Defer
 

@@ -55,8 +55,8 @@ NextViz currently outputs: `{ triggered: true, triggeredAt: ISO string, payload:
 
 ### 🟨 Tier 3 — Engine-Wide Gaps
 
-- [ ] **Template resolution** — `{{ variable }}` strings in nodeData are never replaced with upstream values (not relevant here since there are no fields, but noted for completeness)
-- [ ] **`continueOnFail`** — not applicable to triggers
+- [x] **Template resolution** — implemented engine-wide in `lib/nextviz/template.ts`. Not applicable to Manual Trigger (no configurable fields) but available to all downstream nodes.
+- [x] **`continueOnFail`** — implemented engine-wide. Not applicable to triggers (they don't fail in a continuable way), but available to all action/logic nodes.
 
 ### 🟦 Tier 4 — Defer
 
@@ -147,7 +147,39 @@ NextViz currently outputs: `{ triggered: true, triggeredAt: ISO string, payload:
 
 ### Tier 3
 
-<!-- Not applicable for this node. -->
+These tests verify the engine-wide features (`template.ts` + `continueOnFail` in `engine.ts`) using Manual Trigger as the trigger source. The Manual Trigger node itself has no configurable fields, so template resolution is tested on a downstream node.
+
+**Template resolution — `{{ key }}` from trigger payload**
+
+- [ ] Create a flow: Manual Trigger → HTTP Request. Set the HTTP Request URL field to `{{ endpoint }}`.
+- [ ] Execute the flow with payload `{ "endpoint": "https://httpbin.org/get" }` (via `executeFlow("flow-id", { endpoint: "https://httpbin.org/get" })`).
+- [ ] Confirm the HTTP Request executor received the resolved URL (not the literal string `{{ endpoint }}`). Check the Output tab — should show a successful response, not a "no URL configured" error.
+
+**Template resolution — `{{ $json.key }}` n8n shorthand**
+
+- [ ] Set the HTTP Request URL to `{{ $json.endpoint }}` (n8n shorthand form).
+- [ ] Execute with the same payload `{ "endpoint": "https://httpbin.org/get" }`.
+- [ ] Confirm the executor resolves `$json.endpoint` identically to `{{ endpoint }}` — successful response in Output tab.
+
+**Template resolution — unresolvable expression is left unchanged**
+
+- [x] Set the HTTP Request URL to `{{ nonexistent }}` (a key that does not exist in the payload).
+- [x] Execute the flow.
+- [x] Confirm the executor receives the literal string `{{ nonexistent }}` (not `undefined` or an empty string). The HTTP Request should fail with "no URL configured" or an invalid URL error — not a crash in `template.ts`. — confirmed via `template.ts:33`: `if (resolved === undefined) return original`
+
+**`continueOnFail` — downstream nodes run after a failing node**
+
+- [ ] Create a flow: Manual Trigger → HTTP Request (bad URL, will throw) → a second node (e.g. Log Data).
+- [ ] Set `continueOnFail: true` on the HTTP Request node's data (edit the flow JSON directly for now — no UI yet).
+- [ ] Execute the flow.
+- [ ] Confirm in the Output tab: HTTP Request shows `{ "error": "...", "continueOnFail": true }` and the second (Log Data) node also executed and has its own output.
+- [ ] Confirm the overall `FlowExecutionResult.success` is `true` (flow completed, not halted).
+
+**`continueOnFail` defaults to halt (regression)**
+
+- [x] Remove or set `continueOnFail: false` on the HTTP Request node.
+- [x] Execute the same flow with a bad URL.
+- [x] Confirm the flow halts: second node has no output, `FlowExecutionResult.success` is `false`, error message appears in Problems tab. — confirmed via `engine.ts:187`: check is `=== true` strictly; `false`/`undefined`/absent falls through to `return failure(...)`
 
 ---
 

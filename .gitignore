@@ -44,3 +44,6 @@ next-env.d.ts
 # NextViz specific
 .env.nextviz
 .claude
+
+# Notes
+Notes.md

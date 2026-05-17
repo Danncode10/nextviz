@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Undo2, Redo2, KeyRound } from "lucide-react";
+import { Plus, Undo2, Redo2, KeyRound, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { NodePropertiesPanel } from "./node-properties-panel";
 import { Console, CanvasWarning } from "./console";
@@ -547,6 +547,22 @@ export function CanvasClient({ initialFlowId }: CanvasClientProps) {
             </Button>
             <Button size="sm" variant="ghost" onClick={redo} disabled={!canRedo} title="Redo (⌘⇧Z)" className="px-2">
               <Redo2 className="h-4 w-4" />
+            </Button>
+
+            {/* Reset execution state */}
+            <Button
+              size="sm"
+              variant="ghost"
+              title="Reset canvas (clear execution states)"
+              className="px-2"
+              onClick={() => {
+                clearExecutionStates();
+                setExecutionResult(null);
+                setShowExecutionOutput(false);
+                setCanvasWarnings([]);
+              }}
+            >
+              <RotateCcw className="h-4 w-4" />
             </Button>
 
             <div className="w-px h-5 bg-border mx-1" />
