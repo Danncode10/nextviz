@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash([ -d \"/Users/lesterdannlopez/Desktop/Dann Folder/MyProjects/Work/nextviz/app/nextviz/nodes/$node\" ])",
+      "Bash([ -f \"/Users/lesterdannlopez/Desktop/Dann Folder/MyProjects/Work/nextviz/app/nextviz/nodes/$node\" ])"
+    ]
+  }
+}

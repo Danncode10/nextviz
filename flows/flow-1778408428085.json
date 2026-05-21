@@ -21,8 +21,8 @@
       "id": "node-1778738573211",
       "type": "aiAgent",
       "position": {
-        "x": 441.34026164095764,
-        "y": -105.2544301276742
+        "x": 429.9415387769638,
+        "y": -178.96617131483478
       },
       "data": {
         "label": "AI Agent",
@@ -35,7 +35,7 @@
           "type": "simple"
         }
       },
-      "selected": false,
+      "selected": true,
       "width": 280,
       "height": 173
     },
@@ -43,8 +43,8 @@
       "id": "node-1778738573211-model",
       "type": "chatModelNode",
       "position": {
-        "x": 165.41790979123755,
-        "y": 108.26302671008264
+        "x": 154.77910178484325,
+        "y": 121.94149414687533
       },
       "data": {
         "chatModel": {
@@ -53,7 +53,7 @@
           "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
         }
       },
-      "selected": true,
+      "selected": false,
       "width": 160,
       "height": 56
     },
@@ -61,8 +61,8 @@
       "id": "node-1778738573211-memory",
       "type": "memoryNode",
       "position": {
-        "x": 345.8908135049966,
-        "y": 187.47399113447773
+        "x": 322.3334529194092,
+        "y": 203.4322031440692
       },
       "data": {
         "memory": {

@@ -112,11 +112,11 @@ function OptionsSection({ node, onNodeChange }: { node: Node; onNodeChange?: (n:
 // ── Main parameters content ────────────────────────────────────────────────────
 
 function AIAgentParameters({ node, onNodeChange }: { node: Node; onNodeChange?: (n: Node) => void }) {
-  const [showTip, setShowTip]         = useState(true);
+  const [showTip, setShowTip] = useState(true);
   const [promptSource, setPromptSource] = useState<string>(node.data?.promptSource ?? "chatTrigger");
   const [promptTemplate, setTemplate] = useState<string>(node.data?.promptTemplate ?? "{{ $json.chatInput }}");
   const [systemPrompt, setSystemPrompt] = useState<string>(node.data?.systemPrompt ?? "");
-  const [requireFormat, setFormat]    = useState<boolean>(node.data?.requireOutputFormat ?? false);
+  const [requireFormat, setFormat] = useState<boolean>(node.data?.requireOutputFormat ?? false);
   const [enableFallback, setFallback] = useState<boolean>(node.data?.enableFallback ?? false);
 
   const sync = (patch: Record<string, unknown>) =>
@@ -272,14 +272,14 @@ function SubComponentFooter({
 // ── Panel export ───────────────────────────────────────────────────────────────
 
 export function AIAgentPanel({ node, onClose, onExecuteStep, onNodeChange }: AIAgentPanelProps) {
-  const [subView, setSubView]           = useState<SubView>(null);
+  const [subView, setSubView] = useState<SubView>(null);
   const [modelPopupOpen, setModelPopup] = useState(false);
 
   const hasModel = !!(node.data?.chatModel as Record<string, string> | undefined)?.type;
 
   const parametersContent = (() => {
     if (subView === "memory") return <MemoryConfig node={node} onNodeChange={onNodeChange} />;
-    if (subView === "tool")   return <ToolConfig   node={node} onNodeChange={onNodeChange} />;
+    if (subView === "tool") return <ToolConfig node={node} onNodeChange={onNodeChange} />;
     return <AIAgentParameters node={node} onNodeChange={onNodeChange} />;
   })();
 
