@@ -1,14 +1,14 @@
 {
-  "id": "flow-1778408428085",
-  "name": "example",
-  "description": "Default example for NextViz",
+  "id": "flow-1779335852897",
+  "name": "dsckscn",
+  "description": "",
   "nodes": [
     {
-      "id": "node-1778738569629",
+      "id": "node-1779335856887",
       "type": "chatTrigger",
       "position": {
-        "x": 124.52762162513545,
-        "y": -120.03909697380587
+        "x": 279,
+        "y": 278.5
       },
       "data": {
         "label": "Chat Trigger"
@@ -18,11 +18,11 @@
       "height": 108
     },
     {
-      "id": "node-1778738573211",
+      "id": "node-1779335859650",
       "type": "aiAgent",
       "position": {
-        "x": 441.34026164095764,
-        "y": -105.2544301276742
+        "x": 476,
+        "y": 285
       },
       "data": {
         "label": "AI Agent",
@@ -40,11 +40,11 @@
       "height": 173
     },
     {
-      "id": "node-1778738573211-model",
+      "id": "node-1779335859650-model",
       "type": "chatModelNode",
       "position": {
-        "x": 165.41790979123755,
-        "y": 108.26302671008264
+        "x": 312,
+        "y": 495
       },
       "data": {
         "chatModel": {
@@ -53,16 +53,16 @@
           "apiKeyRef": "NEXTVIZ_OPENAI_API_KEY"
         }
       },
-      "selected": true,
+      "selected": false,
       "width": 160,
       "height": 56
     },
     {
-      "id": "node-1778738573211-memory",
+      "id": "node-1779335859650-memory",
       "type": "memoryNode",
       "position": {
-        "x": 345.8908135049966,
-        "y": 187.47399113447773
+        "x": 464.34664128774534,
+        "y": 569.5377342762935
       },
       "data": {
         "memory": {
@@ -76,24 +76,24 @@
   ],
   "edges": [
     {
-      "id": "reactflow__edge-node-1778738569629-node-1778738573211",
-      "source": "node-1778738569629",
-      "target": "node-1778738573211",
+      "id": "reactflow__edge-node-1779335856887-node-1779335859650",
+      "source": "node-1779335856887",
+      "target": "node-1779335859650",
       "sourceHandle": null,
       "targetHandle": null
     },
     {
-      "id": "node-1778738573211-to-model",
-      "source": "node-1778738573211",
-      "target": "node-1778738573211-model",
+      "id": "node-1779335859650-to-model",
+      "source": "node-1779335859650",
+      "target": "node-1779335859650-model",
       "sourceHandle": "model-out",
       "targetHandle": "model-in",
       "type": "smoothstep"
     },
     {
-      "id": "node-1778738573211-to-memory",
-      "source": "node-1778738573211",
-      "target": "node-1778738573211-memory",
+      "id": "node-1779335859650-to-memory",
+      "source": "node-1779335859650",
+      "target": "node-1779335859650-memory",
       "sourceHandle": "memory-out",
       "targetHandle": "memory-in",
       "type": "smoothstep"

@@ -193,6 +193,7 @@ One file per flow = no merge conflicts. Use `/checkpoint` command for this.
 ---
 
 ## Related Files
+- `docs/claude-code.md` — contributor guide for using Claude Code with NextViz
 - `make_component_prompt.md` — manual node build template (use `/build-node` instead)
 - `docs/masterplan.md` — full phase roadmap
 - `docs/engine-architecture.md` — engine internals, caching, variable resolution
