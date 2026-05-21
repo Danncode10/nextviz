@@ -14,8 +14,14 @@ function buildPayload(req: NextRequest, body: unknown): Record<string, unknown> 
 
 export async function POST(req: NextRequest, { params }: Params) {
   const { flowId } = await params;
-  const body = await req.json().catch(() => ({}));
-  const result = await executeFlow(flowId, buildPayload(req, body));
+  const body = await req.json().catch(() => ({})) as Record<string, unknown>;
+  // If caller passes { payload: {...} }, use that directly as execution payload
+  // (manual trigger / testing). Otherwise wrap full HTTP request for webhook nodes.
+  const executionPayload =
+    body.payload !== undefined && typeof body.payload === "object"
+      ? (body.payload as Record<string, unknown>)
+      : buildPayload(req, body);
+  const result = await executeFlow(flowId, executionPayload);
   return NextResponse.json(result, { status: result.success ? 200 : 500 });
 }
 

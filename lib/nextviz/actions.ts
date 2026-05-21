@@ -1,7 +1,7 @@
 "use server";
 
 import * as registry from "./registry";
-import { executeFlow } from "./engine";
+import { executeFlow, invalidatePlan } from "./engine";
 import { WorkflowJSON } from "./types";
 
 function guardDev() {
@@ -31,6 +31,7 @@ export async function saveFlow(
   guardDev();
   try {
     await registry.saveFlow(flow);
+    invalidatePlan(flow.id);
     return { success: true };
   } catch (e: any) {
     return { success: false, error: e.message };

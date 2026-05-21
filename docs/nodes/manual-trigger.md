@@ -151,15 +151,15 @@ These tests verify the engine-wide features (`template.ts` + `continueOnFail` in
 
 **Template resolution — `{{ key }}` from trigger payload**
 
-- [ ] Create a flow: Manual Trigger → HTTP Request. Set the HTTP Request URL field to `{{ endpoint }}`.
-- [ ] Execute the flow with payload `{ "endpoint": "https://httpbin.org/get" }` (via `executeFlow("flow-id", { endpoint: "https://httpbin.org/get" })`).
-- [ ] Confirm the HTTP Request executor received the resolved URL (not the literal string `{{ endpoint }}`). Check the Output tab — should show a successful response, not a "no URL configured" error.
+- [x] Create a flow: Manual Trigger → HTTP Request. Set the HTTP Request URL field to `{{ endpoint }}`.
+- [x] Execute the flow with payload `{ "endpoint": "https://httpbin.org/get" }` (via `curl -X POST http://localhost:3000/api/nextviz/flow-1779344475515 -d '{"payload":{"endpoint":"https://httpbin.org/get"}}'`).
+- [x] Confirm the HTTP Request executor received the resolved URL (not the literal string `{{ endpoint }}`). HTTP Request returned `status: 200` with real httpbin.org data — confirmed template resolved correctly.
 
 **Template resolution — `{{ $json.key }}` n8n shorthand**
 
-- [ ] Set the HTTP Request URL to `{{ $json.endpoint }}` (n8n shorthand form).
-- [ ] Execute with the same payload `{ "endpoint": "https://httpbin.org/get" }`.
-- [ ] Confirm the executor resolves `$json.endpoint` identically to `{{ endpoint }}` — successful response in Output tab.
+- [x] Set the HTTP Request URL to `{{ $json.endpoint }}` (n8n shorthand form).
+- [x] Execute with the same payload `{ "endpoint": "https://httpbin.org/get" }` (via curl to `/api/nextviz/flow-1779344475515`).
+- [x] Confirm the executor resolves `$json.endpoint` identically to `{{ endpoint }}` — HTTP Request returned `status: 200` with real httpbin.org data. Canvas-only run (no payload) correctly fails with `fetch failed` — expected.
 
 **Template resolution — unresolvable expression is left unchanged**
 

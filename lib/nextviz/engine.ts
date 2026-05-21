@@ -38,8 +38,6 @@ export function clearPlanCache(): void {
 function buildExecutionPlan(flow: WorkflowJSON): ExecutionPlan {
   const { nodes, edges } = flow;
 
-  // Build lookup structures
-  const nodeMap = new Map<string, NextVizNode>(nodes.map((n) => [n.id, n]));
   const inDegree = new Map<string, number>(nodes.map((n) => [n.id, 0]));
   const adjacency = new Map<string, string[]>(nodes.map((n) => [n.id, []]));
   const incomingEdges = new Map<string, string[]>(nodes.map((n) => [n.id, []]));
@@ -73,7 +71,7 @@ function buildExecutionPlan(flow: WorkflowJSON): ExecutionPlan {
     );
   }
 
-  return { flowId: flow.id, sortedNodeIds, nodeMap, incomingEdges };
+  return { flowId: flow.id, sortedNodeIds, incomingEdges };
 }
 
 function getOrBuildPlan(flow: WorkflowJSON): ExecutionPlan {
@@ -130,8 +128,10 @@ export async function executeFlow(
   const startTime = performance.now();
   const context: NodeExecutionContext = { flowId, executionId, payload, nodeOutputs };
 
+  const nodeMap = new Map<string, NextVizNode>(flow.nodes.map((n) => [n.id, n]));
+
   for (const nodeId of plan.sortedNodeIds) {
-    const node = plan.nodeMap.get(nodeId);
+    const node = nodeMap.get(nodeId);
     if (!node) continue;
 
     const executor = nodeExecutors[node.type ?? ""];

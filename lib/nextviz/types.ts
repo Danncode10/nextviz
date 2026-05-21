@@ -67,8 +67,6 @@ export interface ExecutionPlan {
   flowId: string;
   /** Node IDs in topologically sorted order (safe execution sequence). */
   sortedNodeIds: string[];
-  /** Fast node lookup by ID. */
-  nodeMap: Map<string, NextVizNode>;
   /** nodeId → IDs of all nodes whose output feeds into it. */
   incomingEdges: Map<string, string[]>;
 }

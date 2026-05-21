@@ -1,0 +1,83 @@
+{
+  "id": "flow-1779344475515",
+  "name": "Flow test",
+  "description": "",
+  "nodes": [
+    {
+      "id": "node-1779344482257",
+      "type": "manualTrigger",
+      "position": {
+        "x": 101.48661063982513,
+        "y": 97.72334486827131
+      },
+      "data": {
+        "label": "Manual Trigger",
+        "executionState": "success"
+      },
+      "selected": false,
+      "width": 108,
+      "height": 108
+    },
+    {
+      "id": "node-1779344507734",
+      "type": "httpRequest",
+      "position": {
+        "x": 329,
+        "y": 97
+      },
+      "data": {
+        "label": "HTTP Request",
+        "method": "GET",
+        "url": "http://localhost:1/this-will-fail",
+        "continueOnFail": true,
+        "authType": "none",
+        "authToken": "",
+        "authApiKeyHeader": "X-API-Key",
+        "authApiKeyValue": "",
+        "authUsername": "",
+        "authPassword": "",
+        "sendQueryParams": false,
+        "sendHeaders": false,
+        "sendBody": false,
+        "queryParams": [],
+        "headers": [],
+        "bodyType": "json",
+        "body": "",
+        "executionState": "success"
+      },
+      "selected": false,
+      "width": 108,
+      "height": 108
+    },
+    {
+      "id": "node-logdata-test",
+      "type": "logData",
+      "position": {
+        "x": 559.0426600224398,
+        "y": 89.52975633431467
+      },
+      "data": {
+        "label": "Log Data"
+      },
+      "selected": true,
+      "width": 256,
+      "height": 88
+    }
+  ],
+  "edges": [
+    {
+      "id": "reactflow__edge-node-1779344482257-node-1779344507734",
+      "source": "node-1779344482257",
+      "target": "node-1779344507734",
+      "sourceHandle": null,
+      "targetHandle": null
+    },
+    {
+      "id": "reactflow__edge-node-1779344507734-node-logdata-test",
+      "source": "node-1779344507734",
+      "target": "node-logdata-test",
+      "sourceHandle": null,
+      "targetHandle": null
+    }
+  ]
+}
